@@ -1,9 +1,9 @@
 import { Outlet } from "react-router";
 
-const OfferedCourseLayout = () => {
+const TeacherLayout = () => {
   return (
     <div>
-      <aside>OfferedCourseLayout</aside>
+      <aside>TeacherLayout</aside>
       <main>
         <Outlet />
       </main>
@@ -11,4 +11,4 @@ const OfferedCourseLayout = () => {
   );
 };
 
-export default OfferedCourseLayout;
+export default TeacherLayout;
