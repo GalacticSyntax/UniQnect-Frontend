@@ -1,5 +1,4 @@
-import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import type { Route } from "./+types/about";
 import { Button } from "~/components/ui/button";
 import {
   Accordion,
