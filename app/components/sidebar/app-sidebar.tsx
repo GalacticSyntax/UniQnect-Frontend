@@ -1,26 +1,15 @@
 import * as React from "react";
-import {
-  AudioWaveform,
-  BookOpen,
-  Bot,
-  Command,
-  Frame,
-  GalleryVerticalEnd,
-  Map,
-  PieChart,
-  Settings2,
-  SquareTerminal,
-} from "lucide-react";
+import { Book, NotebookTabs, User } from "lucide-react";
+import NavMain from "~/components/sidebar/app-nav-main";
+import AppNavUser from "~/components/sidebar/app-nav-user";
+import AppSidebarHeader from "~/components/sidebar/app-sidebar-header";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarHeader,
   SidebarRail,
-} from "~/components/ui/sidebar";
-import NavMain from "~/components/sidebar/app-nav-main";
-import AppNavUser from "~/components/sidebar/app-nav-user";
-import AppSidebarHeader from "./app-sidebar-header";
+} from "~/components/sidebar/app-sidebar/app-sidebar-root";
 
 // This is sample data.
 const data = {
@@ -29,125 +18,136 @@ const data = {
     email: "m@example.com",
     avatar: "https://ui.shadcn.com/avatars/shadcn.jpg",
   },
-  teams: [
-    {
-      name: "Acme Inc",
-      logo: GalleryVerticalEnd,
-      plan: "Enterprise",
-    },
-    {
-      name: "Acme Corp.",
-      logo: AudioWaveform,
-      plan: "Startup",
-    },
-    {
-      name: "Evil Corp.",
-      logo: Command,
-      plan: "Free",
-    },
-  ],
   navMain: [
+    // {
+    //   title: "Design Engineering",
+    //   url: "#",
+    //   icon: Frame,
+    // },
     {
-      title: "Playground",
-      url: "#",
-      icon: SquareTerminal,
-      isActive: true,
+      id: "user",
+      title: "user",
+      url: "/dashboard/user",
+      icon: User,
+      isActive: false,
       items: [
         {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
+          title: "All Users",
+          url: "/dashboard/user",
         },
       ],
     },
     {
-      title: "Models",
-      url: "#",
-      icon: Bot,
+      id: "teacher",
+      title: "teacher",
+      url: "/dashboard/user",
+      icon: User,
+      isActive: false,
       items: [
         {
-          title: "Genesis",
-          url: "#",
-        },
-        {
-          title: "Explorer",
-          url: "#",
-        },
-        {
-          title: "Quantum",
-          url: "#",
+          title: "Teachers",
+          url: "/dashboard/teacher",
         },
       ],
     },
     {
-      title: "Documentation",
-      url: "#",
-      icon: BookOpen,
+      id: "student",
+      title: "student",
+      url: "/dashboard/student",
+      icon: User,
+      isActive: false,
       items: [
         {
-          title: "Introduction",
-          url: "#",
-        },
-        {
-          title: "Get Started",
-          url: "#",
-        },
-        {
-          title: "Tutorials",
-          url: "#",
-        },
-        {
-          title: "Changelog",
-          url: "#",
+          title: "Students",
+          url: "/dashboard/student",
         },
       ],
     },
     {
-      title: "Settings",
-      url: "#",
-      icon: Settings2,
+      id: "attendance",
+      title: "attendance",
+      url: "/dashboard/attendance",
+      icon: NotebookTabs,
+      isActive: false,
       items: [
         {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
+          title: "Attendance",
+          url: "/dashboard/attendance",
         },
       ],
     },
-  ],
-  projects: [
     {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
+      id: "course",
+      title: "course",
+      url: "/dashboard/course",
+      icon: Book,
+      isActive: false,
+      items: [
+        {
+          title: "Courses",
+          url: "/dashboard/course",
+        },
+        {
+          title: "Advisor",
+          url: "/dashboard/course/advisor",
+        },
+        {
+          title: "Offered",
+          url: "/dashboard/course/offered",
+        },
+        {
+          title: "Registered",
+          url: "/dashboard/course/registered",
+        },
+      ],
     },
     {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
+      id: "curriculum",
+      title: "Curriculum",
+      url: "/dashboard/curriculum",
+      isActive: false,
+      items: [
+        {
+          title: "Curriculum",
+          url: "/dashboard/curriculum",
+        },
+      ],
     },
     {
-      name: "Travel",
-      url: "#",
-      icon: Map,
+      id: "department",
+      title: "Department",
+      url: "/dashboard/department",
+      isActive: false,
+      items: [
+        {
+          title: "Department",
+          url: "/dashboard/department",
+        },
+      ],
+    },
+    {
+      id: "result",
+      title: "Result",
+      url: "/dashboard/result",
+      isActive: false,
+      items: [
+        {
+          title: "Result",
+          url: "/dashboard/result",
+        },
+      ],
+    },
+    {
+      id: "school",
+      title: "school",
+      url: "/dashboard/school",
+      isActive: false,
+      items: [
+        {
+          title: "school",
+          url: "/dashboard/school",
+        },
+      ],
     },
   ],
 };
@@ -156,7 +156,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <AppSidebarHeader teams={data.teams} />
+        <AppSidebarHeader />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />

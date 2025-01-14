@@ -4,7 +4,7 @@ import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "~/components/ui/sidebar";
+} from "~/components/sidebar/app-sidebar/app-sidebar-root";
 
 const DashboardLayout = () => {
   return (
