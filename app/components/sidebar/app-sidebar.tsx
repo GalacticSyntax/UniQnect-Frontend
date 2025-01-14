@@ -1,5 +1,15 @@
 import * as React from "react";
-import { Book, NotebookTabs, User } from "lucide-react";
+import {
+  Book,
+  Building,
+  CheckSquare,
+  ClipboardList,
+  FileText,
+  GraduationCap,
+  School,
+  User,
+  Users,
+} from "lucide-react";
 import NavMain from "~/components/sidebar/app-nav-main";
 import AppNavUser from "~/components/sidebar/app-nav-user";
 import AppSidebarHeader from "~/components/sidebar/app-sidebar-header";
@@ -11,7 +21,6 @@ import {
   SidebarRail,
 } from "~/components/sidebar/app-sidebar/app-sidebar-root";
 
-// This is sample data.
 const data = {
   user: {
     name: "shadcn",
@@ -19,16 +28,11 @@ const data = {
     avatar: "https://ui.shadcn.com/avatars/shadcn.jpg",
   },
   navMain: [
-    // {
-    //   title: "Design Engineering",
-    //   url: "#",
-    //   icon: Frame,
-    // },
     {
       id: "user",
-      title: "user",
+      title: "User",
       url: "/dashboard/user",
-      icon: User,
+      icon: Users, // Represents people/users
       isActive: false,
       items: [
         {
@@ -39,9 +43,9 @@ const data = {
     },
     {
       id: "teacher",
-      title: "teacher",
-      url: "/dashboard/user",
-      icon: User,
+      title: "Teacher",
+      url: "/dashboard/teacher",
+      icon: GraduationCap, // Represents teachers/education
       isActive: false,
       items: [
         {
@@ -52,9 +56,9 @@ const data = {
     },
     {
       id: "student",
-      title: "student",
+      title: "Student",
       url: "/dashboard/student",
-      icon: User,
+      icon: User, // Represents individual users (e.g., students)
       isActive: false,
       items: [
         {
@@ -65,9 +69,9 @@ const data = {
     },
     {
       id: "attendance",
-      title: "attendance",
+      title: "Attendance",
       url: "/dashboard/attendance",
-      icon: NotebookTabs,
+      icon: CheckSquare, // Represents checklists or attendance
       isActive: false,
       items: [
         {
@@ -78,9 +82,9 @@ const data = {
     },
     {
       id: "course",
-      title: "course",
+      title: "Course",
       url: "/dashboard/course",
-      icon: Book,
+      icon: Book, // Represents courses or books
       isActive: false,
       items: [
         {
@@ -105,6 +109,7 @@ const data = {
       id: "curriculum",
       title: "Curriculum",
       url: "/dashboard/curriculum",
+      icon: ClipboardList, // Represents a structured list or curriculum
       isActive: false,
       items: [
         {
@@ -117,6 +122,7 @@ const data = {
       id: "department",
       title: "Department",
       url: "/dashboard/department",
+      icon: Building, // Represents departments or buildings
       isActive: false,
       items: [
         {
@@ -129,6 +135,7 @@ const data = {
       id: "result",
       title: "Result",
       url: "/dashboard/result",
+      icon: FileText, // Represents results or documents
       isActive: false,
       items: [
         {
@@ -139,19 +146,19 @@ const data = {
     },
     {
       id: "school",
-      title: "school",
+      title: "School",
       url: "/dashboard/school",
+      icon: School, // Represents schools/education institutions
       isActive: false,
       items: [
         {
-          title: "school",
+          title: "School",
           url: "/dashboard/school",
         },
       ],
     },
   ],
 };
-
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   return (
     <Sidebar collapsible="icon" {...props}>
