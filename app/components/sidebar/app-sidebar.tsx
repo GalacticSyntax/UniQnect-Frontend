@@ -39,6 +39,10 @@ const data = {
           title: "All Users",
           url: "/dashboard/user",
         },
+        {
+          title: "Add User",
+          url: "/dashboard/user/add-user",
+        },
       ],
     },
     {

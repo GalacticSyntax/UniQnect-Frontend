@@ -32,7 +32,10 @@ export default [
 
       /* user routes */
       layout("routes/dashboard/user/layout.tsx", [
-        ...prefix("user", [index("routes/dashboard/user/user.tsx")]),
+        ...prefix("user", [
+          index("routes/dashboard/user/user.tsx"),
+          route("add-user", "routes/dashboard/user/add-user.tsx"),
+        ]),
       ]),
 
       /* result routes */

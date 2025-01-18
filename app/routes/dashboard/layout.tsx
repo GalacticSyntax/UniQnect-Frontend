@@ -4,20 +4,19 @@ import AppSidebar from "~/components/sidebar/app-sidebar";
 import {
   SidebarInset,
   SidebarProvider,
-  SidebarTrigger,
 } from "~/components/sidebar/app-sidebar/app-sidebar-root";
 
 const DashboardLayout = () => {
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset>
-        <Header />
-        <main>
+    <>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <Header />
           <Outlet />
-        </main>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </>
   );
 };
 
