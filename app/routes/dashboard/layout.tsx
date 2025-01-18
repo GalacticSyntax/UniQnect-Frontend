@@ -8,15 +8,13 @@ import {
 
 const DashboardLayout = () => {
   return (
-    <>
-      <SidebarProvider>
-        <AppSidebar />
-        <SidebarInset>
-          <Header />
-          <Outlet />
-        </SidebarInset>
-      </SidebarProvider>
-    </>
+    <SidebarProvider>
+      <AppSidebar />
+      <SidebarInset>
+        <Header />
+        <Outlet />
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 

@@ -83,7 +83,7 @@ const UserPage = () => {
             </TableHeader>
             <TableBody>
               {usersList
-                .slice(0, 5)
+                .slice(0, 50)
                 .map(({ id, fullName, email, phone, image, gender, role }) => (
                   <TableRow
                     key={id}
