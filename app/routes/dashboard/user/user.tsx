@@ -4,16 +4,30 @@ import {
   TableBody,
   TableCaption,
   TableCell,
-  TableFooter,
   TableHead,
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
 import type { Route } from "./+types/user";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { useState } from "react";
 import { Input } from "~/components/ui/input";
 import { usersList } from "~/data/generateUsers";
+import { Link } from "react-router";
+import { Button } from "~/components/ui/button";
+import { Plus, Search, X } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
+import TablePagination from "~/components/table/TablePagination";
+import TableRowNumberSelector from "~/components/table/TableRowNumberSelector";
+import UsersTableFooter from "~/components/table/TableFooter";
+import { useState, type ChangeEvent, type FormEvent } from "react";
+import { Label } from "~/components/ui/label";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -21,6 +35,8 @@ export const meta = ({}: Route.MetaArgs) => {
     { name: "description", content: "Welcome to React Router!" },
   ];
 };
+
+const rowSizeList = ["10", "20", "30", "50", "80", "100"];
 
 const header = [
   {
@@ -54,98 +70,129 @@ const header = [
 ];
 
 const UserPage = () => {
+  const [searchType, setSearchType] = useState("name");
+  const [searchTerm, setSearcTerm] = useState("");
+
+  const handleSearchTypeChange = (value: string) => {
+    setSearchType(value);
+  };
+
+  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearcTerm(e.target.value);
+  };
+
+  const handleClearSearchTerm = () => {
+    setSearcTerm("");
+  };
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+  };
+
   return (
     <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
-      <section className="flex justify-between">
+      <section className="flex justify-between flex-wrap gap-4">
         <h1 className="text-2xl font-bold">User list</h1>
+        <Link to="/dashboard/user/add-user">
+          <Button>
+            <Plus /> Add New User
+          </Button>
+        </Link>
       </section>
-      <section className="flex justify-between">
-        <div>
-          <Input />
+      <section className="flex justify-between flex-wrap gap-2">
+        <div className="flex items-center gap-2">
+          <Label htmlFor="searchType" className="flex-shrink-0">Search by</Label>
+          <Select value={searchType} onValueChange={handleSearchTypeChange}>
+            <SelectTrigger id="searchType" className="max-w-[180px]">
+              <SelectValue placeholder="Search by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                <SelectItem value="name">Name</SelectItem>
+                <SelectItem value="email">Email</SelectItem>
+                <SelectItem value="phone">Phone number</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
         </div>
+        <form
+          className="flex rounded-sm border pl-3 ml-auto"
+          onSubmit={handleSearch}
+        >
+          <input
+            value={searchTerm}
+            onChange={handleSearchTermChange}
+            className="outline-none bg-transparent w-full"
+            placeholder="Search User"
+          />
+          <div className="size-9">
+            {searchTerm && (
+              <Button
+                size={"icon"}
+                variant={"ghost"}
+                onClick={handleClearSearchTerm}
+              >
+                <X />
+              </Button>
+            )}
+          </div>
+          <Button className="flex-shrink-0 rounded-l-none border">
+            <Search />
+          </Button>
+        </form>
       </section>
-      <div className="w-full overflow-auto">
-        <ScrollArea className="">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                {header.map(({ id, label, sortable, center }) => (
-                  <TableActionHead
-                    key={id}
-                    sortable={sortable}
-                    center={center}
-                    className="capitalize whitespace-nowrap"
-                  >
-                    {label}
-                  </TableActionHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {usersList
-                .slice(0, 50)
-                .map(({ id, fullName, email, phone, image, gender, role }) => (
-                  <TableRow
-                    key={id}
-                    className="hover:bg-gray-200/60 duration-100 transition-all"
-                  >
-                    <TableCell className="font-medium">{fullName}</TableCell>
-                    <TableCell>{email}</TableCell>
-                    <TableCell>{phone}</TableCell>
-                    <TableCell className="text-right">
-                      <img
-                        src={image}
-                        alt=""
-                        className="size-9 rounded-full object-cover mx-auto select-none"
-                      />
-                    </TableCell>
-                    <TableCell>{gender}</TableCell>
-                    <TableCell>{role}</TableCell>
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
-      </div>
-      <div className="w-full justify-between"></div>
+      <section className="w-full flex flex-col gap-4">
+        <div className="w-full overflow-auto">
+          <ScrollArea className="">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  {header.map(({ id, label, sortable, center }) => (
+                    <TableActionHead
+                      key={id}
+                      sortable={sortable}
+                      center={center}
+                      className="capitalize whitespace-nowrap"
+                    >
+                      {label}
+                    </TableActionHead>
+                  ))}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {usersList
+                  .slice(0, 100)
+                  .map(
+                    ({ id, fullName, email, phone, image, gender, role }) => (
+                      <TableRow
+                        key={id}
+                        className="hover:bg-gray-200/60 duration-100 transition-all"
+                      >
+                        <TableCell className="font-medium">
+                          {fullName}
+                        </TableCell>
+                        <TableCell>{email}</TableCell>
+                        <TableCell>{phone}</TableCell>
+                        <TableCell className="text-right">
+                          <img
+                            src={image}
+                            alt=""
+                            className="size-9 rounded-full object-cover mx-auto select-none"
+                          />
+                        </TableCell>
+                        <TableCell>{gender}</TableCell>
+                        <TableCell>{role}</TableCell>
+                      </TableRow>
+                    )
+                  )}
+              </TableBody>
+            </Table>
+            <ScrollBar orientation="horizontal" />
+          </ScrollArea>
+        </div>
+        <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
+      </section>
     </section>
-  );
-};
-
-const Test = () => {
-  return (
-    <>
-      <header className="flex justify-between p-4">
-        <h1 className="text-2xl font-bold">Card List</h1>
-      </header>
-
-      <div className="overflow-hidden">
-        <div className="flex space-x-4 overflow-x-auto py-4">
-          <div className="flex-none w-64 h-40 bg-blue-500 rounded-lg shadow-lg">
-            {/* Card Content */}
-            <p className="text-white p-4">Card 1</p>
-          </div>
-          <div className="flex-none w-64 h-40 bg-red-500 rounded-lg shadow-lg">
-            {/* Card Content */}
-            <p className="text-white p-4">Card 2</p>
-          </div>
-          <div className="flex-none w-64 h-40 bg-green-500 rounded-lg shadow-lg">
-            {/* Card Content */}
-            <p className="text-white p-4">Card 3</p>
-          </div>
-          <div className="flex-none w-64 h-40 bg-yellow-500 rounded-lg shadow-lg">
-            {/* Card Content */}
-            <p className="text-white p-4">Card 4</p>
-          </div>
-          <div className="flex-none w-64 h-40 bg-purple-500 rounded-lg shadow-lg">
-            {/* Card Content */}
-            <p className="text-white p-4">Card 5</p>
-          </div>
-          {/* Add more cards as needed */}
-        </div>
-      </div>
-    </>
   );
 };
 
