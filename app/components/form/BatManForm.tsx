@@ -87,6 +87,15 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
     }));
   };
 
+  const handleClearForm = () => {
+    const initialFormState = { ...formState };
+    for (const name in formState) {
+      initialFormState[name] = "";
+    }
+
+    setFormState(initialFormState);
+  };
+
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     console.log(e.target.name, e.target.value);
 
@@ -163,7 +172,13 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
       } else if (field?.type === "submit") {
         return <BatManFormSubmitButton key={field.name} field={field} />;
       } else if (field?.type === "reset") {
-        return <BatManFormResetButton key={field.name} field={field} />;
+        return (
+          <BatManFormResetButton
+            key={field.name}
+            field={field}
+            onClear={handleClearForm}
+          />
+        );
       } else if (field?.type === "select") {
         return (
           <BatManFormSelect

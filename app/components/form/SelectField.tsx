@@ -27,10 +27,13 @@ const SelectField = ({ field, value, onChange }: SlectFieldProps) => {
   };
 
   return (
-    <Select name={field.name} onValueChange={handleChange}>
+    <Select
+      name={field.name}
+      onValueChange={handleChange}
+      value={value || (defaultvalue as string)}
+    >
       <SelectTrigger className="w-[180px]">
         <SelectValue
-          defaultValue={value || (defaultvalue as string)}
           id={field.name}
           placeholder={field.placeholder || field.label}
         />
