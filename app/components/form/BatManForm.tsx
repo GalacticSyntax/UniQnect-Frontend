@@ -4,6 +4,7 @@ import BatManFormInput from "~/components/form/BatManFormInput";
 import BatManFormSubmitButton from "~/components/form/BatManFormSubmitButton";
 import BatManFormSelect from "~/components/form/BatManFormSelect";
 import BatManFormResetButton from "~/components/form/BatManFormResetButton";
+import { useEffect, useState, type ChangeEvent } from "react";
 
 export interface FieldInterface {
   type?: string;
@@ -39,15 +40,78 @@ export interface TitleInterface {
 export interface FormSchemaInterface {
   title?: TitleInterface;
   fields: Array<FieldListType>;
-  onSubmit?: () => void;
 }
 
 interface BatManFormProps {
   formSchema: FormSchemaInterface;
   className?: string;
+  onSubmit?: (formData: Record<string, unknown>) => void;
 }
 
-const BatManForm = ({ formSchema, className }: BatManFormProps) => {
+const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
+  const [formState, setFormState] = useState<Record<string, unknown>>({});
+  const [passwordToggleState, setPasswordToggleState] = useState<
+    Record<string, boolean>
+  >({});
+
+  useEffect(() => {
+    const initialState: Record<string, unknown> = {};
+    const initialPasswordToggleState: Record<string, boolean> = {};
+    const initializeState = (fields: Array<FieldListType>) => {
+      fields.forEach((field) => {
+        if (Array.isArray(field)) {
+          initializeState(field);
+        } else if (field.name) {
+          const defaultvalue =
+            (field.defaultValue &&
+            typeof field.defaultValue === "object" &&
+            "value" in field.defaultValue
+              ? field.defaultValue?.value
+              : field.defaultValue) || "";
+          initialState[field.name] = defaultvalue;
+
+          if (field.type === "password")
+            initialPasswordToggleState[field.name] = false;
+        }
+      });
+    };
+    initializeState(formSchema.fields);
+    setFormState(initialState);
+    setPasswordToggleState(initialPasswordToggleState);
+  }, [formSchema.fields]);
+
+  const handleTogglePassword = (name: string) => {
+    setPasswordToggleState((prev) => ({
+      ...prev,
+      [name]: !prev[name],
+    }));
+  };
+
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log(e.target.name, e.target.value);
+
+    setFormState((prev) => ({
+      ...prev,
+      [e.target.name]: e.target.value,
+    }));
+  };
+
+  const handleSelectChange = (newValue: string, name: string) => {
+    setFormState((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+  };
+
+  const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    console.log(formState);
+
+    if (onSubmit) {
+      onSubmit(formState);
+    }
+  };
+
   const renderFields = (fields: Array<FieldListType>): React.ReactNode => {
     return fields.map((field, index) => {
       if (Array.isArray(field)) {
@@ -68,15 +132,47 @@ const BatManForm = ({ formSchema, className }: BatManFormProps) => {
           </div>
         );
       } else if (field?.type === "text" || !field.type) {
-        return <BatManFormInput field={field} />;
+        return (
+          <BatManFormInput
+            key={field.name}
+            field={field}
+            onChange={handleInputChange}
+            value={formState[field.name as string]}
+          />
+        );
       } else if (field?.type === "email") {
-        return <BatManFormInput field={field} />;
+        return (
+          <BatManFormInput
+            key={field.name}
+            field={field}
+            onChange={handleInputChange}
+            value={formState[field.name as string]}
+          />
+        );
+      } else if (field?.type === "password") {
+        return (
+          <BatManFormInput
+            onToggleHide={handleTogglePassword}
+            key={field.name}
+            field={field}
+            passwordHideState={passwordToggleState[field.name as string]}
+            onChange={handleInputChange}
+            value={formState[field.name as string]}
+          />
+        );
       } else if (field?.type === "submit") {
-        return <BatManFormSubmitButton field={field} />;
+        return <BatManFormSubmitButton key={field.name} field={field} />;
       } else if (field?.type === "reset") {
-        return <BatManFormResetButton field={field} />;
+        return <BatManFormResetButton key={field.name} field={field} />;
       } else if (field?.type === "select") {
-        return <BatManFormSelect field={field} />;
+        return (
+          <BatManFormSelect
+            key={field.name}
+            field={field}
+            value={formState[field.name as string]}
+            onChange={handleSelectChange}
+          />
+        );
       }
       return null;
     });
@@ -84,8 +180,9 @@ const BatManForm = ({ formSchema, className }: BatManFormProps) => {
 
   return (
     <form
+      onSubmit={handleFormSubmit}
       className={clsx(
-        "w-full max-w-md px-5 py-6 border rounded-md flex flex-col gap-4",
+        "w-full max-w-md px-6 py-6 border rounded-md flex flex-col gap-4",
         className
       )}
     >

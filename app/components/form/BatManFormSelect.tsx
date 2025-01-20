@@ -4,13 +4,14 @@ import SelectField from "~/components/form/SelectField";
 
 interface BatManFormSelectProps {
   field: FieldInterface;
+  [key: string]: unknown;
 }
-const BatManFormSelect = ({ field }: BatManFormSelectProps) => {
-  if (!field.label) return <SelectField field={field} />;
+const BatManFormSelect = ({ field, ...props }: BatManFormSelectProps) => {
+  if (!field.label) return <SelectField field={field} {...props} />;
 
   return (
     <FieldWithLabelWrapper field={field}>
-      <SelectField field={field} />
+      <SelectField field={field} {...props} />
     </FieldWithLabelWrapper>
   );
 };

@@ -6,22 +6,13 @@ const formSchema = {
     align: "center" as AlignType,
   },
   fields: [
-    [
-      {
-        type: "text",
-        name: "firstName",
-        label: "First name",
-        placeholder: "First name",
-        required: true,
-      },
-      {
-        type: "text",
-        name: "lastName",
-        label: "Last name",
-        placeholder: "Last name",
-        required: true,
-      },
-    ],
+    {
+      type: "text",
+      name: "fullName",
+      label: "Full Name",
+      placeholder: "Full Name",
+      required: true,
+    },
     {
       type: "email",
       name: "email",
@@ -31,16 +22,16 @@ const formSchema = {
     },
     {
       type: "text",
-      name: "fullName",
-      label: "Full Name",
-      placeholder: "Full Name",
-      required: true,
-    },
-    {
-      type: "text",
       name: "phone",
       label: "Phone number",
       placeholder: "Phone number",
+      required: true,
+    },
+    {
+      type: "password",
+      name: "password",
+      label: "Password",
+      placeholder: "Password",
       required: true,
     },
     [
@@ -85,21 +76,25 @@ const formSchema = {
     ],
     {
       type: "reset",
+      name: "reset",
       label: "Clear",
       className: "w-fit",
     },
     {
       type: "submit",
+      name: "submit",
       label: "Add",
     },
   ],
-  onSubmit: () => {},
 };
-
 const AddUser = () => {
+  const handleFormSubmit = (formData: Record<string, unknown>) => {
+    console.log(formData);
+  };
+
   return (
     <section className="w-full h-full grid place-items-center p-5">
-      <BatManForm formSchema={formSchema} />
+      <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} />
     </section>
   );
 };
