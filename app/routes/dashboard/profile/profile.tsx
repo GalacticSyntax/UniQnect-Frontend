@@ -1,6 +1,7 @@
 import type { Route } from "./+types/profile";
 import ProfileTop from "~/routes/dashboard/profile/_components/ProfileTop";
 import ProfileDetails from "~/routes/dashboard/profile/_components/ProfileDetails";
+import EditProfile from "~/routes/dashboard/profile/_components/EditProfile";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -16,6 +17,7 @@ const ProfilePage = ({ params }: Route.ComponentProps) => {
     <section className="w-full max-w-5xl mx-auto p-5 flex flex-col gap-5">
       <ProfileTop />
       <ProfileDetails />
+      <EditProfile />
     </section>
   );
 };

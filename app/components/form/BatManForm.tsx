@@ -1,10 +1,11 @@
-import clsx from "clsx";
 import BatManFormHeading from "~/components/form/BatManFormHeading";
 import BatManFormInput from "~/components/form/BatManFormInput";
 import BatManFormSubmitButton from "~/components/form/BatManFormSubmitButton";
 import BatManFormSelect from "~/components/form/BatManFormSelect";
 import BatManFormResetButton from "~/components/form/BatManFormResetButton";
 import { useEffect, useState, type ChangeEvent } from "react";
+import { cn } from "~/lib/utils";
+import BatManFormTextArea from "~/components/form/BatManFormTextArea";
 
 export interface FieldInterface {
   type?: string;
@@ -128,13 +129,13 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
         return (
           <div
             key={index}
-            className={clsx("grid gap-4", {
-              "grid-cols-1": field.length === 1,
-              "grid-cols-2": field.length === 2,
-              "grid-cols-3": field.length === 3,
-              "grid-cols-4": field.length === 5,
-              "grid-cols-5": field.length === 4,
-              "grid-cols-6": field.length === 6,
+            className={cn("grid gap-4", {
+              "sm:grid-cols-1": field.length === 1,
+              "sm:grid-cols-2": field.length === 2,
+              "sm:grid-cols-3": field.length === 3,
+              "sm:grid-cols-4": field.length === 5,
+              "sm:grid-cols-5": field.length === 4,
+              "sm:grid-cols-6": field.length === 6,
             })}
           >
             {renderFields(field)}
@@ -188,6 +189,15 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
             onChange={handleSelectChange}
           />
         );
+      } else if (field?.type === "textarea") {
+        return (
+          <BatManFormTextArea
+            key={field.name}
+            field={field}
+            value={formState[field.name as string]}
+            onChange={handleSelectChange}
+          />
+        );
       }
       return null;
     });
@@ -196,7 +206,7 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
   return (
     <form
       onSubmit={handleFormSubmit}
-      className={clsx(
+      className={cn(
         "w-full max-w-md px-6 py-6 border rounded-md flex flex-col gap-4",
         className
       )}
