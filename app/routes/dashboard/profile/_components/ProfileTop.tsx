@@ -7,6 +7,7 @@ import {
   TooltipTrigger,
 } from "~/components/ui/tooltip";
 import { cn } from "~/lib/utils";
+import ProfileImageEditor from "./ProfileImageEditor";
 
 const ProfileTop = () => {
   const profileImage =
@@ -15,34 +16,11 @@ const ProfileTop = () => {
   const isVerified = true;
 
   return (
-    <div className="flex flex-col sm:flex-row gap-4 shadow-lg p-5 bg-primary rounded-md overflow-hidden">
+    <div className="flex flex-col sm:flex-row gap-4 shadow-lg p-5 sm:py-8 bg-primary rounded-md overflow-hidden">
       <div className="w-full max-w-52 aspect-square rounded-md ring-2 ring-primary-foreground relative">
         <img src={profileImage} alt="" className="w-full h-full object-cover" />
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              {isVerified ? (
-                <span className="bg-green-500 text-white absolute bottom-0 right-0 z-10 rounded-full p-1 translate-x-2 translate-y-2">
-                  <BadgeCheck />
-                </span>
-              ) : (
-                <span className="bg-red-500 text-white absolute bottom-0 right-0 z-10 rounded-full p-1 translate-x-2 translate-y-2">
-                  <BadgeX />
-                </span>
-              )}
-            </TooltipTrigger>
-            <TooltipContent
-              side="bottom"
-              sideOffset={3}
-              className={cn({
-                "bg-red-500": !isVerified,
-                "bg-green-500": isVerified,
-              })}
-            >
-              <p>{isVerified ? "verified" : "unverified"}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <EditProfileImageOverlay />
+        <VerifyTag isVerified={isVerified} />
       </div>
       <div className="w-full flex flex-col gap-2 items-start text-primary-foreground selection:bg-primary-foreground selection:text-primary">
         <h2 className="text-2xl font-bold">Md. Abdus Shohid Shakil</h2>
@@ -52,6 +30,50 @@ const ProfileTop = () => {
         <p>Semester: 8th</p>
         <p>Session: Fall-21</p>
       </div>
+    </div>
+  );
+};
+
+interface VerifyTagProps {
+  isVerified: boolean;
+}
+
+const VerifyTag = ({ isVerified }: VerifyTagProps) => {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          {isVerified ? (
+            <span className="bg-green-500 text-white absolute bottom-0 right-0 z-10 rounded-full p-1 translate-x-2 translate-y-2">
+              <BadgeCheck />
+            </span>
+          ) : (
+            <span className="bg-red-500 text-white absolute bottom-0 right-0 z-10 rounded-full p-1 translate-x-2 translate-y-2">
+              <BadgeX />
+            </span>
+          )}
+        </TooltipTrigger>
+        <TooltipContent
+          side="bottom"
+          sideOffset={3}
+          className={cn({
+            "bg-red-500": !isVerified,
+            "bg-green-500": isVerified,
+          })}
+        >
+          <p>{isVerified ? "verified" : "unverified"}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+interface EditProfileImageOverlayProps {}
+
+const EditProfileImageOverlay = ({}: EditProfileImageOverlayProps) => {
+  return (
+    <div className="absolute w-full h-full top-0 left-0 grid place-items-center duration-100 transition-colors bg-primary/50 opacity-0 hover:opacity-100 rounded-md">
+      <ProfileImageEditor />
     </div>
   );
 };
