@@ -85,10 +85,13 @@ Located in a bustling commercial area, this address is close to shopping malls, 
       <TooltipProvider>
         <ul className="flex flex-col">
           {detailsList.map(({ id, label, value, copy }) => (
-            <li key={id} className={"flex gap-2 text-sm sm:text-base"}>
-              <p className={"flex-shrink-0 w-28 sm:min-w-44 py-2"}>{label}:</p>
+            <li
+              key={id}
+              className={"text-sm sm:text-base grid grid-cols-12 gap-3"}
+            >
+              <p className={"flex-shrink-0 py-2 col-span-4"}>{label}:</p>
               {copy ? (
-                <div className="flex items-center gap-2 rounded-sm py-1">
+                <div className="flex items-center gap-2 rounded-sm py-1  col-span-8">
                   <p className="leading-relaxed">{value}</p>
                   <Tooltip>
                     <TooltipTrigger asChild>
@@ -106,7 +109,7 @@ Located in a bustling commercial area, this address is close to shopping malls, 
                   </Tooltip>
                 </div>
               ) : (
-                <p className="py-2 leading-relaxed">{value}</p>
+                <p className="py-2 leading-relaxed col-span-8">{value}</p>
               )}
             </li>
           ))}
