@@ -15,6 +15,13 @@ export default [
     ...prefix("dashboard", [
       index("routes/dashboard/dashboard.tsx"),
 
+      /* profile routes */
+      layout("routes/dashboard/profile/layout.tsx", [
+        ...prefix("profile", [
+          route(":id?", "routes/dashboard/profile/profile.tsx"),
+        ]),
+      ]),
+
       /* student routes */
       layout("routes/dashboard/student/layout.tsx", [
         ...prefix("student", [index("routes/dashboard/student/student.tsx")]),
