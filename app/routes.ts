@@ -57,6 +57,10 @@ export default [
       layout("routes/dashboard/department/layout.tsx", [
         ...prefix("department", [
           index("routes/dashboard/department/department.tsx"),
+          route(
+            "add-department",
+            "routes/dashboard/department/add-department.tsx"
+          ),
         ]),
       ]),
 

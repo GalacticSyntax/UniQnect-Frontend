@@ -137,6 +137,10 @@ const data = {
           title: "Department",
           url: "/dashboard/department",
         },
+        {
+          title: "Add Department",
+          url: "/dashboard/department/add-department",
+        },
       ],
     },
     {
