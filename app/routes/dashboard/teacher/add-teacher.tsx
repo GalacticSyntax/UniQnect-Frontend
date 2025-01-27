@@ -1,8 +1,9 @@
-import BatManForm, { type AlignType } from "~/components/form/BatManForm";
+import type { AlignType } from "~/components/form/BatManForm";
+import BatManForm from "~/components/form/BatManForm";
 
 const formSchema = {
   title: {
-    label: "Add new user",
+    label: "Add new teacher",
     align: "center" as AlignType,
   },
   fields: [
@@ -34,46 +35,24 @@ const formSchema = {
       placeholder: "Password",
       required: true,
     },
-    [
-      {
-        type: "select",
-        name: "gender",
-        label: "Gender",
-        placeholder: "Gender",
-        options: [
-          {
-            id: "male",
-            value: "Male",
-          },
-          {
-            id: "female",
-            value: "Female",
-          },
-        ],
-        required: true,
-      },
-      {
-        type: "select",
-        name: "role",
-        label: "Role",
-        placeholder: "Role",
-        options: [
-          {
-            id: "student",
-            value: "Student",
-          },
-          {
-            id: "teacher",
-            value: "Teacher",
-          },
-          {
-            id: "admission_office",
-            value: "Admission Office",
-          },
-        ],
-        required: true,
-      },
-    ],
+    {
+      type: "select",
+      name: "gender",
+      label: "Gender",
+      placeholder: "Gender",
+      options: [
+        {
+          id: "male",
+          value: "Male",
+        },
+        {
+          id: "female",
+          value: "Female",
+        },
+      ],
+      className: "w-full",
+      required: true,
+    },
     {
       type: "reset",
       name: "reset",
@@ -88,7 +67,7 @@ const formSchema = {
   ],
 };
 
-const AddUser = () => {
+const AddTeacher = () => {
   const handleFormSubmit = (formData: Record<string, unknown>) => {
     console.log(formData);
   };
@@ -100,4 +79,4 @@ const AddUser = () => {
   );
 };
 
-export default AddUser;
+export default AddTeacher;

@@ -56,6 +56,10 @@ const data = {
           title: "Teachers",
           url: "/dashboard/teacher",
         },
+        {
+          title: "Add Teacher",
+          url: "/dashboard/teacher/add-teacher",
+        },
       ],
     },
     {

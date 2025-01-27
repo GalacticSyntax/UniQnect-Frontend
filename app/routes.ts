@@ -29,7 +29,10 @@ export default [
 
       /* teacher routes */
       layout("routes/dashboard/teacher/layout.tsx", [
-        ...prefix("teacher", [index("routes/dashboard/teacher/teacher.tsx")]),
+        ...prefix("teacher", [
+          index("routes/dashboard/teacher/teacher.tsx"),
+          route("add-teacher", "routes/dashboard/teacher/add-teacher.tsx"),
+        ]),
       ]),
 
       /* school routes */
@@ -65,8 +68,8 @@ export default [
       ]),
 
       /* course routes */
-      layout("routes/dashboard/course/layout.tsx", [
-        ...prefix("course", [
+      ...prefix("course", [
+        layout("routes/dashboard/course/layout.tsx", [
           index("routes/dashboard/course/course.tsx"),
           route("advisor", "routes/dashboard/course/advisor.tsx"),
           route("offered", "routes/dashboard/course/offered.tsx"),

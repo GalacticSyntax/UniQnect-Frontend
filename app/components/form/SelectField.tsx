@@ -7,6 +7,7 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import type { FieldInterface } from "~/components/form/BatManForm";
+import { cn } from "~/lib/utils";
 
 interface SlectFieldProps {
   field: FieldInterface;
@@ -32,7 +33,7 @@ const SelectField = ({ field, value, onChange }: SlectFieldProps) => {
       onValueChange={handleChange}
       value={value || (defaultvalue as string)}
     >
-      <SelectTrigger className="w-[180px]">
+      <SelectTrigger className={cn("w-[180px]", field.className)}>
         <SelectValue
           id={field.name}
           placeholder={field.placeholder || field.label}
