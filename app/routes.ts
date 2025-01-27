@@ -24,7 +24,10 @@ export default [
 
       /* student routes */
       layout("routes/dashboard/student/layout.tsx", [
-        ...prefix("student", [index("routes/dashboard/student/student.tsx")]),
+        ...prefix("student", [
+          index("routes/dashboard/student/student.tsx"),
+          route("add-student", "routes/dashboard/student/add-student.tsx"),
+        ]),
       ]),
 
       /* teacher routes */
@@ -37,7 +40,10 @@ export default [
 
       /* school routes */
       layout("routes/dashboard/school/layout.tsx", [
-        ...prefix("school", [index("routes/dashboard/school/school.tsx")]),
+        ...prefix("school", [
+          index("routes/dashboard/school/school.tsx"),
+          route("add-school", "routes/dashboard/school/add-school.tsx"),
+        ]),
       ]),
 
       /* user routes */

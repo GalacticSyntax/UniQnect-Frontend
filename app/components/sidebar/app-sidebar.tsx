@@ -73,6 +73,10 @@ const data = {
           title: "Students",
           url: "/dashboard/student",
         },
+        {
+          title: "Add Student",
+          url: "/dashboard/student/add-student",
+        },
       ],
     },
     {
@@ -166,6 +170,10 @@ const data = {
         {
           title: "School",
           url: "/dashboard/school",
+        },
+        {
+          title: "Add School",
+          url: "/dashboard/school/add-school",
         },
       ],
     },
