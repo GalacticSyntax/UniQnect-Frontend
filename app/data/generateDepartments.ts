@@ -1,0 +1,51 @@
+export const departmentsList = [
+  {
+    name: "Computer Science",
+    code: "CS101",
+    school: "School of Engineering",
+    number_of_teachers: 30,
+    number_of_students: 450,
+  },
+  {
+    name: "Electrical Engineering",
+    code: "EE101",
+    school: "School of Engineering",
+    number_of_teachers: 25,
+    number_of_students: 350,
+  },
+  {
+    name: "Mathematics",
+    code: "MATH101",
+    school: "School of Science",
+    number_of_teachers: 20,
+    number_of_students: 300,
+  },
+  {
+    name: "Physics",
+    code: "PHY101",
+    school: "School of Science",
+    number_of_teachers: 18,
+    number_of_students: 200,
+  },
+  {
+    name: "Literature",
+    code: "LIT101",
+    school: "School of Humanities",
+    number_of_teachers: 15,
+    number_of_students: 250,
+  },
+  {
+    name: "Business Administration",
+    code: "BA101",
+    school: "School of Business",
+    number_of_teachers: 22,
+    number_of_students: 400,
+  },
+  {
+    name: "Psychology",
+    code: "PSY101",
+    school: "School of Social Sciences",
+    number_of_teachers: 10,
+    number_of_students: 150,
+  },
+];

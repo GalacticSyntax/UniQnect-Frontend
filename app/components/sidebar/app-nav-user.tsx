@@ -18,6 +18,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/sidebar/app-sidebar/app-sidebar-root";
+import { Link } from "react-router";
 
 const AppNavUser = ({
   user,
@@ -70,10 +71,12 @@ const AppNavUser = ({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Profile
-              </DropdownMenuItem>
+              <Link to="/dashboard/profile/123">
+                <DropdownMenuItem className="cursor-pointer">
+                  <BadgeCheck />
+                  Profile
+                </DropdownMenuItem>
+              </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem>
