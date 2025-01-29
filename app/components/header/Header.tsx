@@ -8,7 +8,7 @@ const Header = () => {
       <div className="flex items-center gap-2 px-4">
         <SidebarTrigger className="-ml-1" />
       </div>
-      <Link to="/">
+      <Link to="/dashboard/profile/abc">
         <Avatar>
           <AvatarImage src="https://github.com/shadcn.png" alt="@shadcn" />
           <AvatarFallback>CN</AvatarFallback>

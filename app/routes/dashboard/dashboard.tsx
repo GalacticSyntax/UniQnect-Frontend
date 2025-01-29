@@ -1,4 +1,8 @@
+import StudentCountChart from "~/components/charts/StudentCountChart";
 import type { Route } from "./+types/dashboard";
+import TeacherCountChart from "~/components/charts/TeacherCountChart";
+import StudentsVSCourses from "~/components/charts/StudentsVSCourses";
+import AttendanceDistribution from "~/components/charts/AttendanceDistribution";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -9,9 +13,12 @@ export const meta = ({}: Route.MetaArgs) => {
 
 const DashboardPage = () => {
   return (
-    <>
-      <h1 className="text-2xl text-green-500 font-bold">Dashboard Page</h1>
-    </>
+    <section className="p-5 grid md:grid-cols-2 gap-5">
+      <StudentsVSCourses />
+      <AttendanceDistribution />
+      <StudentCountChart />
+      <TeacherCountChart />
+    </section>
   );
 };
 
