@@ -195,7 +195,7 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
             key={field.name}
             field={field}
             value={formState[field.name as string]}
-            onChange={handleSelectChange}
+            onChange={handleInputChange}
           />
         );
       }

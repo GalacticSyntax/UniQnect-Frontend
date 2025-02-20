@@ -51,6 +51,10 @@ const header = [
     sortable: true,
   },
   {
+    id: "department",
+    label: "Department",
+  },
+  {
     id: "curriculum",
     label: "Curriculum",
   },
@@ -155,7 +159,15 @@ const CoursePage = () => {
                 {coursesList
                   .slice(0, 100)
                   .map(
-                    ({ id, name, code, credit, curriculum, prerequisites }) => (
+                    ({
+                      id,
+                      name,
+                      code,
+                      credit,
+                      department,
+                      curriculum,
+                      prerequisites,
+                    }) => (
                       <TableRow
                         key={id}
                         className="hover:bg-gray-200/60 duration-100 transition-all"
@@ -163,6 +175,7 @@ const CoursePage = () => {
                         <TableCell className="font-medium">{name}</TableCell>
                         <TableCell>{code}</TableCell>
                         <TableCell>{credit}</TableCell>
+                        <TableCell>{department}</TableCell>
                         <TableCell>{curriculum}</TableCell>
                         <TableCell>
                           {prerequisites.length ? prerequisites : "N/A"}

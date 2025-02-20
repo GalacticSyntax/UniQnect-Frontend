@@ -10,10 +10,9 @@ import { cn } from "~/lib/utils";
 import ProfileImageEditor from "./ProfileImageEditor";
 
 const ProfileTop = () => {
-  const profileImage =
-    "https://scontent.fdac24-3.fna.fbcdn.net/v/t39.30808-6/325618153_754096169469617_5563270339517372522_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=a5f93a&_nc_ohc=xG6Hilk4XycQ7kNvgHKNDZc&_nc_zt=23&_nc_ht=scontent.fdac24-3.fna&_nc_gid=A4dHJC6sj8vIp482qrmxMBQ&oh=00_AYBtHDxc4X-Vqmv-bKhUA1QHfzsimAr7ab7qnwOK9yzQmA&oe=679A6BDC";
+  const profileImage = "https://avatars.githubusercontent.com/u/124599?v=4";
 
-  const isVerified = true;
+  const isVerified = false;
 
   return (
     <div className="flex flex-col sm:flex-row gap-4 shadow-lg p-5 sm:py-8 bg-primary rounded-md overflow-hidden">
