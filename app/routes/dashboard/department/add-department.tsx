@@ -1,5 +1,10 @@
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import type { AlignType } from "~/components/form/BatManForm";
 import BatManForm from "~/components/form/BatManForm";
+import { axiosClient } from "~/lib/apiClient";
 
 const formSchema = {
   title: {
@@ -17,38 +22,15 @@ const formSchema = {
     {
       type: "text",
       name: "code",
-      label: "Code",
-      placeholder: "Code",
+      label: "Department Code",
+      placeholder: "Department Code",
       required: true,
     },
     {
-      type: "select",
-      name: "school",
-      label: "School",
-      placeholder: "School",
-      options: [
-        {
-          id: "school_1",
-          value: "School 1",
-        },
-        {
-          id: "school_2",
-          value: "School 2",
-        },
-        {
-          id: "school_3",
-          value: "School 3",
-        },
-        {
-          id: "school_4",
-          value: "School 4",
-        },
-        {
-          id: "school_5",
-          value: "School 5",
-        },
-      ],
-      className: "w-full",
+      type: "text",
+      name: "schoolId",
+      label: "School Code",
+      placeholder: "School Code",
       required: true,
     },
     {
@@ -66,8 +48,33 @@ const formSchema = {
 };
 
 const AddDepartment = () => {
-  const handleFormSubmit = (formData: Record<string, unknown>) => {
-    console.log(formData);
+  const [loader, setLoader] = useState(false);
+  const navigate = useNavigate();
+
+  const handleFormSubmit = async (formData: Record<string, unknown>) => {
+    setLoader(true);
+
+    try {
+      const response = await axiosClient.post("/department", {
+        ...formData,
+      });
+
+      const data = await response.data;
+      setLoader(false);
+
+      toast("Department Created", {
+        description: `${data?.data?.name} department created`,
+      });
+
+      navigate("/dashboard/department");
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
   };
 
   return (

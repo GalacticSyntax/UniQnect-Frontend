@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { departmentsList } from "~/data/generateDepartments";
+// import { departmentsList } from "~/data/generateDepartments";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Plus, Search, X } from "lucide-react";
@@ -29,8 +29,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Label } from "~/components/ui/label";
+import { axiosClient } from "~/lib/apiClient";
+import { toast } from "sonner";
+import axios from "axios";
 
 const rowSizeList = ["10", "20", "30", "50", "80", "100"];
 
@@ -60,8 +63,33 @@ const header = [
 ];
 
 const DepartmentPage = () => {
+  const [loader, setLoader] = useState(false);
+  const [departmentList, setDepartmentList] = useState([]);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
+
+  useEffect(() => {
+    fetchDepartment();
+  }, []);
+
+  const fetchDepartment = async () => {
+    try {
+      const response = await axiosClient.get("/department");
+
+      const data = await response.data;
+
+      setDepartmentList((prev) => data?.data ?? []);
+
+      setLoader(false);
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
 
   const handleSearchTypeChange = (value: string) => {
     setSearchType(value);
@@ -151,7 +179,7 @@ const DepartmentPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {departmentsList
+                {departmentList
                   .slice(0, 100)
                   .map(
                     ({
