@@ -28,11 +28,42 @@ const formSchema = {
       placeholder: "Phone number",
       required: true,
     },
+    [
+      {
+        type: "text",
+        name: "teacherId",
+        label: "Teacher Id",
+        placeholder: "Teacher Id",
+        required: true,
+      },
+      {
+        type: "text",
+        name: "departmentId",
+        label: "Department Id",
+        placeholder: "Department Id",
+        required: true,
+      },
+    ],
     {
-      type: "password",
-      name: "password",
-      label: "Password",
-      placeholder: "Password",
+      type: "select",
+      name: "designation",
+      label: "Designation",
+      placeholder: "Designation",
+      options: [
+        { id: "professor", value: "Professor" },
+        { id: "associate_professor", value: "Associate Professor" },
+        { id: "assistant_professor", value: "Assistant Professor" },
+        { id: "senior_lecturer", value: "Senior Lecturer" },
+        { id: "lecturer", value: "Lecturer" },
+        { id: "teaching_assistant", value: "Teaching Assistant" },
+        { id: "chancellor", value: "Chancellor" },
+        { id: "vice_chancellor", value: "Vice Chancellor" },
+        { id: "pro_vice_chancellor", value: "Pro Vice Chancellor" },
+        { id: "head_of_department", value: "Head of Department" },
+        { id: "program_coordinator", value: "Program Coordinator" },
+        { id: "course_advisor", value: "Course Advisor" },
+      ],
+      className: "w-full",
       required: true,
     },
     {
@@ -74,7 +105,7 @@ const AddTeacher = () => {
 
   return (
     <section className="w-full h-full grid place-items-center p-5">
-      <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} />
+      <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} className="max-w-3xl" />
     </section>
   );
 };
