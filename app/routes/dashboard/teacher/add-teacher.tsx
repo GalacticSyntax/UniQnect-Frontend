@@ -61,12 +61,7 @@ const formSchema = {
         { id: "senior_lecturer", value: "Senior Lecturer" },
         { id: "lecturer", value: "Lecturer" },
         { id: "teaching_assistant", value: "Teaching Assistant" },
-        { id: "chancellor", value: "Chancellor" },
-        { id: "vice_chancellor", value: "Vice Chancellor" },
-        { id: "pro_vice_chancellor", value: "Pro Vice Chancellor" },
         { id: "head_of_department", value: "Head of Department" },
-        { id: "program_coordinator", value: "Program Coordinator" },
-        { id: "course_advisor", value: "Course Advisor" },
       ],
       className: "w-full",
       required: true,
@@ -120,7 +115,7 @@ const AddTeacher = () => {
       setLoader(false);
 
       toast("Teacher added", {
-        description: `${data?.data?.name} teacher added successfully`,
+        description: `${data?.data?.fullName} teacher added successfully`,
       });
 
       navigate("/dashboard/teacher");
