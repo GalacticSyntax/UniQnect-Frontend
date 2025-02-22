@@ -1,5 +1,10 @@
+import axios from "axios";
+import { useState } from "react";
+import { useNavigate } from "react-router";
+import { toast } from "sonner";
 import type { AlignType } from "~/components/form/BatManForm";
 import BatManForm from "~/components/form/BatManForm";
+import { axiosClient } from "~/lib/apiClient";
 
 const formSchema = {
   title: {
@@ -16,7 +21,7 @@ const formSchema = {
     },
     {
       type: "text",
-      name: "code",
+      name: "schoolId",
       label: "Code",
       placeholder: "Code",
       required: true,
@@ -36,8 +41,34 @@ const formSchema = {
 };
 
 const AddSchool = () => {
-  const handleFormSubmit = (formData: Record<string, unknown>) => {
-    console.log(formData);
+  const [loader, setLoader] = useState(false);
+  const navigate = useNavigate();
+
+  const handleFormSubmit = async (formData: Record<string, unknown>) => {
+    setLoader(true);
+
+    try {
+      const response = await axiosClient.post("/school", {
+        ...formData,
+      });
+      console.log(response);
+
+      const data = await response.data;
+      setLoader(false);
+
+      toast("School Created", {
+        description: `${data?.data?.name} school created`,
+      });
+
+      navigate("/dashboard/school");
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
   };
 
   return (

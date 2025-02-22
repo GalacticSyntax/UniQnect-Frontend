@@ -92,8 +92,7 @@ const SchoolPage = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="code">Code</SelectItem>
-                <SelectItem value="school">School</SelectItem>
+                <SelectItem value="schoolId">Code</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -161,7 +160,7 @@ const SchoolPage = () => {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
+        {/*<UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />*/}
       </section>
     </section>
   );
