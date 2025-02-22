@@ -98,10 +98,10 @@ const TeacherPage = () => {
   return (
     <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
       <section className="flex justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold">Teacher list</h1>
+        <h1 className="text-2xl font-bold">Admission officer list</h1>
         <Link to="/dashboard/teacher/add-teacher">
           <Button>
-            <Plus /> Add New Teacher
+            <Plus /> Add Admission officer
           </Button>
         </Link>
       </section>
@@ -117,12 +117,8 @@ const TeacherPage = () => {
             <SelectContent>
               <SelectGroup>
                 <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="teacherId">Teacher Id</SelectItem>
-                <SelectItem value="designation">Designation</SelectItem>
                 <SelectItem value="email">Email</SelectItem>
                 <SelectItem value="phone">Phone number</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
               </SelectGroup>
             </SelectContent>
           </Select>
