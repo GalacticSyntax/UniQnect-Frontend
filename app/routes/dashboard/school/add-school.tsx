@@ -51,7 +51,6 @@ const AddSchool = () => {
       const response = await axiosClient.post("/school", {
         ...formData,
       });
-      console.log(response);
 
       const data = await response.data;
       setLoader(false);

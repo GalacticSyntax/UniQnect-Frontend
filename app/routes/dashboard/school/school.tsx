@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { schoolList } from "~/data/generateSchools";
+// import { schoolList } from "~/data/generateSchools";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Plus, Search, X } from "lucide-react";
@@ -29,8 +29,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Label } from "~/components/ui/label";
+import { axiosClient } from "~/lib/apiClient";
+import { toast } from "sonner";
+import axios from "axios";
 
 const rowSizeList = ["10", "20", "30", "50", "80", "100"];
 
@@ -51,8 +54,33 @@ const header = [
 ];
 
 const SchoolPage = () => {
+  const [loader, setLoader] = useState(false);
+  const [schoolList, setSchoolList] = useState([]);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
+
+  useEffect(() => {
+    fetchSchools();
+  }, []);
+
+  const fetchSchools = async () => {
+    try {
+      const response = await axiosClient.get("/school");
+
+      const data = await response.data;
+
+      setSchoolList((prev) => data?.data ?? []);
+
+      setLoader(false);
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
 
   const handleSearchTypeChange = (value: string) => {
     setSearchType(value);
@@ -141,9 +169,8 @@ const SchoolPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {schoolList
-                  .slice(0, 100)
-                  .map(({ name, code, number_of_departments }) => (
+                {schoolList.map(
+                  ({ name, schoolId: code, number_of_departments }) => (
                     <TableRow
                       key={code}
                       className="hover:bg-gray-200/60 duration-100 transition-all"
@@ -154,7 +181,8 @@ const SchoolPage = () => {
                         {number_of_departments}
                       </TableCell>
                     </TableRow>
-                  ))}
+                  )
+                )}
               </TableBody>
             </Table>
             <ScrollBar orientation="horizontal" />
