@@ -46,6 +46,23 @@ const data = {
       ],
     },
     {
+      id: "admission-office",
+      title: "Admission Office",
+      url: "/dashboard/admission-office",
+      icon: GraduationCap, // Represents teachers/education
+      isActive: false,
+      items: [
+        {
+          title: "Admission Officers",
+          url: "/dashboard/admission-office",
+        },
+        {
+          title: "Add Admission Offices",
+          url: "/dashboard/admission-office/add-admission-office",
+        },
+      ],
+    },
+    {
       id: "teacher",
       title: "Teacher",
       url: "/dashboard/teacher",

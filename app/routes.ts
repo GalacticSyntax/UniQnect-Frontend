@@ -38,6 +38,17 @@ export default [
         ]),
       ]),
 
+      /* admission-office routes */
+      layout("routes/dashboard/admission-office/layout.tsx", [
+        ...prefix("admission-office", [
+          index("routes/dashboard/admission-office/admission-office.tsx"),
+          route(
+            "add-admission-office",
+            "routes/dashboard/admission-office/add-admission-office.tsx"
+          ),
+        ]),
+      ]),
+
       /* school routes */
       layout("routes/dashboard/school/layout.tsx", [
         ...prefix("school", [
