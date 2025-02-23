@@ -150,7 +150,6 @@ const UserPage = () => {
               </TableHeader>
               <TableBody>
                 {userList
-                  .slice(0, 100)
                   .map(
                     ({ id, fullName, email, phone, image, gender, role }) => (
                       <TableRow
