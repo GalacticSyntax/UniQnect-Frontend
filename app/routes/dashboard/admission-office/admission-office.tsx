@@ -26,7 +26,7 @@ export const meta = ({}: Route.MetaArgs) => {
   ];
 };
 
-const rowSizeList = ["10", "20", "30", "50", "80", "100"];
+const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
 
 const header = [
   {

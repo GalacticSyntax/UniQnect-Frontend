@@ -12,7 +12,7 @@ import type { Route } from "./+types/user";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Input } from "~/components/ui/input";
 import { usersList } from "~/data/generateUsers";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Plus, Search, X } from "lucide-react";
 import {
@@ -31,6 +31,7 @@ import { Label } from "~/components/ui/label";
 import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
+import SearchWithUrlSync from "~/components/SearchWithUrlSync";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -39,7 +40,7 @@ export const meta = ({}: Route.MetaArgs) => {
   ];
 };
 
-const rowSizeList = ["10", "20", "30", "50", "80", "100"];
+const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
 
 const header = [
   {
@@ -73,24 +74,35 @@ const header = [
 ];
 
 const UserPage = () => {
+  let [searchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
   const [userList, setUserList] = useState([]);
-  const [searchType, setSearchType] = useState("name");
-  const [searchTerm, setSearcTerm] = useState("");
+  const [totalPage, setTotalPage] = useState(0);
 
   useEffect(() => {
     fetchUserList();
-  }, []);
+  }, [searchParams, searchParams.toString()]);
 
   const fetchUserList = async () => {
+    const limit = searchParams.get("size") ?? 5;
+    const page = searchParams.get("page") || 1;
+    const searchTerm = searchParams.get("searchTerm");
+    const sort = searchParams.get("sort");
+    // const fields = searchParams.get("fields");
     try {
-      const response = await axiosClient.get("/user");
+      let apiUrl = `/user?limit=${limit}&page=${page}`;
+      searchTerm && (apiUrl += `&searchTerm=${searchTerm}`);
+      sort && (apiUrl += `&sort=${sort}`);
+      // fields && (apiUrl += `&fields=${fields}`);
+
+      const response = await axiosClient.get(apiUrl);
 
       const data = await response.data;
 
       if (!data || !data.data || !data.data.result) return;
 
       setUserList((prev) => data.data?.result ?? []);
+      setTotalPage(data.data?.meta?.totalPage);
 
       setLoader(false);
     } catch (error: unknown) {
@@ -101,22 +113,6 @@ const UserPage = () => {
           : "Something went wrong",
       });
     }
-  };
-
-  const handleSearchTypeChange = (value: string) => {
-    setSearchType(value);
-  };
-
-  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearcTerm(e.target.value);
-  };
-
-  const handleClearSearchTerm = () => {
-    setSearcTerm("");
-  };
-
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
   };
 
   return (
@@ -130,48 +126,8 @@ const UserPage = () => {
         </Link>
       </section>
       <section className="flex justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="searchType" className="flex-shrink-0">
-            Search by
-          </Label>
-          <Select value={searchType} onValueChange={handleSearchTypeChange}>
-            <SelectTrigger id="searchType" className="max-w-[180px]">
-              <SelectValue placeholder="Search by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="phone">Phone number</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <form
-          className="flex rounded-sm border pl-3 ml-auto"
-          onSubmit={handleSearch}
-        >
-          <input
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            className="outline-none bg-transparent w-full"
-            placeholder="Search User"
-          />
-          <div className="size-9">
-            {searchTerm && (
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                onClick={handleClearSearchTerm}
-              >
-                <X />
-              </Button>
-            )}
-          </div>
-          <Button className="flex-shrink-0 rounded-l-none border">
-            <Search />
-          </Button>
-        </form>
+        {/* <SelectWithUrlSync list={searchList} /> */}
+        <SearchWithUrlSync label="Search by email address" />
       </section>
       <section className="w-full flex flex-col gap-4">
         <div className="w-full overflow-auto">
@@ -223,7 +179,7 @@ const UserPage = () => {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
+        <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} />
       </section>
     </section>
   );
