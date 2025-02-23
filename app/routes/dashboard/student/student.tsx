@@ -71,33 +71,6 @@ const header = [
   },
 ];
 
-const searchList = [
-  {
-    value: "name",
-    label: "Name",
-  },
-  {
-    value: "studentId",
-    label: "Student Id",
-  },
-  {
-    value: "email",
-    label: "Email",
-  },
-  {
-    value: "phone",
-    label: "Phone number",
-  },
-  {
-    value: "department",
-    label: "Department",
-  },
-  {
-    value: "session",
-    label: "Session",
-  },
-];
-
 const StudentPage = () => {
   let [searchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
@@ -121,8 +94,6 @@ const StudentPage = () => {
       sort && (apiUrl += `&sort=${sort}`);
       // fields && (apiUrl += `&fields=${fields}`);
 
-      console.log({ apiUrl });
-
       const response = await axiosClient.get(apiUrl);
 
       const data = await response.data;
@@ -130,7 +101,6 @@ const StudentPage = () => {
       if (!data || !data.data || !data.data.result) return;
 
       setStudentList((prev) => data.data?.result ?? []);
-      console.log(data.data.result);
       setTotalPage(data.data?.meta?.totalPage);
 
       setLoader(false);

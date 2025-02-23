@@ -10,23 +10,16 @@ import {
 } from "~/components/ui/table";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { teacherList } from "~/data/generateTeacher";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Plus, Search, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Plus } from "lucide-react";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { Label } from "~/components/ui/label";
+import { useEffect, useState } from "react";
 import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
+import SearchWithUrlSync from "~/components/SearchWithUrlSync";
+import SelectWithUrlSync from "~/components/SelectWithUrlSync";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -35,13 +28,13 @@ export const meta = ({}: Route.MetaArgs) => {
   ];
 };
 
-const rowSizeList = ["10", "20", "30", "50", "80", "100"];
+const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
 
 const header = [
   {
     id: "fullName",
     label: "Full Name",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "teacherId",
@@ -55,17 +48,17 @@ const header = [
   {
     id: "department",
     label: "Department",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "email",
     label: "Email",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "phone",
     label: "Phone Number",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "image",
@@ -79,27 +72,38 @@ const header = [
 ];
 
 const TeacherPage = () => {
+  let [searchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
   const [teacherList, setTeacherList] = useState([]);
-  const [searchType, setSearchType] = useState("name");
-  const [searchTerm, setSearcTerm] = useState("");
+  const [totalPage, setTotalPage] = useState(0);
 
   useEffect(() => {
     fetchTeacherList();
-  }, []);
+  }, [searchParams]);
 
   const fetchTeacherList = async () => {
+    const limit = searchParams.get("size") ?? 5;
+    const page = searchParams.get("page") || 1;
+    const searchTerm = searchParams.get("searchTerm");
+    const sort = searchParams.get("sort");
+
     try {
-      const response = await axiosClient.get("/teacher");
+      let apiUrl = `/teacher?limit=${limit}&page=${page}`;
+      searchTerm && (apiUrl += `&searchTerm=${searchTerm}`);
+      sort && (apiUrl += `&sort=${sort}`);
+
+      const response = await axiosClient.get(apiUrl);
 
       const data = await response.data;
 
       if (!data || !data.data || !data.data.result) return;
-
+      console.log(data.data);
       setTeacherList((prev) => data.data?.result ?? []);
+      setTotalPage(data.data?.meta?.totalPage);
 
       setLoader(false);
     } catch (error: unknown) {
+      console.log(error);
       setLoader(false);
       toast("Error occure", {
         description: axios.isAxiosError(error)
@@ -107,22 +111,6 @@ const TeacherPage = () => {
           : "Something went wrong",
       });
     }
-  };
-
-  const handleSearchTypeChange = (value: string) => {
-    setSearchType(value);
-  };
-
-  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearcTerm(e.target.value);
-  };
-
-  const handleClearSearchTerm = () => {
-    setSearcTerm("");
-  };
-
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
   };
 
   return (
@@ -136,52 +124,8 @@ const TeacherPage = () => {
         </Link>
       </section>
       <section className="flex justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="searchType" className="flex-shrink-0">
-            Search by
-          </Label>
-          <Select value={searchType} onValueChange={handleSearchTypeChange}>
-            <SelectTrigger id="searchType" className="max-w-[180px]">
-              <SelectValue placeholder="Search by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="teacherId">Teacher Id</SelectItem>
-                <SelectItem value="designation">Designation</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="phone">Phone number</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <form
-          className="flex rounded-sm border pl-3 ml-auto"
-          onSubmit={handleSearch}
-        >
-          <input
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            className="outline-none bg-transparent w-full"
-            placeholder="Search teacher"
-          />
-          <div className="size-9">
-            {searchTerm && (
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                onClick={handleClearSearchTerm}
-              >
-                <X />
-              </Button>
-            )}
-          </div>
-          <Button className="flex-shrink-0 rounded-l-none border">
-            <Search />
-          </Button>
-        </form>
+        {/* <SelectWithUrlSync list={searchList} /> */}
+        <SearchWithUrlSync label="Search by teacher ID" />
       </section>
       <section className="w-full flex flex-col gap-4">
         <div className="w-full overflow-auto">
@@ -203,54 +147,48 @@ const TeacherPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {teacherList
-                  .slice(0, 100)
-                  .map(
-                    ({
-                      fullName,
-                      teacherId,
-                      designation,
-                      department,
-                      email,
-                      phone,
-                      image,
-                      gender,
-                    }) => (
-                      <TableRow
-                        key={teacherId}
-                        className="hover:bg-gray-200/60 duration-100 transition-all"
-                      >
-                        <TableCell className="font-medium">
-                          {fullName}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {teacherId}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {designation}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {department}
-                        </TableCell>
-                        <TableCell>{email}</TableCell>
-                        <TableCell>{phone}</TableCell>
-                        <TableCell className="text-right">
-                          <img
-                            src={image}
-                            alt=""
-                            className="size-9 rounded-full object-cover mx-auto select-none"
-                          />
-                        </TableCell>
-                        <TableCell>{gender}</TableCell>
-                      </TableRow>
-                    )
-                  )}
+                {teacherList.map(
+                  ({
+                    fullName,
+                    teacherId,
+                    designation,
+                    department,
+                    email,
+                    phone,
+                    image,
+                    gender,
+                  }) => (
+                    <TableRow
+                      key={teacherId}
+                      className="hover:bg-gray-200/60 duration-100 transition-all"
+                    >
+                      <TableCell className="font-medium">{fullName}</TableCell>
+                      <TableCell className="font-medium">{teacherId}</TableCell>
+                      <TableCell className="font-medium">
+                        {designation}
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        {department}
+                      </TableCell>
+                      <TableCell>{email}</TableCell>
+                      <TableCell>{phone}</TableCell>
+                      <TableCell className="text-right">
+                        <img
+                          src={image}
+                          alt=""
+                          className="size-9 rounded-full object-cover mx-auto select-none"
+                        />
+                      </TableCell>
+                      <TableCell>{gender}</TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
+        <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} />
       </section>
     </section>
   );
