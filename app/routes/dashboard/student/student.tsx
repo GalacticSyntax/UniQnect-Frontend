@@ -78,10 +78,10 @@ const StudentPage = () => {
   const [totalPage, setTotalPage] = useState(0);
 
   useEffect(() => {
-    fetchTeacherList();
+    fetchStudentsList();
   }, [searchParams]);
 
-  const fetchTeacherList = async () => {
+  const fetchStudentsList = async () => {
     const limit = searchParams.get("size") ?? 5;
     const page = searchParams.get("page") || 1;
     const searchTerm = searchParams.get("searchTerm");

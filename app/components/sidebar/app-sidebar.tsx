@@ -7,6 +7,7 @@ import {
   FileText,
   GraduationCap,
   School,
+  ShieldPlus,
   User,
   Users,
 } from "lucide-react";
@@ -49,7 +50,7 @@ const data = {
       id: "admission-office",
       title: "Admission Office",
       url: "/dashboard/admission-office",
-      icon: GraduationCap, // Represents teachers/education
+      icon: ShieldPlus,
       isActive: false,
       items: [
         {
