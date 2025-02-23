@@ -5,7 +5,10 @@ import { Button } from "~/components/ui/button";
 import {
   ArrowDownNarrowWide as AscendingIcon,
   ArrowUpNarrowWide as DescendingIcon,
+  Minus,
 } from "lucide-react";
+import { useSearchParams } from "react-router";
+import useModifyQueryParams from "~/hooks/use-modify-query-params";
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -90,36 +93,88 @@ const TableActionHead = React.forwardRef<
   HTMLTableCellElement,
   React.ThHTMLAttributes<HTMLTableCellElement> & {
     sortable?: boolean;
+    id: string;
     center?: boolean;
     sortedType?: "acc" | "desc";
   }
 >(
   (
-    { className, sortable, center = false, sortedType, children, ...props },
+    { className, sortable, id, center = false, sortedType, children, ...props },
     ref
-  ) => (
-    <th
-      ref={ref}
-      className={cn(
-        "h-10 px-2 text-left align-middle font-medium text-muted-foreground select-none [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
-        {
-          "text-center": center,
-        },
-        className
-      )}
-      {...props}
-    >
-      {sortable ? (
-        <Button variant={"ghost"} className="pl-0">
-          {children}
-          {sortedType === "acc" && <DescendingIcon />}
-          {!sortedType && <AscendingIcon />}
-        </Button>
-      ) : (
-        children
-      )}
-    </th>
-  )
+  ) => {
+    let [searchParams, setSearchParams] = useSearchParams();
+    const { modifyParams } = useModifyQueryParams();
+
+    React.useEffect(() => {
+      if (!searchParams.get("sort"))
+        setSearchParams(modifyParams("delete", "sort"));
+    }, [searchParams]);
+
+    // Helper function to check if the column id is in the query params and what type of sorting it has
+    const getSortType = () => {
+      const sortParam = searchParams.get("sort");
+      if (!sortParam) return null;
+
+      const sortArray = sortParam.split(",");
+      const currentSort = sortArray.find((item) => item.includes(id));
+      if (!currentSort) return null;
+
+      if (currentSort.startsWith("-")) return "desc"; // descending
+      if (currentSort.startsWith("+")) return "acc"; // ascending
+      return null;
+    };
+
+    // Function to handle sorting
+    const handleSort = () => {
+      let sortParam = searchParams.get("sort");
+      const sortArray = sortParam ? sortParam.split(",") : [];
+
+      const currentSortIndex = sortArray.findIndex((item) => item.includes(id));
+
+      if (currentSortIndex !== -1) {
+        // If the column is already in the sort query, toggle its value
+        if (!sortArray[currentSortIndex].startsWith("-")) {
+          sortArray[currentSortIndex] = `-${id}`; // Change to descending
+        } else if (sortArray[currentSortIndex].startsWith("-")) {
+          sortArray.splice(currentSortIndex, 1); // Remove the sort parameter
+        }
+      } else {
+        // If the column is not in the sort query, add it as ascending
+        sortArray.push(id);
+      }
+
+      // Update the sort parameter in the query
+      const updatedUrl = modifyParams("set", "sort", sortArray.join(","));
+      setSearchParams(updatedUrl);
+    };
+
+    const sortType = getSortType();
+
+    return (
+      <th
+        ref={ref}
+        className={cn(
+          "h-10 px-2 text-left align-middle font-medium text-muted-foreground select-none [&:has([role=checkbox])]:pr-0 [&>[role=checkbox]]:translate-y-[2px]",
+          {
+            "text-center": center,
+          },
+          className
+        )}
+        {...props}
+      >
+        {sortable ? (
+          <Button variant={"ghost"} className="pl-0" onClick={handleSort}>
+            {children}
+            {sortType === "acc" && <DescendingIcon />}
+            {sortType === "desc" && <AscendingIcon />}
+            {!sortType && <Minus />}
+          </Button>
+        ) : (
+          children
+        )}
+      </th>
+    );
+  }
 );
 TableActionHead.displayName = "TableActionHead";
 

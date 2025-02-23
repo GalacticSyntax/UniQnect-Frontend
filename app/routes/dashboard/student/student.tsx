@@ -11,21 +11,14 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { studenstList } from "~/data/generateStudents";
 import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Plus, Search, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Plus } from "lucide-react";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { Label } from "~/components/ui/label";
+import { useEffect, useState } from "react";
 import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
+import SelectWithUrlSync from "~/components/SelectWithUrlSync";
+import SearchWithUrlSync from "~/components/SearchWithUrlSync";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -40,7 +33,7 @@ const header = [
   {
     id: "fullName",
     label: "Full Name",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "studentId",
@@ -50,22 +43,22 @@ const header = [
   {
     id: "department",
     label: "Department",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "session",
     label: "Session",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "email",
     label: "Email",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "phone",
     label: "Phone Number",
-    sortable: true,
+    // sortable: true,
   },
   {
     id: "image",
@@ -78,13 +71,38 @@ const header = [
   },
 ];
 
+const searchList = [
+  {
+    value: "name",
+    label: "Name",
+  },
+  {
+    value: "studentId",
+    label: "Student Id",
+  },
+  {
+    value: "email",
+    label: "Email",
+  },
+  {
+    value: "phone",
+    label: "Phone number",
+  },
+  {
+    value: "department",
+    label: "Department",
+  },
+  {
+    value: "session",
+    label: "Session",
+  },
+];
+
 const StudentPage = () => {
-  let [searchParams, setSearchParams] = useSearchParams();
+  let [searchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
   const [studentList, setStudentList] = useState([]);
   const [totalPage, setTotalPage] = useState(0);
-  const [searchType, setSearchType] = useState("name");
-  const [searchTerm, setSearcTerm] = useState("");
 
   useEffect(() => {
     fetchTeacherList();
@@ -93,18 +111,26 @@ const StudentPage = () => {
   const fetchTeacherList = async () => {
     const limit = searchParams.get("size") ?? 5;
     const page = searchParams.get("page") || 1;
+    const searchTerm = searchParams.get("searchTerm");
+    const sort = searchParams.get("sort");
+    // const fields = searchParams.get("fields");
 
     try {
-      const response = await axiosClient.get(
-        `/student?limit=${limit}&page=${page}`
-      );
+      let apiUrl = `/student?limit=${limit}&page=${page}`;
+      searchTerm && (apiUrl += `&searchTerm=${searchTerm}`);
+      sort && (apiUrl += `&sort=${sort}`);
+      // fields && (apiUrl += `&fields=${fields}`);
+
+      console.log({ apiUrl });
+
+      const response = await axiosClient.get(apiUrl);
 
       const data = await response.data;
 
       if (!data || !data.data || !data.data.result) return;
 
       setStudentList((prev) => data.data?.result ?? []);
-      console.log(data.data.meta.totalPage);
+      console.log(data.data.result);
       setTotalPage(data.data?.meta?.totalPage);
 
       setLoader(false);
@@ -120,22 +146,6 @@ const StudentPage = () => {
     }
   };
 
-  const handleSearchTypeChange = (value: string) => {
-    setSearchType(value);
-  };
-
-  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearcTerm(e.target.value);
-  };
-
-  const handleClearSearchTerm = () => {
-    setSearcTerm("");
-  };
-
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-  };
-
   return (
     <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
       <section className="flex justify-between flex-wrap gap-4">
@@ -147,51 +157,8 @@ const StudentPage = () => {
         </Link>
       </section>
       <section className="flex justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="searchType" className="flex-shrink-0">
-            Search by
-          </Label>
-          <Select value={searchType} onValueChange={handleSearchTypeChange}>
-            <SelectTrigger id="searchType" className="max-w-[180px]">
-              <SelectValue placeholder="Search by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="studentId">Student Id</SelectItem>
-                <SelectItem value="email">Email</SelectItem>
-                <SelectItem value="phone">Phone number</SelectItem>
-                <SelectItem value="department">Department</SelectItem>
-                <SelectItem value="session">Session</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <form
-          className="flex rounded-sm border pl-3 ml-auto"
-          onSubmit={handleSearch}
-        >
-          <input
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            className="outline-none bg-transparent w-full"
-            placeholder="Search student"
-          />
-          <div className="size-9">
-            {searchTerm && (
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                onClick={handleClearSearchTerm}
-              >
-                <X />
-              </Button>
-            )}
-          </div>
-          <Button className="flex-shrink-0 rounded-l-none border">
-            <Search />
-          </Button>
-        </form>
+        {/* <SelectWithUrlSync list={searchList} /> */}
+        <SearchWithUrlSync label="Search by student ID" />
       </section>
       <section className="w-full flex flex-col gap-4">
         <div className="w-full overflow-auto">
@@ -201,6 +168,7 @@ const StudentPage = () => {
                 <TableRow>
                   {header.map(({ id, label, sortable, center }) => (
                     <TableActionHead
+                      id={id}
                       key={id}
                       sortable={sortable}
                       center={center}

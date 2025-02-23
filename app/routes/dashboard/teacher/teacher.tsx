@@ -191,6 +191,7 @@ const TeacherPage = () => {
                 <TableRow>
                   {header.map(({ id, label, sortable, center }) => (
                     <TableActionHead
+                      id={id}
                       key={id}
                       sortable={sortable}
                       center={center}
