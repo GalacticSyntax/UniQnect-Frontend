@@ -110,7 +110,7 @@ const AddStudent = () => {
         description: `${data?.data?.fullName} student added successfully`,
       });
 
-      navigate("/dashboard/student");
+      // navigate("/dashboard/student");
     } catch (error: unknown) {
       setLoader(false);
       toast("Error occure", {

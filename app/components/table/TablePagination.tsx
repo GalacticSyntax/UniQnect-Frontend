@@ -15,7 +15,7 @@ interface TablePaginationProps {
   totalPages?: number;
 }
 
-const TablePagination = ({ totalPages = 10 }: TablePaginationProps) => {
+const TablePagination = ({ totalPages = 100 }: TablePaginationProps) => {
   let [searchParams, setSearchParams] = useSearchParams();
   const { modifyParams } = useModifyQueryParams();
 
@@ -40,10 +40,9 @@ const TablePagination = ({ totalPages = 10 }: TablePaginationProps) => {
           </PaginationItem>
         )}
 
-        {/* when page near starting */}
-        {page <= 2 && (
+        {totalPages <= 3 && (
           <>
-            {Array(3)
+            {Array(totalPages)
               .fill(0)
               .map((_, index) => {
                 const contextPage = index + 1;
@@ -58,67 +57,96 @@ const TablePagination = ({ totalPages = 10 }: TablePaginationProps) => {
                   </PaginationItem>
                 );
               })}
-            {totalPages > 3 && (
-              <PaginationItem>
-                <PaginationEllipsis
-                  onClick={() => handlePageChange(page + 1)}
-                />
-              </PaginationItem>
-            )}
           </>
         )}
 
-        {/* when page near ending */}
-        {totalPages - page < 2 && (
+        {totalPages > 3 && (
           <>
-            {totalPages > 3 && (
-              <PaginationItem>
-                <PaginationEllipsis
-                  onClick={() => handlePageChange(page - 1)}
-                />
-              </PaginationItem>
+            {/* when page near starting */}
+            {page <= 2 && (
+              <>
+                {Array(3)
+                  .fill(0)
+                  .map((_, index) => {
+                    const contextPage = index + 1;
+                    return (
+                      <PaginationItem key={contextPage}>
+                        <PaginationLink
+                          isActive={page === contextPage}
+                          onClick={() => handlePageChange(contextPage)}
+                        >
+                          {contextPage}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                {totalPages > 3 && (
+                  <PaginationItem>
+                    <PaginationEllipsis
+                      onClick={() => handlePageChange(page + 1)}
+                    />
+                  </PaginationItem>
+                )}
+              </>
             )}
-            {Array(3)
-              .fill(0)
-              .map((_, index) => {
-                const contextPage = totalPages - (3 - index - 1);
-                return (
-                  <PaginationItem key={contextPage}>
-                    <PaginationLink
-                      isActive={page === contextPage}
-                      onClick={() => handlePageChange(contextPage)}
-                    >
-                      {contextPage}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-          </>
-        )}
 
-        {page > 2 && page <= totalPages - 2 && (
-          <>
-            <PaginationItem>
-              <PaginationEllipsis onClick={() => handlePageChange(page - 1)} />
-            </PaginationItem>
-            {Array(3)
-              .fill(0)
-              .map((_, index) => {
-                const contextPage = index + page - 1;
-                return (
-                  <PaginationItem key={contextPage}>
-                    <PaginationLink
-                      isActive={page === contextPage}
-                      onClick={() => handlePageChange(contextPage)}
-                    >
-                      {contextPage}
-                    </PaginationLink>
+            {/* when page near ending */}
+            {totalPages - page < 2 && totalPages > 3 && (
+              <>
+                {totalPages > 3 && (
+                  <PaginationItem>
+                    <PaginationEllipsis
+                      onClick={() => handlePageChange(page - 1)}
+                    />
                   </PaginationItem>
-                );
-              })}
-            <PaginationItem>
-              <PaginationEllipsis onClick={() => handlePageChange(page + 1)} />
-            </PaginationItem>
+                )}
+                {Array(3)
+                  .fill(0)
+                  .map((_, index) => {
+                    const contextPage = totalPages - (3 - index - 1);
+                    return (
+                      <PaginationItem key={contextPage}>
+                        <PaginationLink
+                          isActive={page === contextPage}
+                          onClick={() => handlePageChange(contextPage)}
+                        >
+                          {contextPage}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+              </>
+            )}
+
+            {page > 2 && page <= totalPages - 2 && (
+              <>
+                <PaginationItem>
+                  <PaginationEllipsis
+                    onClick={() => handlePageChange(page - 1)}
+                  />
+                </PaginationItem>
+                {Array(3)
+                  .fill(0)
+                  .map((_, index) => {
+                    const contextPage = index + page - 1;
+                    return (
+                      <PaginationItem key={contextPage}>
+                        <PaginationLink
+                          isActive={page === contextPage}
+                          onClick={() => handlePageChange(contextPage)}
+                        >
+                          {contextPage}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  })}
+                <PaginationItem>
+                  <PaginationEllipsis
+                    onClick={() => handlePageChange(page + 1)}
+                  />
+                </PaginationItem>
+              </>
+            )}
           </>
         )}
 

@@ -9,7 +9,7 @@ import {
 import type { Route } from "./+types/student";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { studenstList } from "~/data/generateStudents";
-import { Link } from "react-router";
+import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Plus, Search, X } from "lucide-react";
 import {
@@ -34,7 +34,7 @@ export const meta = ({}: Route.MetaArgs) => {
   ];
 };
 
-const rowSizeList = ["10", "20", "30", "50", "80", "100"];
+const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
 
 const header = [
   {
@@ -79,27 +79,38 @@ const header = [
 ];
 
 const StudentPage = () => {
+  let [searchParams, setSearchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
   const [studentList, setStudentList] = useState([]);
+  const [totalPage, setTotalPage] = useState(0);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
 
   useEffect(() => {
     fetchTeacherList();
-  }, []);
+  }, [searchParams]);
 
   const fetchTeacherList = async () => {
+    const limit = searchParams.get("size") ?? 5;
+    const page = searchParams.get("page") || 1;
+
     try {
-      const response = await axiosClient.get("/student");
+      const response = await axiosClient.get(
+        `/student?limit=${limit}&page=${page}`
+      );
 
       const data = await response.data;
 
       if (!data || !data.data || !data.data.result) return;
 
       setStudentList((prev) => data.data?.result ?? []);
+      console.log(data.data.meta.totalPage);
+      setTotalPage(data.data?.meta?.totalPage);
 
       setLoader(false);
     } catch (error: unknown) {
+      console.log(error);
+
       setLoader(false);
       toast("Error occure", {
         description: axios.isAxiosError(error)
@@ -240,7 +251,7 @@ const StudentPage = () => {
             <ScrollBar orientation="horizontal" />
           </ScrollArea>
         </div>
-        <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
+        <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} />
       </section>
     </section>
   );
