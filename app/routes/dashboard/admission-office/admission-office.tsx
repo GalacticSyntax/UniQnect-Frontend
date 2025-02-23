@@ -1,5 +1,4 @@
 import type { Route } from "./+types/admission-office";
-
 import {
   Table,
   TableActionHead,
@@ -11,18 +10,9 @@ import {
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Plus, Search, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Plus } from "lucide-react";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
-import { Label } from "~/components/ui/label";
+import { useEffect, useState } from "react";
 import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
