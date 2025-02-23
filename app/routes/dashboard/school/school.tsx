@@ -28,6 +28,7 @@ import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
 import PrivateRoute from "~/components/PrivateRoute";
+import { useAuth } from "~/provider/AuthProvider";
 
 const rowSizeList = ["10", "20", "30", "50", "80", "100"];
 
@@ -48,6 +49,7 @@ const header = [
 ];
 
 const SchoolPage = () => {
+  const { user } = useAuth();
   const [loader, setLoader] = useState(false);
   const [schoolList, setSchoolList] = useState([]);
 
@@ -79,11 +81,13 @@ const SchoolPage = () => {
       <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
         <section className="flex justify-between flex-wrap gap-4">
           <h1 className="text-2xl font-bold">School list</h1>
-          <Link to="/dashboard/school/add-school">
-            <Button>
-              <Plus /> Add New School
-            </Button>
-          </Link>
+          {user?.role === "admin" && (
+            <Link to="/dashboard/school/add">
+              <Button>
+                <Plus /> Add New School
+              </Button>
+            </Link>
+          )}
         </section>
 
         <section className="w-full flex flex-col gap-4">

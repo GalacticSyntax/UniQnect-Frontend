@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import SearchWithUrlSync from "~/components/SearchWithUrlSync";
 import PrivateRoute from "~/components/PrivateRoute";
+import { useAuth } from "~/provider/AuthProvider";
 
 const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
 
@@ -56,6 +57,7 @@ const header = [
 ];
 
 const DepartmentPage = () => {
+  const { user } = useAuth();
   let [searchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
   const [departmentList, setDepartmentList] = useState([]);
@@ -102,11 +104,13 @@ const DepartmentPage = () => {
       <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
         <section className="flex justify-between flex-wrap gap-4">
           <h1 className="text-2xl font-bold">Departments list</h1>
-          <Link to="/dashboard/department/add-department">
-            <Button>
-              <Plus /> Add New Department
-            </Button>
-          </Link>
+          {user?.role === "admin" && (
+            <Link to="/dashboard/department/add">
+              <Button>
+                <Plus /> Add New Department
+              </Button>
+            </Link>
+          )}
         </section>
         <section className="flex justify-between flex-wrap gap-2">
           {/* <SelectWithUrlSync list={searchList} /> */}

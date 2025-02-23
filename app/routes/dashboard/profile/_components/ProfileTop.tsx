@@ -76,7 +76,7 @@ const ProfileTop = () => {
     ? "teacher"
     : user.studentId
     ? "student"
-    : "Admission officer";
+    : "admission-office";
 
   const userImage =
     userRole === "student" || userRole === "teacher"

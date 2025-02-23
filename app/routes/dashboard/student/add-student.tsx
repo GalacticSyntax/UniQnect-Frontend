@@ -130,7 +130,7 @@ const AddStudent = () => {
           onSubmit={handleFormSubmit}
           className="max-w-3xl"
         />
-      </section>{" "}
+      </section>
     </PrivateRoute>
   );
 };

@@ -21,6 +21,7 @@ import axios from "axios";
 import SearchWithUrlSync from "~/components/SearchWithUrlSync";
 import SelectWithUrlSync from "~/components/SelectWithUrlSync";
 import PrivateRoute from "~/components/PrivateRoute";
+import { useAuth } from "~/provider/AuthProvider";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -73,6 +74,7 @@ const header = [
 ];
 
 const TeacherPage = () => {
+  const { user } = useAuth();
   let [searchParams] = useSearchParams();
   const [loader, setLoader] = useState(false);
   const [teacherList, setTeacherList] = useState([]);
@@ -114,16 +116,20 @@ const TeacherPage = () => {
     }
   };
 
+  console.log({ role: user?.role });
+
   return (
     <PrivateRoute>
       <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
         <section className="flex justify-between flex-wrap gap-4">
           <h1 className="text-2xl font-bold">Teacher list</h1>
-          <Link to="/dashboard/teacher/add-teacher">
-            <Button>
-              <Plus /> Add New Teacher
-            </Button>
-          </Link>
+          {user?.role === "admin" && (
+            <Link to="/dashboard/teacher/add">
+              <Button>
+                <Plus /> Add New Teacher
+              </Button>
+            </Link>
+          )}
         </section>
         <section className="flex justify-between flex-wrap gap-2">
           {/* <SelectWithUrlSync list={searchList} /> */}
