@@ -26,8 +26,11 @@ import {
 import TablePagination from "~/components/table/TablePagination";
 import TableRowNumberSelector from "~/components/table/TableRowNumberSelector";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Label } from "~/components/ui/label";
+import { axiosClient } from "~/lib/apiClient";
+import { toast } from "sonner";
+import axios from "axios";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -70,8 +73,35 @@ const header = [
 ];
 
 const UserPage = () => {
+  const [loader, setLoader] = useState(false);
+  const [userList, setUserList] = useState([]);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
+
+  useEffect(() => {
+    fetchUserList();
+  }, []);
+
+  const fetchUserList = async () => {
+    try {
+      const response = await axiosClient.get("/user");
+
+      const data = await response.data;
+
+      if (!data || !data.data || !data.data.result) return;
+
+      setUserList((prev) => data.data?.result ?? []);
+
+      setLoader(false);
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
 
   const handleSearchTypeChange = (value: string) => {
     setSearchType(value);
@@ -101,7 +131,9 @@ const UserPage = () => {
       </section>
       <section className="flex justify-between flex-wrap gap-2">
         <div className="flex items-center gap-2">
-          <Label htmlFor="searchType" className="flex-shrink-0">Search by</Label>
+          <Label htmlFor="searchType" className="flex-shrink-0">
+            Search by
+          </Label>
           <Select value={searchType} onValueChange={handleSearchTypeChange}>
             <SelectTrigger id="searchType" className="max-w-[180px]">
               <SelectValue placeholder="Search by" />
@@ -160,7 +192,7 @@ const UserPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {usersList
+                {userList
                   .slice(0, 100)
                   .map(
                     ({ id, fullName, email, phone, image, gender, role }) => (
@@ -180,7 +212,7 @@ const UserPage = () => {
                             className="size-9 rounded-full object-cover mx-auto select-none"
                           />
                         </TableCell>
-                        <TableCell>{gender}</TableCell>
+                        <TableCell className="capitalize">{gender}</TableCell>
                         <TableCell>{role}</TableCell>
                       </TableRow>
                     )

@@ -21,8 +21,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Label } from "~/components/ui/label";
+import { axiosClient } from "~/lib/apiClient";
+import { toast } from "sonner";
+import axios from "axios";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -76,8 +79,35 @@ const header = [
 ];
 
 const StudentPage = () => {
+  const [loader, setLoader] = useState(false);
+  const [studentList, setStudentList] = useState([]);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
+
+  useEffect(() => {
+    fetchTeacherList();
+  }, []);
+
+  const fetchTeacherList = async () => {
+    try {
+      const response = await axiosClient.get("/student");
+
+      const data = await response.data;
+
+      if (!data || !data.data || !data.data.result) return;
+
+      setStudentList((prev) => data.data?.result ?? []);
+
+      setLoader(false);
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
 
   const handleSearchTypeChange = (value: string) => {
     setSearchType(value);
@@ -155,7 +185,7 @@ const StudentPage = () => {
       <section className="w-full flex flex-col gap-4">
         <div className="w-full overflow-auto">
           <ScrollArea className="">
-            <Table>
+            <Table className="table-auto">
               <TableHeader>
                 <TableRow>
                   {header.map(({ id, label, sortable, center }) => (
@@ -171,46 +201,40 @@ const StudentPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {studenstList
-                  .slice(0, 100)
-                  .map(
-                    ({
-                      fullName,
-                      email,
-                      phone,
-                      studentId,
-                      image,
-                      gender,
-                      department,
-                      session,
-                    }) => (
-                      <TableRow
-                        key={studentId}
-                        className="hover:bg-gray-200/60 duration-100 transition-all"
-                      >
-                        <TableCell className="font-medium">
-                          {fullName}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {studentId}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {department}
-                        </TableCell>
-                        <TableCell className="font-medium">{session}</TableCell>
-                        <TableCell>{email}</TableCell>
-                        <TableCell>{phone}</TableCell>
-                        <TableCell className="text-right">
-                          <img
-                            src={image}
-                            alt=""
-                            className="size-9 rounded-full object-cover mx-auto select-none"
-                          />
-                        </TableCell>
-                        <TableCell>{gender}</TableCell>
-                      </TableRow>
-                    )
-                  )}
+                {studentList.map(
+                  ({
+                    fullName,
+                    email,
+                    phone,
+                    studentId,
+                    image,
+                    gender,
+                    department,
+                    session,
+                  }) => (
+                    <TableRow
+                      key={studentId}
+                      className="hover:bg-gray-200/60 duration-100 transition-all"
+                    >
+                      <TableCell className="font-medium">{fullName}</TableCell>
+                      <TableCell className="font-medium">{studentId}</TableCell>
+                      <TableCell className="font-medium">
+                        {department}
+                      </TableCell>
+                      <TableCell className="font-medium">{session}</TableCell>
+                      <TableCell>{email}</TableCell>
+                      <TableCell>{phone}</TableCell>
+                      <TableCell className="text-right">
+                        <img
+                          src={image}
+                          alt=""
+                          className="size-9 rounded-full object-cover mx-auto select-none"
+                        />
+                      </TableCell>
+                      <TableCell>{gender}</TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
             <ScrollBar orientation="horizontal" />

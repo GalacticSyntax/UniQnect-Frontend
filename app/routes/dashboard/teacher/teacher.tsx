@@ -22,8 +22,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Label } from "~/components/ui/label";
+import { axiosClient } from "~/lib/apiClient";
+import { toast } from "sonner";
+import axios from "axios";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -76,8 +79,35 @@ const header = [
 ];
 
 const TeacherPage = () => {
+  const [loader, setLoader] = useState(false);
+  const [teacherList, setTeacherList] = useState([]);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
+
+  useEffect(() => {
+    fetchTeacherList();
+  }, []);
+
+  const fetchTeacherList = async () => {
+    try {
+      const response = await axiosClient.get("/teacher");
+
+      const data = await response.data;
+
+      if (!data || !data.data || !data.data.result) return;
+
+      setTeacherList((prev) => data.data?.result ?? []);
+
+      setLoader(false);
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
 
   const handleSearchTypeChange = (value: string) => {
     setSearchType(value);
