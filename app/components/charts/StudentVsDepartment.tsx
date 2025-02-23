@@ -1,5 +1,5 @@
-import React from "react";
-
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 
 import {
@@ -16,43 +16,63 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
+import { axiosClient } from "~/lib/apiClient";
 
-// Updated chart data representing students and departments
-const chartData = [
-  { department: "CSE", students: 1200, fill: "var(--color-cse)" },
-  { department: "EEE", students: 950, fill: "var(--color-eee)" },
-  { department: "BBA", students: 870, fill: "var(--color-bba)" },
-  { department: "MAT", students: 650, fill: "var(--color-mat)" },
-  { department: "LAW", students: 500, fill: "var(--color-law)" },
-];
+// Generate random color for each department
+const generateRandomColor = () =>
+  `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`;
 
-const chartConfig = {
-  students: {
-    label: "Students",
-  },
-  cse: {
-    label: "CSE",
-    color: "hsl(var(--chart-1))",
-  },
-  eee: {
-    label: "EEE",
-    color: "hsl(var(--chart-2))",
-  },
-  bba: {
-    label: "BBA",
-    color: "hsl(var(--chart-3))",
-  },
-  mat: {
-    label: "MAT",
-    color: "hsl(var(--chart-4))",
-  },
-  law: {
-    label: "LAW",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig;
+const StudentVsDepartment: React.FC = () => {
+  const [chartData, setChartData] = useState<
+    { department: string; students: number; fill: string }[]
+  >([]);
+  const [chartConfig, setChartConfig] = useState<ChartConfig>({});
 
-const StudentCountChart: React.FC = () => {
+  // Fetch data from the API
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const response = await axiosClient.get(
+          "/department/departmentVsStudents"
+        );
+
+        const data: Array<{
+          department: string;
+          code: string;
+          students: number;
+        }> = response.data.data;
+
+        // Format data with dynamic colors
+        const formattedData: Array<{
+          department: string;
+          code: string;
+          students: number;
+          fill: string;
+        }> = data.map((item) => ({
+          ...item,
+          fill: generateRandomColor(),
+        }));
+
+        setChartData(formattedData);
+
+        // Create dynamic chartConfig based on data
+        const config = formattedData.reduce((acc, curr) => {
+          acc[curr.code] = {
+            label: curr.code,
+            color: curr.fill,
+          };
+          return acc;
+        }, {} as ChartConfig);
+
+        setChartConfig(config);
+      } catch (error) {
+        console.error("Failed to fetch chart data:", error);
+      }
+    };
+
+    fetchChartData();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
@@ -65,12 +85,10 @@ const StudentCountChart: React.FC = () => {
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{
-              left: 0,
-            }}
+            margin={{ left: 0 }}
           >
             <YAxis
-              dataKey="department"
+              dataKey="code"
               type="category"
               tickLine={false}
               tickMargin={10}
@@ -101,4 +119,4 @@ const StudentCountChart: React.FC = () => {
   );
 };
 
-export default StudentCountChart;
+export default StudentVsDepartment;

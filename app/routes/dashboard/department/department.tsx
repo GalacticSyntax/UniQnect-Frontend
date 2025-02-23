@@ -59,9 +59,9 @@ const DepartmentPage = () => {
   const [departmentList, setDepartmentList] = useState([]);
   // const [totalPage, setTotalPage] = useState(0);
 
-  // useEffect(() => {
-  //   fetchDepartment();
-  // }, [searchParams, searchParams.toString()]);
+  useEffect(() => {
+    fetchDepartment();
+  }, [searchParams, searchParams.toString()]);
 
   const fetchDepartment = async () => {
     // const limit = searchParams.get("size") ?? 5;
@@ -85,7 +85,7 @@ const DepartmentPage = () => {
 
       setLoader(false);
     } catch (error: unknown) {
-      console.log(error)
+      console.log(error);
       setLoader(false);
       toast("Error occure", {
         description: axios.isAxiosError(error)

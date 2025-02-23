@@ -9,7 +9,7 @@ const AppSidebarHeader = () => {
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        <Link to="/" className="flex items-center">
+        <Link to="/dashboard" className="flex items-center">
           <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
             <GalleryVerticalEnd size={18} />
           </div>

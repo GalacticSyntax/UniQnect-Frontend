@@ -53,7 +53,7 @@ const chartConfig = {
   },
 } satisfies ChartConfig;
 
-const TeacherCountChart: React.FC = () => {
+const TeacherVsDepartment: React.FC = () => {
   return (
     <Card>
       <CardHeader>
@@ -102,4 +102,4 @@ const TeacherCountChart: React.FC = () => {
   );
 };
 
-export default TeacherCountChart;
+export default TeacherVsDepartment;
