@@ -65,8 +65,6 @@ const ProfileTop = () => {
     fetchUserData();
   }, []);
 
-  console.log(user);
-
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
