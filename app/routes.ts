@@ -75,10 +75,8 @@ export default [
       layout("routes/dashboard/department/layout.tsx", [
         ...prefix("department", [
           index("routes/dashboard/department/department.tsx"),
-          route(
-            "add",
-            "routes/dashboard/department/add-department.tsx"
-          ),
+          route("add", "routes/dashboard/department/add-department.tsx"),
+          route("edit/:id", "routes/dashboard/department/edit-department.tsx"),
         ]),
       ]),
 

@@ -11,6 +11,7 @@ import {
   TableActionHead,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
@@ -18,7 +19,7 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 // import { departmentsList } from "~/data/generateDepartments";
 import { Link, useSearchParams } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import UsersTableFooter from "~/components/table/TableFooter";
 import { useEffect, useState } from "react";
 import { axiosClient } from "~/lib/apiClient";
@@ -124,6 +125,7 @@ const DepartmentPage = () => {
                       {label}
                     </TableActionHead>
                   ))}
+                  <TableHead className="text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -144,6 +146,13 @@ const DepartmentPage = () => {
                       <TableCell className="font-medium">{school}</TableCell>
                       <TableCell>{number_of_teachers}</TableCell>
                       <TableCell>{number_of_students}</TableCell>
+                      <TableCell className="font-medium text-center">
+                        <Link to={`/dashboard/department/edit/${code}`}>
+                          <Button size={"icon"}>
+                            <Pencil />
+                          </Button>
+                        </Link>
+                      </TableCell>
                     </TableRow>
                   )
                 )}

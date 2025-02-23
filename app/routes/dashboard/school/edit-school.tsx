@@ -45,10 +45,6 @@ const AddSchool = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleReset = () => {
-    setFormData({ name: "", schoolId: schoolId ?? "" });
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -108,12 +104,7 @@ const AddSchool = () => {
             />
           </div>
 
-          <div className="flex justify-between">
-            <Button type="button" variant="outline" onClick={handleReset}>
-              Clear
-            </Button>
-            <Button type="submit">Add</Button>
-          </div>
+          <Button type="submit" className="w-full">Update</Button>
         </form>
       </CardContent>
     </Card>
