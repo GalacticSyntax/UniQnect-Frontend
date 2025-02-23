@@ -26,7 +26,7 @@ export default [
       layout("routes/dashboard/student/layout.tsx", [
         ...prefix("student", [
           index("routes/dashboard/student/student.tsx"),
-          route("add-student", "routes/dashboard/student/add-student.tsx"),
+          route("add", "routes/dashboard/student/add-student.tsx"),
         ]),
       ]),
 
@@ -34,7 +34,7 @@ export default [
       layout("routes/dashboard/teacher/layout.tsx", [
         ...prefix("teacher", [
           index("routes/dashboard/teacher/teacher.tsx"),
-          route("add-teacher", "routes/dashboard/teacher/add-teacher.tsx"),
+          route("add", "routes/dashboard/teacher/add-teacher.tsx"),
         ]),
       ]),
 
@@ -43,7 +43,7 @@ export default [
         ...prefix("admission-office", [
           index("routes/dashboard/admission-office/admission-office.tsx"),
           route(
-            "add-admission-office",
+            "add",
             "routes/dashboard/admission-office/add-admission-office.tsx"
           ),
         ]),
@@ -53,7 +53,8 @@ export default [
       layout("routes/dashboard/school/layout.tsx", [
         ...prefix("school", [
           index("routes/dashboard/school/school.tsx"),
-          route("add-school", "routes/dashboard/school/add-school.tsx"),
+          route("add", "routes/dashboard/school/add-school.tsx"),
+          route("edit/:id", "routes/dashboard/school/edit-school.tsx"),
         ]),
       ]),
 
@@ -61,7 +62,7 @@ export default [
       layout("routes/dashboard/user/layout.tsx", [
         ...prefix("user", [
           index("routes/dashboard/user/user.tsx"),
-          route("add-user", "routes/dashboard/user/add-user.tsx"),
+          route("add", "routes/dashboard/user/add-user.tsx"),
         ]),
       ]),
 
@@ -75,7 +76,7 @@ export default [
         ...prefix("department", [
           index("routes/dashboard/department/department.tsx"),
           route(
-            "add-department",
+            "add",
             "routes/dashboard/department/add-department.tsx"
           ),
         ]),

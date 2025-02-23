@@ -42,7 +42,7 @@ const data = {
         },
         {
           title: "Add User",
-          url: "/dashboard/user/add-user",
+          url: "/dashboard/user/add",
         },
       ],
     },
@@ -59,7 +59,7 @@ const data = {
         },
         {
           title: "Add Admission Offices",
-          url: "/dashboard/admission-office/add-admission-office",
+          url: "/dashboard/admission-office/add",
         },
       ],
     },
@@ -76,7 +76,7 @@ const data = {
         },
         {
           title: "Add Teacher",
-          url: "/dashboard/teacher/add-teacher",
+          url: "/dashboard/teacher/add",
         },
       ],
     },
@@ -93,7 +93,7 @@ const data = {
         },
         {
           title: "Add Student",
-          url: "/dashboard/student/add-student",
+          url: "/dashboard/student/add",
         },
       ],
     },
@@ -161,7 +161,7 @@ const data = {
         },
         {
           title: "Add Department",
-          url: "/dashboard/department/add-department",
+          url: "/dashboard/department/add",
         },
       ],
     },
@@ -191,7 +191,7 @@ const data = {
         },
         {
           title: "Add School",
-          url: "/dashboard/school/add-school",
+          url: "/dashboard/school/add",
         },
       ],
     },

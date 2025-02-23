@@ -30,6 +30,8 @@ const InputField = ({
       className={field.className}
       value={value || (defaultvalue as string)}
       onChange={onChange}
+      readOnly={field.readOnly}
+      disabled={field.disabled}
     />
   );
 };

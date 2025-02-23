@@ -2,8 +2,8 @@ import type { Route } from "./+types/school";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
-    { title: "New React Router App" },
-    { name: "description", content: "Welcome to React Router!" },
+    { title: "School List" },
+    { name: "description", content: "School List!" },
   ];
 };
 
@@ -12,6 +12,7 @@ import {
   TableActionHead,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
@@ -19,7 +20,7 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 // import { schoolList } from "~/data/generateSchools";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Plus } from "lucide-react";
+import { Pencil, Plus } from "lucide-react";
 import UsersTableFooter from "~/components/table/TableFooter";
 import { useEffect, useState } from "react";
 import { Label } from "~/components/ui/label";
@@ -98,6 +99,7 @@ const SchoolPage = () => {
                       {label}
                     </TableActionHead>
                   ))}
+                  <TableHead className="text-center">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -111,6 +113,13 @@ const SchoolPage = () => {
                       <TableCell className="font-medium">{code}</TableCell>
                       <TableCell className="font-medium">
                         {number_of_departments}
+                      </TableCell>
+                      <TableCell className="font-medium text-center">
+                        <Link to={`/dashboard/school/edit/${code}`}>
+                          <Button size={"icon"}>
+                            <Pencil />
+                          </Button>
+                        </Link>
                       </TableCell>
                     </TableRow>
                   )

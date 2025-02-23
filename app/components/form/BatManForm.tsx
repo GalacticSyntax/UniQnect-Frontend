@@ -11,6 +11,8 @@ export interface FieldInterface {
   type?: string;
   name?: string;
   label?: string;
+  readOnly?: boolean;
+  disabled?: boolean;
   placeholder?: string;
   defaultValue?:
     | {
@@ -98,8 +100,6 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
   };
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
-    console.log(e.target.name, e.target.value);
-
     setFormState((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
