@@ -19,17 +19,9 @@ import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 // import { schoolList } from "~/data/generateSchools";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
-import { Plus, Search, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Plus } from "lucide-react";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState } from "react";
 import { Label } from "~/components/ui/label";
 import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
@@ -56,8 +48,6 @@ const header = [
 const SchoolPage = () => {
   const [loader, setLoader] = useState(false);
   const [schoolList, setSchoolList] = useState([]);
-  const [searchType, setSearchType] = useState("name");
-  const [searchTerm, setSearcTerm] = useState("");
 
   useEffect(() => {
     fetchSchools();
@@ -82,22 +72,6 @@ const SchoolPage = () => {
     }
   };
 
-  const handleSearchTypeChange = (value: string) => {
-    setSearchType(value);
-  };
-
-  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearcTerm(e.target.value);
-  };
-
-  const handleClearSearchTerm = () => {
-    setSearcTerm("");
-  };
-
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-  };
-
   return (
     <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
       <section className="flex justify-between flex-wrap gap-4">
@@ -108,59 +82,17 @@ const SchoolPage = () => {
           </Button>
         </Link>
       </section>
-      <section className="flex justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="searchType" className="flex-shrink-0">
-            Search by
-          </Label>
-          <Select value={searchType} onValueChange={handleSearchTypeChange}>
-            <SelectTrigger id="searchType" className="max-w-[180px]">
-              <SelectValue placeholder="Search by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="schoolId">Code</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <form
-          className="flex rounded-sm border pl-3 ml-auto"
-          onSubmit={handleSearch}
-        >
-          <input
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            className="outline-none bg-transparent w-full"
-            placeholder="Search school"
-          />
-          <div className="size-9">
-            {searchTerm && (
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                onClick={handleClearSearchTerm}
-              >
-                <X />
-              </Button>
-            )}
-          </div>
-          <Button className="flex-shrink-0 rounded-l-none border">
-            <Search />
-          </Button>
-        </form>
-      </section>
+
       <section className="w-full flex flex-col gap-4">
         <div className="w-full overflow-auto">
           <ScrollArea className="">
             <Table>
               <TableHeader>
                 <TableRow>
-                  {header.map(({ id, label, sortable }) => (
+                  {header.map(({ id, label }) => (
                     <TableActionHead
+                      id={id}
                       key={id}
-                      sortable={sortable}
                       className="capitalize whitespace-nowrap"
                     >
                       {label}
