@@ -77,7 +77,7 @@ const AddTeacher = () => {
     try {
       const response = await axiosClient.post("/user", {
         ...formData,
-        role: "addmission-office",
+        role: "admission-office",
       });
 
       const data = await response.data;

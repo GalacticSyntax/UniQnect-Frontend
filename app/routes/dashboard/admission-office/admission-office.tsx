@@ -9,7 +9,6 @@ import {
   TableRow,
 } from "~/components/ui/table";
 import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
-import { teacherList } from "~/data/generateTeacher";
 import { Link } from "react-router";
 import { Button } from "~/components/ui/button";
 import { Plus, Search, X } from "lucide-react";
@@ -22,8 +21,11 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import UsersTableFooter from "~/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useEffect, useState, type ChangeEvent, type FormEvent } from "react";
 import { Label } from "~/components/ui/label";
+import { axiosClient } from "~/lib/apiClient";
+import { toast } from "sonner";
+import axios from "axios";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -38,20 +40,6 @@ const header = [
   {
     id: "fullName",
     label: "Full Name",
-    sortable: true,
-  },
-  {
-    id: "teacherId",
-    label: "Id",
-    sortable: true,
-  },
-  {
-    id: "designation",
-    label: "Designation",
-  },
-  {
-    id: "department",
-    label: "Department",
     sortable: true,
   },
   {
@@ -76,8 +64,35 @@ const header = [
 ];
 
 const TeacherPage = () => {
+  const [loader, setLoader] = useState(false);
+  const [admissionOfficerList, setAdmissionOfficerList] = useState([]);
   const [searchType, setSearchType] = useState("name");
   const [searchTerm, setSearcTerm] = useState("");
+
+  useEffect(() => {
+    fetchAdmissionOfficers();
+  }, []);
+
+  const fetchAdmissionOfficers = async () => {
+    try {
+      const response = await axiosClient.get("/user/admission-officers");
+
+      const data = await response.data;
+
+      if (!data || !data.data || !data.data.result) return;
+
+      setAdmissionOfficerList((prev) => data.data?.result ?? []);
+
+      setLoader(false);
+    } catch (error: unknown) {
+      setLoader(false);
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
 
   const handleSearchTypeChange = (value: string) => {
     setSearchType(value);
@@ -168,48 +183,26 @@ const TeacherPage = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {teacherList
-                  .slice(0, 100)
-                  .map(
-                    ({
-                      fullName,
-                      teacherId,
-                      designation,
-                      department,
-                      email,
-                      phone,
-                      image,
-                      gender,
-                    }) => (
-                      <TableRow
-                        key={teacherId}
-                        className="hover:bg-gray-200/60 duration-100 transition-all"
-                      >
-                        <TableCell className="font-medium">
-                          {fullName}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {teacherId}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {designation}
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          {department}
-                        </TableCell>
-                        <TableCell>{email}</TableCell>
-                        <TableCell>{phone}</TableCell>
-                        <TableCell className="text-right">
-                          <img
-                            src={image}
-                            alt=""
-                            className="size-9 rounded-full object-cover mx-auto select-none"
-                          />
-                        </TableCell>
-                        <TableCell>{gender}</TableCell>
-                      </TableRow>
-                    )
-                  )}
+                {admissionOfficerList.map(
+                  ({ _id, fullName, email, phone, image, gender }) => (
+                    <TableRow
+                      key={_id}
+                      className="hover:bg-gray-200/60 duration-100 transition-all"
+                    >
+                      <TableCell className="font-medium">{fullName}</TableCell>
+                      <TableCell>{email}</TableCell>
+                      <TableCell>{phone}</TableCell>
+                      <TableCell className="text-right">
+                        <img
+                          src={image}
+                          alt=""
+                          className="size-9 rounded-full object-cover mx-auto select-none"
+                        />
+                      </TableCell>
+                      <TableCell>{gender}</TableCell>
+                    </TableRow>
+                  )
+                )}
               </TableBody>
             </Table>
             <ScrollBar orientation="horizontal" />
