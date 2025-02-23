@@ -1,6 +1,6 @@
 "use client";
 
-import { BadgeCheck, ChevronsUpDown, LogOut } from "lucide-react";
+import { BadgeCheck, ChevronsUpDown, LogOut, UserPen } from "lucide-react";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -19,6 +19,7 @@ import {
   useSidebar,
 } from "~/components/sidebar/app-sidebar/app-sidebar-root";
 import { Link } from "react-router";
+import { useAuth } from "~/provider/AuthProvider";
 
 const AppNavUser = ({
   user,
@@ -30,6 +31,7 @@ const AppNavUser = ({
   };
 }) => {
   const { isMobile } = useSidebar();
+  const { logout } = useAuth();
 
   return (
     <SidebarMenu>
@@ -79,7 +81,14 @@ const AppNavUser = ({
               </Link>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/change-password">
+                <UserPen />
+                Change Password
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

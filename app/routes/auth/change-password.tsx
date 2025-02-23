@@ -10,7 +10,7 @@ import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
 import { useAuth } from "~/provider/AuthProvider";
-import PreventAuthRoute from "~/components/PreventAuthRoute";
+import PrivateRoute from "~/components/PrivateRoute";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -19,15 +19,15 @@ export const meta = ({}: Route.MetaArgs) => {
   ];
 };
 
-const Login = ({
+const ChangePassword = ({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) => {
-  const { login } = useAuth(); // Get login function from context
+  const { login, user } = useAuth(); // Get login function from context
   // State to hold all form data
   const [formData, setFormData] = useState({
-    email: "",
     password: "",
+    email: user?.email ? user.email : "",
   });
   const navigate = useNavigate();
 
@@ -46,19 +46,18 @@ const Login = ({
     // Handle the login logic here, e.g., call an API
 
     try {
-      const response = await axiosClient.post("/auth/login", {
+      const response = await axiosClient.post("/auth/changePassword", {
         ...formData,
-        role: "admission-office",
       });
 
       const data = await response?.data?.data;
+      
+      console.log({ data });
 
       if (!data) return null;
 
-      login(data.user);
-
-      toast("Loggedin successfully", {
-        description: `Loggedin successfully`,
+      toast("Password Changed successfully", {
+        description: `Password Changed successfully`,
       });
 
       navigate("/dashboard");
@@ -72,31 +71,28 @@ const Login = ({
   };
 
   return (
-    <PreventAuthRoute>
+    <PrivateRoute>
       <div className={cn("flex flex-col gap-6", className)} {...props}>
         <Card>
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">Welcome back</CardTitle>
+            <CardTitle className="text-xl">Change Password</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit}>
               <div className="grid gap-6">
                 <div className="grid gap-6">
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email" // Use the name attribute for state updates
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                      value={formData.email} // Sync with state
-                      onChange={handleChange} // Handle change
-                    />
-                  </div>
+                  <Input
+                    hidden
+                    className="hidden"
+                    id="password"
+                    name="password" // Use the name attribute for state updates
+                    type="password"
+                    required
+                    value={formData.password} // Sync with state // Handle change
+                  />
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor="password">New Password</Label>
                     </div>
                     <Input
                       id="password"
@@ -108,22 +104,16 @@ const Login = ({
                     />
                   </div>
                   <Button type="submit" className="w-full">
-                    Login
+                    Change Now
                   </Button>
-                  {/* <a
-                  href="#"
-                  className="text-sm underline-offset-4 hover:underline text-center"
-                >
-                  Forgot your password?
-                </a> */}
                 </div>
               </div>
             </form>
           </CardContent>
         </Card>
       </div>
-    </PreventAuthRoute>
+    </PrivateRoute>
   );
 };
 
-export default Login;
+export default ChangePassword;

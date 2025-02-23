@@ -9,7 +9,10 @@ import {
 export default [
   index("routes/home.tsx"),
   route("/about", "routes/about.tsx"),
-  layout("routes/auth/layout.tsx", [route("login", "./routes/auth/login.tsx")]),
+  layout("routes/auth/layout.tsx", [
+    route("login", "./routes/auth/login.tsx"),
+    route("change-password", "./routes/auth/change-password.tsx"),
+  ]),
 
   layout("routes/dashboard/layout.tsx", [
     ...prefix("dashboard", [
