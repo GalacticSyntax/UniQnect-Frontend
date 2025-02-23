@@ -1,6 +1,4 @@
-import React from "react";
-
-import { TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Bar, BarChart, XAxis, YAxis } from "recharts";
 
 import {
@@ -17,47 +15,68 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "~/components/ui/chart";
+import { axiosClient } from "~/lib/apiClient";
 
-// Updated chart data representing teachers and departments
-const chartData = [
-  { department: "CSE", teachers: 35, fill: "var(--color-cse)" },
-  { department: "EEE", teachers: 28, fill: "var(--color-eee)" },
-  { department: "BBA", teachers: 25, fill: "var(--color-bba)" },
-  { department: "MAT", teachers: 22, fill: "var(--color-mat)" },
-  { department: "LAW", teachers: 18, fill: "var(--color-law)" },
-];
+// Generate random color for each department
+const generateRandomColor = () =>
+  `hsl(${Math.floor(Math.random() * 360)}, 70%, 60%)`;
 
-const chartConfig = {
-  teachers: {
-    label: "Teachers",
-  },
-  cse: {
-    label: "CSE",
-    color: "hsl(var(--chart-1))",
-  },
-  eee: {
-    label: "EEE",
-    color: "hsl(var(--chart-2))",
-  },
-  bba: {
-    label: "BBA",
-    color: "hsl(var(--chart-3))",
-  },
-  mat: {
-    label: "MAT",
-    color: "hsl(var(--chart-4))",
-  },
-  law: {
-    label: "LAW",
-    color: "hsl(var(--chart-5))",
-  },
-} satisfies ChartConfig;
+const TeacherVsDepartment = () => {
+  const [chartData, setChartData] = useState<
+    { department: string; teachers: number; fill: string }[]
+  >([]);
+  const [chartConfig, setChartConfig] = useState<ChartConfig>({});
 
-const TeacherVsDepartment: React.FC = () => {
+  // Fetch data from the API
+  useEffect(() => {
+    const fetchChartData = async () => {
+      try {
+        const response = await axiosClient.get(
+          "/department/departmentsVsTeachers"
+        );
+
+        const data: Array<{
+          department: string;
+          code: string;
+          teachers: number;
+        }> = response.data.data;
+
+        // Format data with dynamic colors
+        const formattedData: Array<{
+          department: string;
+          code: string;
+          teachers: number;
+          fill: string;
+        }> = data.map((item) => ({
+          ...item,
+          fill: generateRandomColor(),
+        }));
+
+        setChartData(formattedData);
+
+        // Create dynamic chartConfig based on data
+        const config = formattedData.reduce((acc, curr) => {
+          console.log(curr);
+          acc[curr.code] = {
+            label: curr.code,
+            color: curr.fill,
+          };
+          return acc;
+        }, {} as ChartConfig);
+
+        setChartConfig(config);
+      } catch (error) {
+        console.error("Failed to fetch chart data:", error);
+      }
+    };
+
+    fetchChartData();
+  }, []);
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Teachers vs Department</CardTitle>
+        <CardTitle>Departments vs Teachers</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
       <CardContent>
@@ -66,12 +85,10 @@ const TeacherVsDepartment: React.FC = () => {
             accessibilityLayer
             data={chartData}
             layout="vertical"
-            margin={{
-              left: 0,
-            }}
+            margin={{ left: 0 }}
           >
             <YAxis
-              dataKey="department"
+              dataKey="code"
               type="category"
               tickLine={false}
               tickMargin={10}
@@ -92,7 +109,7 @@ const TeacherVsDepartment: React.FC = () => {
       </CardContent>
       <CardFooter className="flex-col items-start gap-2 text-sm">
         <div className="flex gap-2 font-medium leading-none">
-          <span>Teachers distribution in different departments</span>
+          <span>Teacher distribution across departments</span>
         </div>
         <div className="leading-none text-muted-foreground">
           Showing teacher distribution for the first half of 2024.

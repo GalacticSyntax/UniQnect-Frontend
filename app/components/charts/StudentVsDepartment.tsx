@@ -33,7 +33,7 @@ const StudentVsDepartment: React.FC = () => {
     const fetchChartData = async () => {
       try {
         const response = await axiosClient.get(
-          "/department/departmentVsStudents"
+          "/department/departmentsVsStudents"
         );
 
         const data: Array<{
