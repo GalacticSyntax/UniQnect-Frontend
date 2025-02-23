@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
+import PrivateRoute from "~/components/PrivateRoute";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -74,40 +75,44 @@ const AddSchool = () => {
   };
 
   return (
-    <Card className="max-w-lg mx-auto mt-10">
-      <CardHeader>
-        <CardTitle className="text-center">Update School</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <PrivateRoute>
+      <Card className="max-w-lg mx-auto mt-10">
+        <CardHeader>
+          <CardTitle className="text-center">Update School</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div>
-            <Label htmlFor="schoolId">Code</Label>
-            <Input
-              type="text"
-              name="schoolId"
-              placeholder="Code"
-              value={formData.schoolId}
-              readOnly
-              disabled
-            />
-          </div>
+            <div>
+              <Label htmlFor="schoolId">Code</Label>
+              <Input
+                type="text"
+                name="schoolId"
+                placeholder="Code"
+                value={formData.schoolId}
+                readOnly
+                disabled
+              />
+            </div>
 
-          <Button type="submit" className="w-full">Update</Button>
-        </form>
-      </CardContent>
-    </Card>
+            <Button type="submit" className="w-full">
+              Update
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </PrivateRoute>
   );
 };
 

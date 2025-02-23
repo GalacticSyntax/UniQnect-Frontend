@@ -1,3 +1,4 @@
+import PrivateRoute from "~/components/PrivateRoute";
 import type { Route } from "./+types/attendance";
 
 export const meta = ({}: Route.MetaArgs) => {
@@ -9,9 +10,9 @@ export const meta = ({}: Route.MetaArgs) => {
 
 const AttendancePage = () => {
   return (
-    <>
+    <PrivateRoute>
       <h1 className="text-2xl text-green-500 font-bold">Attendance Page</h1>
-    </>
+    </PrivateRoute>
   );
 };
 

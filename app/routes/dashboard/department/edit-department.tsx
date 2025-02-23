@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { toast } from "sonner";
 import type { AlignType } from "~/components/form/BatManForm";
 import BatManForm from "~/components/form/BatManForm";
+import PrivateRoute from "~/components/PrivateRoute";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { Input } from "~/components/ui/input";
@@ -77,60 +78,62 @@ const AddDepartment = () => {
   };
 
   return (
-    <Card className="max-w-lg mx-auto mt-10">
-      <CardHeader>
-        <CardTitle className="text-center">Update Department</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <form onSubmit={handleFormSubmit} className="space-y-4">
-          {/* Name Field */}
-          <div>
-            <Label htmlFor="name">Name</Label>
-            <Input
-              type="text"
-              name="name"
-              placeholder="Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+    <PrivateRoute>
+      <Card className="max-w-lg mx-auto mt-10">
+        <CardHeader>
+          <CardTitle className="text-center">Update Department</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleFormSubmit} className="space-y-4">
+            {/* Name Field */}
+            <div>
+              <Label htmlFor="name">Name</Label>
+              <Input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          {/* Department Code Field */}
-          <div>
-            <Label htmlFor="code">Department Code</Label>
-            <Input
-              type="text"
-              name="code"
-              placeholder="Department Code"
-              value={formData.code}
-              onChange={handleChange}
-              required
-              readOnly
-              disabled
-            />
-          </div>
+            {/* Department Code Field */}
+            <div>
+              <Label htmlFor="code">Department Code</Label>
+              <Input
+                type="text"
+                name="code"
+                placeholder="Department Code"
+                value={formData.code}
+                onChange={handleChange}
+                required
+                readOnly
+                disabled
+              />
+            </div>
 
-          {/* School Code Field */}
-          <div>
-            <Label htmlFor="schoolId">School Code</Label>
-            <Input
-              type="text"
-              name="schoolId"
-              placeholder="School Code"
-              value={formData.schoolId}
-              onChange={handleChange}
-              required
-              readOnly
-              disabled
-            />
-          </div>
-          <Button type="submit" className="w-full">
-            Update
-          </Button>
-        </form>
-      </CardContent>
-    </Card>
+            {/* School Code Field */}
+            <div>
+              <Label htmlFor="schoolId">School Code</Label>
+              <Input
+                type="text"
+                name="schoolId"
+                placeholder="School Code"
+                value={formData.schoolId}
+                onChange={handleChange}
+                required
+                readOnly
+                disabled
+              />
+            </div>
+            <Button type="submit" className="w-full">
+              Update
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+    </PrivateRoute>
   );
 };
 

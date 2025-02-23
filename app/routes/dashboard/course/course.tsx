@@ -146,6 +146,7 @@ const CoursePage = () => {
                 <TableRow>
                   {header.map(({ id, label, sortable }) => (
                     <TableActionHead
+                      id={id}
                       key={id}
                       sortable={sortable}
                       className="capitalize whitespace-nowrap"

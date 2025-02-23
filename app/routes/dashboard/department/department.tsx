@@ -26,6 +26,7 @@ import { axiosClient } from "~/lib/apiClient";
 import { toast } from "sonner";
 import axios from "axios";
 import SearchWithUrlSync from "~/components/SearchWithUrlSync";
+import PrivateRoute from "~/components/PrivateRoute";
 
 const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
 
@@ -97,73 +98,75 @@ const DepartmentPage = () => {
   };
 
   return (
-    <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
-      <section className="flex justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold">Departments list</h1>
-        <Link to="/dashboard/department/add-department">
-          <Button>
-            <Plus /> Add New Department
-          </Button>
-        </Link>
+    <PrivateRoute>
+      <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
+        <section className="flex justify-between flex-wrap gap-4">
+          <h1 className="text-2xl font-bold">Departments list</h1>
+          <Link to="/dashboard/department/add-department">
+            <Button>
+              <Plus /> Add New Department
+            </Button>
+          </Link>
+        </section>
+        <section className="flex justify-between flex-wrap gap-2">
+          {/* <SelectWithUrlSync list={searchList} /> */}
+          {/* <SearchWithUrlSync label="Search by name" /> */}
+        </section>
+        <section className="w-full flex flex-col gap-4">
+          <div className="w-full overflow-auto">
+            <ScrollArea className="">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {header.map(({ id, label }) => (
+                      <TableActionHead
+                        id={id}
+                        key={id}
+                        className="capitalize whitespace-nowrap"
+                      >
+                        {label}
+                      </TableActionHead>
+                    ))}
+                    <TableHead className="text-center">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {departmentList.map(
+                    ({
+                      name,
+                      code,
+                      school,
+                      number_of_teachers,
+                      number_of_students,
+                    }) => (
+                      <TableRow
+                        key={code}
+                        className="hover:bg-gray-200/60 duration-100 transition-all"
+                      >
+                        <TableCell className="font-medium">{name}</TableCell>
+                        <TableCell className="font-medium">{code}</TableCell>
+                        <TableCell className="font-medium">{school}</TableCell>
+                        <TableCell>{number_of_teachers}</TableCell>
+                        <TableCell>{number_of_students}</TableCell>
+                        <TableCell className="font-medium text-center">
+                          <Link to={`/dashboard/department/edit/${code}`}>
+                            <Button size={"icon"}>
+                              <Pencil />
+                            </Button>
+                          </Link>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+          {/* <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} /> */}
+        </section>
       </section>
-      <section className="flex justify-between flex-wrap gap-2">
-        {/* <SelectWithUrlSync list={searchList} /> */}
-        {/* <SearchWithUrlSync label="Search by name" /> */}
-      </section>
-      <section className="w-full flex flex-col gap-4">
-        <div className="w-full overflow-auto">
-          <ScrollArea className="">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {header.map(({ id, label }) => (
-                    <TableActionHead
-                      id={id}
-                      key={id}
-                      className="capitalize whitespace-nowrap"
-                    >
-                      {label}
-                    </TableActionHead>
-                  ))}
-                  <TableHead className="text-center">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {departmentList.map(
-                  ({
-                    name,
-                    code,
-                    school,
-                    number_of_teachers,
-                    number_of_students,
-                  }) => (
-                    <TableRow
-                      key={code}
-                      className="hover:bg-gray-200/60 duration-100 transition-all"
-                    >
-                      <TableCell className="font-medium">{name}</TableCell>
-                      <TableCell className="font-medium">{code}</TableCell>
-                      <TableCell className="font-medium">{school}</TableCell>
-                      <TableCell>{number_of_teachers}</TableCell>
-                      <TableCell>{number_of_students}</TableCell>
-                      <TableCell className="font-medium text-center">
-                        <Link to={`/dashboard/department/edit/${code}`}>
-                          <Button size={"icon"}>
-                            <Pencil />
-                          </Button>
-                        </Link>
-                      </TableCell>
-                    </TableRow>
-                  )
-                )}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-        {/* <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} /> */}
-      </section>
-    </section>
+    </PrivateRoute>
   );
 };
 

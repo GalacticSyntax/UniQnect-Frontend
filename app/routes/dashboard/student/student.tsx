@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import SelectWithUrlSync from "~/components/SelectWithUrlSync";
 import SearchWithUrlSync from "~/components/SearchWithUrlSync";
+import PrivateRoute from "~/components/PrivateRoute";
 
 export const meta = ({}: Route.MetaArgs) => {
   return [
@@ -117,81 +118,87 @@ const StudentPage = () => {
   };
 
   return (
-    <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
-      <section className="flex justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold">Student list</h1>
-        <Link to="/dashboard/student/add-student">
-          <Button>
-            <Plus /> Add New Student
-          </Button>
-        </Link>
+    <PrivateRoute>
+      <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
+        <section className="flex justify-between flex-wrap gap-4">
+          <h1 className="text-2xl font-bold">Student list</h1>
+          <Link to="/dashboard/student/add-student">
+            <Button>
+              <Plus /> Add New Student
+            </Button>
+          </Link>
+        </section>
+        <section className="flex justify-between flex-wrap gap-2">
+          {/* <SelectWithUrlSync list={searchList} /> */}
+          <SearchWithUrlSync label="Search by student ID" />
+        </section>
+        <section className="w-full flex flex-col gap-4">
+          <div className="w-full overflow-auto">
+            <ScrollArea className="">
+              <Table className="table-auto">
+                <TableHeader>
+                  <TableRow>
+                    {header.map(({ id, label, sortable, center }) => (
+                      <TableActionHead
+                        id={id}
+                        key={id}
+                        sortable={sortable}
+                        center={center}
+                        className="capitalize whitespace-nowrap"
+                      >
+                        {label}
+                      </TableActionHead>
+                    ))}
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {studentList.map(
+                    ({
+                      fullName,
+                      email,
+                      phone,
+                      studentId,
+                      image,
+                      gender,
+                      department,
+                      session,
+                    }) => (
+                      <TableRow
+                        key={studentId}
+                        className="hover:bg-gray-200/60 duration-100 transition-all"
+                      >
+                        <TableCell className="font-medium">
+                          {fullName}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {studentId}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {department}
+                        </TableCell>
+                        <TableCell className="font-medium">{session}</TableCell>
+                        <TableCell>{email}</TableCell>
+                        <TableCell>{phone}</TableCell>
+                        <TableCell className="text-right">
+                          <img
+                            src={image}
+                            alt=""
+                            className="size-9 rounded-full object-cover mx-auto select-none"
+                          />
+                        </TableCell>
+                        <TableCell>{gender}</TableCell>
+                      </TableRow>
+                    )
+                  )}
+                </TableBody>
+              </Table>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+          <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} />
+        </section>
       </section>
-      <section className="flex justify-between flex-wrap gap-2">
-        {/* <SelectWithUrlSync list={searchList} /> */}
-        <SearchWithUrlSync label="Search by student ID" />
-      </section>
-      <section className="w-full flex flex-col gap-4">
-        <div className="w-full overflow-auto">
-          <ScrollArea className="">
-            <Table className="table-auto">
-              <TableHeader>
-                <TableRow>
-                  {header.map(({ id, label, sortable, center }) => (
-                    <TableActionHead
-                      id={id}
-                      key={id}
-                      sortable={sortable}
-                      center={center}
-                      className="capitalize whitespace-nowrap"
-                    >
-                      {label}
-                    </TableActionHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {studentList.map(
-                  ({
-                    fullName,
-                    email,
-                    phone,
-                    studentId,
-                    image,
-                    gender,
-                    department,
-                    session,
-                  }) => (
-                    <TableRow
-                      key={studentId}
-                      className="hover:bg-gray-200/60 duration-100 transition-all"
-                    >
-                      <TableCell className="font-medium">{fullName}</TableCell>
-                      <TableCell className="font-medium">{studentId}</TableCell>
-                      <TableCell className="font-medium">
-                        {department}
-                      </TableCell>
-                      <TableCell className="font-medium">{session}</TableCell>
-                      <TableCell>{email}</TableCell>
-                      <TableCell>{phone}</TableCell>
-                      <TableCell className="text-right">
-                        <img
-                          src={image}
-                          alt=""
-                          className="size-9 rounded-full object-cover mx-auto select-none"
-                        />
-                      </TableCell>
-                      <TableCell>{gender}</TableCell>
-                    </TableRow>
-                  )
-                )}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-        <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} />
-      </section>
-    </section>
+    </PrivateRoute>
   );
 };
 

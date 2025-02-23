@@ -56,7 +56,6 @@ const TeacherVsDepartment = () => {
 
         // Create dynamic chartConfig based on data
         const config = formattedData.reduce((acc, curr) => {
-          console.log(curr);
           acc[curr.code] = {
             label: curr.code,
             color: curr.fill,

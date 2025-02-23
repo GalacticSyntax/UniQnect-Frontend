@@ -63,7 +63,6 @@ const StudentVsDepartment: React.FC = () => {
           };
           return acc;
         }, {} as ChartConfig);
-
         setChartConfig(config);
       } catch (error) {
         console.error("Failed to fetch chart data:", error);

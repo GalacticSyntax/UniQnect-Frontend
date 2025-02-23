@@ -4,6 +4,7 @@ import { useNavigate } from "react-router";
 import { toast } from "sonner";
 import type { AlignType } from "~/components/form/BatManForm";
 import BatManForm from "~/components/form/BatManForm";
+import PrivateRoute from "~/components/PrivateRoute";
 import { axiosClient } from "~/lib/apiClient";
 
 const formSchema = {
@@ -78,9 +79,11 @@ const AddDepartment = () => {
   };
 
   return (
-    <section className="w-full h-full grid place-items-center p-5">
-      <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} />
-    </section>
+    <PrivateRoute>
+      <section className="w-full h-full grid place-items-center p-5">
+        <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} />
+      </section>
+    </PrivateRoute>
   );
 };
 

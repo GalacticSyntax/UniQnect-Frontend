@@ -1,4 +1,5 @@
 import BatManForm, { type AlignType } from "~/components/form/BatManForm";
+import PrivateRoute from "~/components/PrivateRoute";
 
 const formSchema = {
   title: {
@@ -94,9 +95,11 @@ const AddUser = () => {
   };
 
   return (
-    <section className="w-full h-full grid place-items-center p-5">
-      <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} />
-    </section>
+    <PrivateRoute>
+      <section className="w-full h-full grid place-items-center p-5">
+        <BatManForm formSchema={formSchema} onSubmit={handleFormSubmit} />
+      </section>
+    </PrivateRoute>
   );
 };
 
