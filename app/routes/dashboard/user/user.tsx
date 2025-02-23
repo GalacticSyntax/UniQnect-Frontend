@@ -104,11 +104,11 @@ const UserPage = () => {
       <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
         <section className="flex justify-between flex-wrap gap-4">
           <h1 className="text-2xl font-bold">User list</h1>
-          <Link to="/dashboard/user/add-user">
+          {/* <Link to="/dashboard/user/add-user">
             <Button>
               <Plus /> Add New User
             </Button>
-          </Link>
+          </Link> */}
         </section>
         <section className="flex justify-between flex-wrap gap-2">
           {/* <SelectWithUrlSync list={searchList} /> */}
