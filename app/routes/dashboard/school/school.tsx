@@ -105,7 +105,9 @@ const SchoolPage = () => {
                         {label}
                       </TableActionHead>
                     ))}
-                    <TableHead className="text-center">Action</TableHead>
+                    {user?.role === "admin" && (
+                      <TableHead className="text-center">Action</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -120,13 +122,15 @@ const SchoolPage = () => {
                         <TableCell className="font-medium">
                           {number_of_departments}
                         </TableCell>
-                        <TableCell className="font-medium text-center">
-                          <Link to={`/dashboard/school/edit/${code}`}>
-                            <Button size={"icon"}>
-                              <Pencil />
-                            </Button>
-                          </Link>
-                        </TableCell>
+                        {user?.role === "admin" && (
+                          <TableCell className="font-medium text-center">
+                            <Link to={`/dashboard/school/edit/${code}`}>
+                              <Button size={"icon"}>
+                                <Pencil />
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        )}
                       </TableRow>
                     )
                   )}

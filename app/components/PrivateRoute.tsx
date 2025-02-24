@@ -9,8 +9,6 @@ const PrivateRoute: React.FC<{
 }> = ({ children, roles = [] }) => {
   const { user, hasPermission } = useAuth();
 
-  console.log(user);
-
   if (!user) {
     return <Navigate to="/login" />;
   }

@@ -131,7 +131,9 @@ const DepartmentPage = () => {
                         {label}
                       </TableActionHead>
                     ))}
-                    <TableHead className="text-center">Action</TableHead>
+                    {user?.role === "admin" && (
+                      <TableHead className="text-center">Action</TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -152,13 +154,15 @@ const DepartmentPage = () => {
                         <TableCell className="font-medium">{school}</TableCell>
                         <TableCell>{number_of_teachers}</TableCell>
                         <TableCell>{number_of_students}</TableCell>
-                        <TableCell className="font-medium text-center">
-                          <Link to={`/dashboard/department/edit/${code}`}>
-                            <Button size={"icon"}>
-                              <Pencil />
-                            </Button>
-                          </Link>
-                        </TableCell>
+                        {user?.role === "admin" && (
+                          <TableCell className="font-medium text-center">
+                            <Link to={`/dashboard/department/edit/${code}`}>
+                              <Button size={"icon"}>
+                                <Pencil />
+                              </Button>
+                            </Link>
+                          </TableCell>
+                        )}
                       </TableRow>
                     )
                   )}
