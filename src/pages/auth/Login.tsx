@@ -37,6 +37,9 @@ const Login = ({
     e.preventDefault();
     // Handle the login logic here, e.g., call an API
 
+    formData["email"] = formData["email"].trim();
+    formData["password"] = formData["password"].trim();
+
     try {
       const response = await axiosClient.post("/auth/login", {
         ...formData,

@@ -1,4 +1,3 @@
-
 import {
   Table,
   TableActionHead,
@@ -80,7 +79,7 @@ const CoursePage = () => {
     <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
       <section className="flex justify-between flex-wrap gap-4">
         <h1 className="text-2xl font-bold">Courses list</h1>
-        <Link to="/dashboard/user/add-user">
+        <Link to="/dashboard/course/add-course">
           <Button>
             <Plus /> Add New Course
           </Button>

@@ -7,7 +7,9 @@ import AddTeacher from "@/pages/dashboard/admission-office/AddAdmissionOffice";
 import AdmissionOfficePage from "@/pages/dashboard/admission-office/AdmissionOffice";
 import AdmissionOfficeLayout from "@/pages/dashboard/admission-office/Layout";
 import AttendancePage from "@/pages/dashboard/attendance/Attendance";
+import CourseAttendance from "@/pages/dashboard/attendance/course/course-by-id/CourseAttendance";
 import AttendancesLayout from "@/pages/dashboard/attendance/Layout";
+import AddCoursePage from "@/pages/dashboard/course/AddCourse";
 import CourseAdvisorPage from "@/pages/dashboard/course/Advisor";
 import CoursePage from "@/pages/dashboard/course/Course";
 import CourseLayout from "@/pages/dashboard/course/Layout";
@@ -145,13 +147,17 @@ const router = createBrowserRouter([
           { path: "advisor", element: <CourseAdvisorPage /> },
           { path: "offered", element: <OfferedCoursePage /> },
           { path: "registered", element: <RegisteredCoursePage /> },
+          { path: "add-course", element: <AddCoursePage /> },
         ],
       },
 
       {
         path: "attendance",
         element: <AttendancesLayout />,
-        children: [{ index: true, element: <AttendancePage /> }],
+        children: [
+          { index: true, element: <AttendancePage /> },
+          { path: "course/:id", element: <CourseAttendance /> },
+        ],
       },
     ],
   },

@@ -49,9 +49,15 @@ interface BatManFormProps {
   formSchema: FormSchemaInterface;
   className?: string;
   onSubmit?: (formData: Record<string, unknown>) => void;
+  children?: React.ReactNode;
 }
 
-const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
+const BatManForm = ({
+  formSchema,
+  className,
+  onSubmit,
+  children,
+}: BatManFormProps) => {
   const [formState, setFormState] = useState<Record<string, unknown>>({});
   const [passwordToggleState, setPasswordToggleState] = useState<
     Record<string, boolean>
@@ -213,6 +219,7 @@ const BatManForm = ({ formSchema, className, onSubmit }: BatManFormProps) => {
     >
       {formSchema.title && <BatManFormHeading {...formSchema.title} />}
       {renderFields(formSchema.fields)}
+      {children}
     </form>
   );
 };
