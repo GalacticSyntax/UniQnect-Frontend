@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, type FormEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Upload, X, Pencil } from "lucide-react";
@@ -12,8 +12,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { toast } from "sonner";
+import axios from "axios";
+import { axiosClient } from "@/lib/apiClient";
+import { useProfile } from "../ProfileProvider";
 
 const ProfileImageEditor = () => {
+  const { user, setUser } = useProfile();
   const [image, setImage] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -50,6 +55,40 @@ const ProfileImageEditor = () => {
     setPreview(null);
   };
 
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!image) {
+      toast("No image selected");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    try {
+      const response = await axiosClient.patch(`/user/${user?._id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...data } = response.data.data ?? {};
+      setUser(data);
+      toast("Update successfully", {
+        description: `Information updated successfully`,
+      });
+      console.log("===================");
+    } catch (error: unknown) {
+      toast("Error occure", {
+        description: axios.isAxiosError(error)
+          ? error?.response?.data?.message
+          : "Something went wrong",
+      });
+    }
+  };
+
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -58,75 +97,77 @@ const ProfileImageEditor = () => {
         </Button>
       </DialogTrigger>
       <DialogContent className="w-[90%] max-h-[90vh] max-w-xl overflow-hidden overflow-y-auto">
-        <ScrollArea className="w-full h-full">
-          <DialogHeader className="pb-5">
-            <DialogTitle className="text-center">
-              Uplaod Profile Image
-            </DialogTitle>
-            <DialogDescription className="hidden"></DialogDescription>
-          </DialogHeader>
-          <section>
-            <Card className="max-w-md mx-auto border-none">
-              <CardContent>
-                <div
-                  className={`border-2 border-dashed rounded-lg p-6 text-center ${
-                    isDragging
-                      ? "border-blue-500 bg-blue-50"
-                      : "border-gray-300"
-                  }`}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                >
-                  {!preview ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-10 h-10 text-gray-400" />
-                      <p className="text-gray-500">
-                        Drag and drop an image here, or click to select one
-                      </p>
-                      <input
-                        type="file"
-                        accept="image/*"
-                        className="hidden"
-                        id="profileUploader"
-                        onChange={handleFileChange}
-                      />
-                      <label
-                        htmlFor="profileUploader"
-                        className="mt-2 px-4 py-1.5 rounded-md cursor-pointer bg-primary text-primary-foreground hover:opacity-80"
-                      >
-                        Browse
-                      </label>
-                    </div>
-                  ) : (
-                    <div className="relative">
-                      <img
-                        src={preview}
-                        alt="Uploaded Preview"
-                        className="rounded-lg object-cover max-h-64 w-full"
-                      />
-                      <Button
-                        variant="ghost"
-                        size={"icon"}
-                        onClick={removeImage}
-                      >
-                        <X className="w-4 h-4 text-gray-600" />
-                      </Button>
-                    </div>
+        <form action="" onSubmit={handleSubmit}>
+          <ScrollArea className="w-full h-full">
+            <DialogHeader className="pb-5">
+              <DialogTitle className="text-center">
+                Uplaod Profile Image
+              </DialogTitle>
+              <DialogDescription className="hidden"></DialogDescription>
+            </DialogHeader>
+            <section>
+              <Card className="max-w-md mx-auto border-none">
+                <CardContent>
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-6 text-center ${
+                      isDragging
+                        ? "border-blue-500 bg-blue-50"
+                        : "border-gray-300"
+                    }`}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
+                  >
+                    {!preview ? (
+                      <div className="flex flex-col items-center gap-2">
+                        <Upload className="w-10 h-10 text-gray-400" />
+                        <p className="text-gray-500">
+                          Drag and drop an image here, or click to select one
+                        </p>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          id="profileUploader"
+                          onChange={handleFileChange}
+                        />
+                        <label
+                          htmlFor="profileUploader"
+                          className="mt-2 px-4 py-1.5 rounded-md cursor-pointer bg-primary text-primary-foreground hover:opacity-80"
+                        >
+                          Browse
+                        </label>
+                      </div>
+                    ) : (
+                      <div className="relative">
+                        <img
+                          src={preview}
+                          alt="Uploaded Preview"
+                          className="rounded-lg object-cover max-h-64 w-full"
+                        />
+                        <Button
+                          variant="ghost"
+                          size={"icon"}
+                          onClick={removeImage}
+                        >
+                          <X className="w-4 h-4 text-gray-600" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  {image && (
+                    <p className="text-center mt-4 text-sm text-gray-500">
+                      {image.name} ({(image.size / 1024).toFixed(2)} KB)
+                    </p>
                   )}
-                </div>
-                {image && (
-                  <p className="text-center mt-4 text-sm text-gray-500">
-                    {image.name} ({(image.size / 1024).toFixed(2)} KB)
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          </section>
-          <DialogFooter>
-            <Button type="submit">Save changes</Button>
-          </DialogFooter>
-        </ScrollArea>
+                </CardContent>
+              </Card>
+            </section>
+            <DialogFooter>
+              <Button type="submit">Save changes</Button>
+            </DialogFooter>
+          </ScrollArea>
+        </form>
       </DialogContent>
     </Dialog>
   );

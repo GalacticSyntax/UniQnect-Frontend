@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BadgeCheck, BadgeX } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -9,8 +9,9 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import ProfileImageEditor from "./ProfileImageEditor";
-import { axiosClient } from "@/lib/apiClient";
 import { useAuth } from "@/provider/AuthProvider";
+import { BACKEND_BASE_URL } from "@/constant";
+import { useProfile } from "../ProfileProvider";
 
 interface User {
   [x: string]: unknown;
@@ -38,34 +39,14 @@ const calculateSemester = (admittedAt: string): number => {
 
 const ProfileTop = () => {
   const { user: localUserData } = useAuth();
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { user, fetchUserData, error, isLoading } = useProfile();
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axiosClient(
-          `/user/${localUserData?._id as string}`
-        ); // Use the actual API endpoint here
-        const data = await response.data;
-        if (data.success) {
-          setUser(data.data);
-        } else {
-          setError(data.message);
-        }
-      } catch {
-        setError("Failed to fetch user data");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUserData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (isLoading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
 
   if (!user) return <div>No user found</div>;
@@ -79,9 +60,12 @@ const ProfileTop = () => {
     : "admission-office";
 
   const userImage =
-    userRole === "student" || userRole === "teacher"
-      ? user?.userId?.image
-      : user.image;
+    BACKEND_BASE_URL +
+    (userRole === "student" || userRole === "teacher"
+      ? localUserData?.userId?.image
+      : user.image);
+
+  console.log({ userImage });
 
   const userFullName =
     userRole === "student" || userRole === "teacher"

@@ -16,6 +16,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (userData: User) => void;
   logout: () => void;
   hasPermission: (roles: string[]) => boolean;
@@ -52,7 +53,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, hasPermission }}>
+    <AuthContext.Provider
+      value={{ user, login, logout, hasPermission, setUser }}
+    >
       {children}
     </AuthContext.Provider>
   );

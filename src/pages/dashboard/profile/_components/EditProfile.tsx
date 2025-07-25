@@ -51,7 +51,6 @@ const EditProfile = () => {
           `/user/${localUserData?._id as string}`
         ); // Use the actual API endpoint here
         const data = await response.data;
-        console.log({ data });
         if (data.success) {
           const user = data.data;
 
@@ -85,7 +84,6 @@ const EditProfile = () => {
               ? user?.userId?.permanentAddress
               : user.permanentAddress) ?? "";
 
-          console.log({ newData });
           setFormData(newData as User);
         }
       } catch (error) {
@@ -96,10 +94,8 @@ const EditProfile = () => {
     };
 
     fetchUserData();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  console.log(formData);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -116,12 +112,13 @@ const EditProfile = () => {
         ...formData,
       });
 
-      // const data = 
+      // const data =
       await response.data;
 
       toast("Update successfully", {
         description: `Information updated successfully`,
       });
+      console.log("===================")
     } catch (error: unknown) {
       toast("Error occure", {
         description: axios.isAxiosError(error)
