@@ -147,7 +147,7 @@ const BatManForm = ({
             {renderFields(field)}
           </div>
         );
-      } else if (field?.type === "text" || !field.type) {
+      } else if (field?.type === "text" || field?.type === "number" || !field.type) {
         return (
           <BatManFormInput
             key={field.name}

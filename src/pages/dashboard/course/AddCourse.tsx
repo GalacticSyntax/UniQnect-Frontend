@@ -11,9 +11,9 @@ import {
 import type { AlignType } from "@/components/form/BatManForm";
 import BatManForm from "@/components/form/BatManForm";
 import PrivateRoute from "@/components/PrivateRoute";
-import axios from "axios";
 import { toast } from "sonner";
 import Papa from "papaparse";
+import { axiosClient } from "@/lib/apiClient";
 
 const formSchema = {
   title: {
@@ -54,7 +54,6 @@ const formSchema = {
       name: "prerequisiteCourse",
       label: "Prerequisite Course codes",
       placeholder: "Add course codes separated by ,",
-      required: true,
     },
     {
       type: "reset",
@@ -71,24 +70,27 @@ const formSchema = {
 };
 
 const AddCoursePage = () => {
+  console.log(formSchema.fields);
   const [, setLoader] = useState(false);
 
   const handleFormSubmit = async (formData: Record<string, unknown>) => {
     setLoader(true);
 
-    const payload = [
-      {
-        ...formData,
-        prerequisiteCourse: (formData["prerequisiteCourse"] as string)
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean),
-      },
-    ];
+    delete formData["reset"];
+    delete formData["submit"];
+    formData["credit"] = Number(formData["credit"]);
+
+    const payload = {
+      ...formData,
+      prerequisiteCourse: (formData["prerequisiteCourse"] as string)
+        .split(",")
+        .map((item) => item.trim())
+        .filter(Boolean),
+    };
 
     try {
-      await axios.post("/api/add-courses", {
-        courses: payload,
+      await axiosClient.post("/course/course", {
+        ...payload,
       });
       toast.success("Course added successfully");
     } catch {
@@ -162,16 +164,27 @@ const UploadData = () => {
   const handleUpload = async () => {
     if (dataList.length === 0) return;
 
-    try {
-      await axios.post("/api/add-courses", {
-        courses: dataList.map((course) => ({
+    const payload = [
+      ...dataList
+        .map((course) => ({
           ...course,
-          prerequisiteCourse: (course["prerequisiteCourse"] as string)
-            .split(",")
-            .map((x) => x.trim())
-            .filter(Boolean),
+          prerequisiteCourse:
+            typeof course["prerequisiteCourse"] === "string"
+              ? course["prerequisiteCourse"]
+                  .split(",")
+                  .map((x) => x.trim())
+                  .filter(Boolean)
+              : course["prerequisiteCourse"],
+        }))
+        .map((course) => ({
+          ...course,
+          credit: Number((course as unknown as { credit: number }).credit),
         })),
-      });
+    ];
+    console.log(payload);
+
+    try {
+      await axiosClient.post("/course/courses", payload);
       toast.success("Courses uploaded successfully");
       setDataList([]);
       setOpen(false);
