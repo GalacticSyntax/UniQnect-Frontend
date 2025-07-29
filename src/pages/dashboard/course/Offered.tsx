@@ -1,234 +1,456 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
-  TableActionHead,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { coursesList } from "@/data/generateCourses";
-import { Button } from "@/components/ui/button";
-import { Search, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import UsersTableFooter from "@/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Label } from "@/components/ui/label";
-import { departmentsList } from "@/data/generateDepartments";
-import PrivateRoute from "@/components/PrivateRoute";
+import { Badge } from "@/components/ui/badge";
+import { BookOpen, UserCheck, GraduationCap } from "lucide-react"; // Added GraduationCap for overall title
 
-const rowSizeList = ["10", "20", "30", "50", "80", "100"];
+// Types
+interface OfferedCourse {
+  courseTitle: string;
+  courseCode: string;
+  credits: number;
+  courseTeachers: string[];
+}
 
-const header = [
-  {
-    id: "name",
-    label: "Name",
-    sortable: true,
-  },
-  {
-    id: "code",
-    label: "Code",
-    sortable: true,
-  },
-  {
-    id: "credit",
-    label: "Credit",
-    sortable: true,
-  },
-  {
-    id: "department",
-    label: "Department",
-  },
-  {
-    id: "teacher",
-    label: "Teacher",
-  },
-  {
-    id: "prerequisites",
-    label: "Prerequisites",
-  },
-];
+interface SemesterBlockData {
+  id: string; // Unique ID for the block
+  semesterName: string;
+  totalCredit: number;
+  advisorName: string;
+  courses: OfferedCourse[];
+}
 
-const OfferedCoursePage = () => {
-  const [searchType, setSearchType] = useState("name");
-  const [semesterState, setSemesterState] = useState("1");
-  const [searchTerm, setSearcTerm] = useState("");
-  const [department, setDepartment] = useState(departmentsList[0].name);
+// SemesterCourseBlock Component
+interface SemesterCourseBlockProps {
+  data: SemesterBlockData;
+}
 
-  const handleSearchTypeChange = (value: string) => {
-    setSearchType(value);
-  };
+function SemesterCourseBlock({ data }: SemesterCourseBlockProps) {
+  return (
+    <Card className="w-full h-full flex flex-col shadow-sm hover:shadow-md transition-shadow duration-200">
+      <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
+        <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+          <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+          {data.semesterName}
+        </CardTitle>
+        <div className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
+          <UserCheck className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+          <span className="font-medium text-gray-700 dark:text-gray-200">
+            Advisor:
+          </span>{" "}
+          {data.advisorName}
+        </div>
+        <div className="text-sm text-muted-foreground mt-0.5">
+          <span className="font-medium text-gray-700 dark:text-gray-200">
+            Total Credit:
+          </span>{" "}
+          {data.totalCredit}
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 flex-grow">
+        <div className="rounded-lg border overflow-hidden">
+          {" "}
+          {/* Changed to rounded-lg for softer corners */}
+          <Table>
+            <TableHeader className="bg-gray-50 dark:bg-gray-800">
+              {" "}
+              {/* Subtle background for header */}
+              <TableRow>
+                <TableHead className="w-[100px] text-gray-600 dark:text-gray-300 font-medium">
+                  Code
+                </TableHead>
+                <TableHead className="text-gray-600 dark:text-gray-300 font-medium">
+                  Course Title
+                </TableHead>
+                <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
+                  Credits
+                </TableHead>
+                <TableHead className="text-gray-600 dark:text-gray-300 font-medium">
+                  Teachers
+                </TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {data.courses.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={4}
+                    className="text-center py-6 text-muted-foreground"
+                  >
+                    No courses offered this semester.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                data.courses.map((course, index) => (
+                  <TableRow
+                    key={index}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                  >
+                    {" "}
+                    {/* Hover effect */}
+                    <TableCell className="font-mono text-sm font-medium text-gray-900 dark:text-gray-50">
+                      {course.courseCode.toUpperCase()}
+                    </TableCell>
+                    <TableCell className="font-medium text-sm text-gray-800 dark:text-gray-100">
+                      {course.courseTitle}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <Badge
+                        variant="outline"
+                        className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
+                      >
+                        {course.credits}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex flex-wrap gap-1">
+                        {course.courseTeachers.map((teacher, i) => (
+                          <Badge
+                            key={i}
+                            variant="secondary"
+                            className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-200 border-blue-100 dark:border-blue-800"
+                          >
+                            {teacher}
+                          </Badge>
+                        ))}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-  const handleSemesterChange = (value: string) => {
-    setSemesterState(value);
-  };
-
-  const handleDepartmentChange = (value: string) => {
-    setDepartment(value);
-  };
-
-  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearcTerm(e.target.value);
-  };
-
-  const handleClearSearchTerm = () => {
-    setSearcTerm("");
-  };
-
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-  };
+// Main Page Component
+export default function OfferedCoursesPage() {
+  // Dummy Data for demonstration
+  const dummySemesterData: SemesterBlockData[] = [
+    {
+      id: "fall-25-1-1",
+      semesterName: "Fall-25 (1/1)",
+      totalCredit: 18,
+      advisorName: "Mr. Shahadat Hussain Parvez (SHP)",
+      courses: [
+        {
+          courseCode: "CSE-0613111",
+          courseTitle: "Discrete Mathematics",
+          credits: 3,
+          courseTeachers: ["Dr. Arif Ahmad (AAD)", "Md. Jahidul Islam (MJI)"],
+        },
+        {
+          courseCode: "CSE-0613113",
+          courseTitle: "Structured Programming Language",
+          credits: 3,
+          courseTeachers: [
+            "Mr. Sabuj Chandra Paul (SCP)",
+            "Mr. Shahadat Hussain Parvez (SHP)",
+          ],
+        },
+        {
+          courseCode: "CSE-0613114",
+          courseTitle: "Structured Programming Language Lab",
+          credits: 1.5,
+          courseTeachers: [
+            "Mr. Sabuj Chandra Paul (SCP)",
+            "Mr. Shahadat Hussain Parvez (SHP)",
+          ],
+        },
+        {
+          courseCode: "CSE-0613115",
+          courseTitle: "Basic Electrical Engineering",
+          credits: 3,
+          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
+        },
+        {
+          courseCode: "CSE-0613116",
+          courseTitle: "Basic Electrical Engineering Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Shahadat Hussain Parvez (SHP)"],
+        },
+        {
+          courseCode: "MAT-0541101",
+          courseTitle: "Calculus",
+          credits: 3,
+          courseTeachers: ["Mr. Rathindra Chandra Gope (RCG)"],
+        },
+        {
+          courseCode: "SSW-03141101",
+          courseTitle: "History of the Emergence of Bangladesh",
+          credits: 3,
+          courseTeachers: ["Ms. Most. Sweety Khatun (MSK)"],
+        },
+      ],
+    },
+    {
+      id: "spring-25-1-2",
+      semesterName: "Spring-25 (1/2)",
+      totalCredit: 21,
+      advisorName: "Dr. Arif Ahmad (AAD)",
+      courses: [
+        {
+          courseCode: "CSE-06131211",
+          courseTitle: "Data Structures and Algorithms",
+          credits: 3,
+          courseTeachers: ["Ms. Muthmainna Mou (MM)"],
+        },
+        {
+          courseCode: "CSE-06131212",
+          courseTitle: "Data Structures and Algorithms Lab",
+          credits: 1.5,
+          courseTeachers: ["Ms. Muthmainna Mou (MM)"],
+        },
+        {
+          courseCode: "CSE-06131213",
+          courseTitle: "Electronic Devices and Circuits",
+          credits: 3,
+          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
+        },
+        {
+          courseCode: "CSE-06131214",
+          courseTitle: "Electronic Devices and Circuits Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
+        },
+        {
+          courseCode: "MAT-05411203",
+          courseTitle: "Linear Algebra",
+          credits: 3,
+          courseTeachers: ["Mr. Rathindra Chandra Gope (RCG)"],
+        },
+        {
+          courseCode: "PHY-05331201",
+          courseTitle: "Fundamentals of Physics",
+          credits: 3,
+          courseTeachers: ["Mr. Mazharul Islam (MI)"],
+        },
+        {
+          courseCode: "ENG-02321201",
+          courseTitle: "Advanced Functional English",
+          credits: 3,
+          courseTeachers: ["Ms. Bushra Jannat (BJ)"],
+        },
+        {
+          courseCode: "SSW-03141202",
+          courseTitle: "Bangladesh Studies",
+          credits: 3,
+          courseTeachers: ["Ms. Most. Sweety Khatun (MSK)"],
+        },
+      ],
+    },
+    {
+      id: "fall-24-2-1",
+      semesterName: "Fall-24 (2/1)",
+      totalCredit: 19.5,
+      advisorName: "Ms. Muthmainna Mou (MM)",
+      courses: [
+        {
+          courseCode: "CSE-06132111",
+          courseTitle: "Object Oriented Programming Language",
+          credits: 3,
+          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
+        },
+        {
+          courseCode: "CSE-06132112",
+          courseTitle: "Object Oriented Programming Language Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
+        },
+        {
+          courseCode: "CSE-06132113",
+          courseTitle: "Algorithm Design and Analysis",
+          credits: 3,
+          courseTeachers: ["Dr. Arif Ahmad (AAD)"],
+        },
+        {
+          courseCode: "CSE-06132114",
+          courseTitle: "Algorithm Design and Analysis Lab",
+          credits: 1.5,
+          courseTeachers: ["Dr. Arif Ahmad (AAD)"],
+        },
+        {
+          courseCode: "CSE-0613213",
+          courseTitle: "Electronic Devices and Circuits",
+          credits: 3,
+          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
+        },
+        {
+          courseCode: "CSE-0613214",
+          courseTitle: "Electronic Devices and Circuits Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
+        },
+        {
+          courseCode: "STA-05422101",
+          courseTitle: "Basic Statistics and Probability",
+          credits: 3,
+          courseTeachers: ["Mr. Moammad Salah Uddin (MSU)"],
+        },
+        {
+          courseCode: "BUS-04112101",
+          courseTitle: "Principles of Accounting",
+          credits: 3,
+          courseTeachers: ["Md Ohiduzzaman Anik (MOA)"],
+        },
+      ],
+    },
+    {
+      id: "spring-24-2-2",
+      semesterName: "Spring-24 (2/2)",
+      totalCredit: 21,
+      advisorName: "Dr. Arif Ahmad (AAD)",
+      courses: [
+        {
+          courseCode: "CSE-06132211",
+          courseTitle: "Introduction to Database Systems",
+          credits: 3,
+          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
+        },
+        {
+          courseCode: "CSE-06132212",
+          courseTitle: "Introduction to Database Systems Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
+        },
+        {
+          courseCode: "CSE-06132213",
+          courseTitle: "Operating System",
+          credits: 3,
+          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
+        },
+        {
+          courseCode: "CSE-06132214",
+          courseTitle: "Operating System Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
+        },
+        {
+          courseCode: "CSE-06132215",
+          courseTitle: "Theory of Computation",
+          credits: 3,
+          courseTeachers: ["Mr. Sourov Roy Shuvo (SRS)"],
+        },
+        {
+          courseCode: "CSE-06132217",
+          courseTitle: "Numerical Analysis",
+          credits: 3,
+          courseTeachers: ["Mr. Pritom Paul (PRP)"],
+        },
+        {
+          courseCode: "CSE-06132218",
+          courseTitle: "Numerical Analysis Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Pritom Paul (PRP)"],
+        },
+        {
+          courseCode: "CSE-06132220",
+          courseTitle: "Project Work I",
+          credits: 1.5,
+          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
+        },
+        {
+          courseCode: "MAT-05412205",
+          courseTitle:
+            "Complex Variables, Laplace Transform and Fourier Series",
+          credits: 3,
+          courseTeachers: ["Mr. Moammad Salah Uddin (MSU)"],
+        },
+      ],
+    },
+    {
+      id: "summer-23-3-1",
+      semesterName: "Summer-23 (3/1)",
+      totalCredit: 21,
+      advisorName: "Mr. Shahadat Hussain Parvez (SHP)",
+      courses: [
+        {
+          courseCode: "CSE-06133111",
+          courseTitle: "Computer Networks",
+          credits: 3,
+          courseTeachers: ["Mr. Sourov Roy Shuvo (SRS)"],
+        },
+        {
+          courseCode: "CSE-06133112",
+          courseTitle: "Computer Networks Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Sourov Roy Shuvo (SRS)"],
+        },
+        {
+          courseCode: "CSE-06133113",
+          courseTitle: "Software Engineering and Design Patterns",
+          credits: 3,
+          courseTeachers: ["Mr. Pritom Paul (PRP)"],
+        },
+        {
+          courseCode: "CSE-06133114",
+          courseTitle: "Software Engineering and Design Patterns Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Pritom Paul (PRP)"],
+        },
+        {
+          courseCode: "CSE-06133115",
+          courseTitle: "Artificial Intelligence",
+          credits: 3,
+          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
+        },
+        {
+          courseCode: "CSE-06133116",
+          courseTitle: "Artificial Intelligence Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
+        },
+        {
+          courseCode: "CSE-06133117",
+          courseTitle: "Microprocessor and Interfacing",
+          credits: 3,
+          courseTeachers: ["Mr. Shahadat Hussain Parvez (SHP)"],
+        },
+        {
+          courseCode: "CSE-06133118",
+          courseTitle: "Microprocessor and Interfacing Lab",
+          credits: 1.5,
+          courseTeachers: ["Mr. Shahadat Hussain Parvez (SHP)"],
+        },
+        {
+          courseCode: "CSE-06133119",
+          courseTitle: "Data Communication",
+          credits: 3,
+          courseTeachers: ["Md. Jahidul Islam (MJI)"],
+        },
+      ],
+    },
+  ];
 
   return (
-    <PrivateRoute>
-      <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
-        <section className="flex justify-between flex-wrap gap-4">
-          <h1 className="text-2xl font-bold">Offered courses list</h1>
-        </section>
-        <section className="flex justify-between flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Label htmlFor="searchType" className="flex-shrink-0">
-              Search by
-            </Label>
-            <Select value={searchType} onValueChange={handleSearchTypeChange}>
-              <SelectTrigger id="searchType" className="max-w-[180px]">
-                <SelectValue placeholder="Search by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="name">Name</SelectItem>
-                  <SelectItem value="code">Code</SelectItem>
-                  <SelectItem value="credit">Credit</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Label htmlFor="searchType" className="flex-shrink-0">
-              Semester
-            </Label>
-            <Select value={semesterState} onValueChange={handleSemesterChange}>
-              <SelectTrigger id="semester" className="max-w-[180px]">
-                <SelectValue placeholder="Semester" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  <SelectItem value="1">1st</SelectItem>
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Label htmlFor="searchType" className="flex-shrink-0">
-              Department
-            </Label>
-            <Select value={department} onValueChange={handleDepartmentChange}>
-              <SelectTrigger id="department" className="max-w-[180px]">
-                <SelectValue placeholder="department" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {departmentsList.map((department) => (
-                    <SelectItem key={department.name} value={department.name}>
-                      {department.name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <form
-            className="flex rounded-sm border pl-3 ml-auto"
-            onSubmit={handleSearch}
-          >
-            <input
-              value={searchTerm}
-              onChange={handleSearchTermChange}
-              className="outline-none bg-transparent w-full"
-              placeholder="Search Course"
-            />
-            <div className="size-9">
-              {searchTerm && (
-                <Button
-                  size={"icon"}
-                  variant={"ghost"}
-                  onClick={handleClearSearchTerm}
-                >
-                  <X />
-                </Button>
-              )}
-            </div>
-            <Button className="flex-shrink-0 rounded-l-none border">
-              <Search />
-            </Button>
-          </form>
-        </section>
-        <section className="w-full flex flex-col gap-4">
-          <div className="w-full overflow-auto">
-            <ScrollArea className="">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    {header.map(({ id, label, sortable }) => (
-                      <TableActionHead
-                        id={id}
-                        key={id}
-                        sortable={sortable}
-                        className="capitalize whitespace-nowrap"
-                      >
-                        {label}
-                      </TableActionHead>
-                    ))}
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {coursesList
-                    .slice(0, 100)
-                    .map(
-                      ({
-                        id,
-                        name,
-                        code,
-                        credit,
-                        department,
-                        curriculum,
-                        prerequisites,
-                      }) => (
-                        <TableRow
-                          key={id}
-                          className="hover:bg-gray-200/60 duration-100 transition-all"
-                        >
-                          <TableCell className="font-medium">{name}</TableCell>
-                          <TableCell>{code}</TableCell>
-                          <TableCell>{credit}</TableCell>
-                          <TableCell>{department}</TableCell>
-                          <TableCell>{curriculum}</TableCell>
-                          <TableCell>
-                            {prerequisites.length ? prerequisites : "N/A"}
-                          </TableCell>
-                        </TableRow>
-                      )
-                    )}
-                </TableBody>
-              </Table>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </div>
-          <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
-        </section>
-      </section>
-    </PrivateRoute>
+    <div className="container mx-auto py-8 space-y-8 px-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      {" "}
+      {/* Added subtle background */}
+      <div className="flex flex-col gap-2 text-center mb-8">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-50 flex items-center justify-center gap-3">
+          <GraduationCap className="w-9 h-9 text-blue-600 dark:text-blue-400" />
+          Department of CSE; Course Offer List
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Comprehensive overview of courses offered by semester and assigned
+          advisors.
+        </p>
+      </div>
+      {/* Using a responsive grid with `items-start` for a masonry-like effect */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 items-start">
+        {dummySemesterData.map((semester) => (
+          <SemesterCourseBlock key={semester.id} data={semester} />
+        ))}
+      </div>
+    </div>
   );
-};
-
-export default OfferedCoursePage;
+}
