@@ -3,7 +3,7 @@ import AuthLayout from "@/pages/auth/AuthLayout";
 import ChangePassword from "@/pages/auth/ChangePassword";
 import Login from "@/pages/auth/Login";
 import AddAdmissionOffice from "@/pages/dashboard/admission-office/AddAdmissionOffice";
-import AddTeacher from "@/pages/dashboard/admission-office/AddAdmissionOffice";
+import AddTeacher from "@/pages/dashboard/teacher/AddTeacher";
 import AdmissionOfficePage from "@/pages/dashboard/admission-office/AdmissionOffice";
 import AdmissionOfficeLayout from "@/pages/dashboard/admission-office/Layout";
 import AttendancePage from "@/pages/dashboard/attendance/Attendance";

@@ -1,189 +1,367 @@
+import { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
-  TableActionHead,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { coursesList } from "@/data/generateCourses";
-import { Link } from "react-router";
-import { Button } from "@/components/ui/button";
-import { Plus, Search, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import UsersTableFooter from "@/components/table/TableFooter";
-import { useState, type ChangeEvent, type FormEvent } from "react";
-import { Label } from "@/components/ui/label";
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Search, X, BookOpen } from "lucide-react";
+import axios from "axios";
 
-const rowSizeList = ["10", "20", "30", "50", "80", "100"];
+// Types
+interface Course {
+  _id: string;
+  name: string;
+  code: string;
+  credit: number;
+  depart: string;
+  prerequisiteCourse: Course[];
+  createdAt: string;
+  updatedAt: string;
+}
 
-const header = [
-  {
-    id: "name",
-    label: "Name",
-    sortable: true,
-  },
-  {
-    id: "code",
-    label: "Code",
-    sortable: true,
-  },
-  {
-    id: "credit",
-    label: "Credit",
-    sortable: true,
-  },
-  {
-    id: "department",
-    label: "Department",
-  },
-  {
-    id: "curriculum",
-    label: "Curriculum",
-  },
-  {
-    id: "prerequisites",
-    label: "Prerequisites",
-  },
-];
+interface CourseFilters {
+  code?: string;
+  name?: string;
+  depart?: string;
+  credit?: number;
+}
 
-const CoursePage = () => {
-  const [searchType, setSearchType] = useState("name");
-  const [searchTerm, setSearcTerm] = useState("");
+// Axios client
+const axiosClient = axios.create({
+  baseURL: "http://localhost:3000/api/v1",
+});
 
-  const handleSearchTypeChange = (value: string) => {
-    setSearchType(value);
+const ITEMS_PER_PAGE = 10;
+
+export default function CourseManagement() {
+  // State
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<CourseFilters>({});
+
+  // Fetch courses function
+  const fetchCourses = async (filterParams: CourseFilters = {}) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axiosClient.get("/course/courses", {
+        params: filterParams,
+      });
+
+      if (response.data.success) {
+        setCourses(response.data.data);
+      } else {
+        setError("Failed to fetch courses");
+      }
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to fetch courses");
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSearchTermChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setSearcTerm(e.target.value);
+  // Load courses on component mount
+  useEffect(() => {
+    fetchCourses();
+  }, []);
+
+  // Filter handlers
+  const handleFilterChange = (key: keyof CourseFilters, value: string) => {
+    const newFilters = {
+      ...filters,
+      [key]: value || undefined,
+    };
+    setFilters(newFilters);
   };
 
-  const handleClearSearchTerm = () => {
-    setSearcTerm("");
+  const handleSearch = () => {
+    setCurrentPage(1);
+    fetchCourses(filters);
   };
 
-  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
+  const handleClear = () => {
+    setFilters({});
+    setCurrentPage(1);
+    fetchCourses({});
   };
+
+  // Pagination
+  const paginatedCourses = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return courses.slice(startIndex, endIndex);
+  }, [courses, currentPage]);
+
+  const totalPages = Math.ceil(courses.length / ITEMS_PER_PAGE);
+
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...");
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
-    <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
-      <section className="flex justify-between flex-wrap gap-4">
-        <h1 className="text-2xl font-bold">Courses list</h1>
-        <Link to="/dashboard/course/add-course">
-          <Button>
-            <Plus /> Add New Course
-          </Button>
-        </Link>
-      </section>
-      <section className="flex justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-2">
-          <Label htmlFor="searchType" className="flex-shrink-0">
-            Search by
-          </Label>
-          <Select value={searchType} onValueChange={handleSearchTypeChange}>
-            <SelectTrigger id="searchType" className="max-w-[180px]">
-              <SelectValue placeholder="Search by" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectItem value="name">Name</SelectItem>
-                <SelectItem value="code">Code</SelectItem>
-                <SelectItem value="credit">Credit</SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <form
-          className="flex rounded-sm border pl-3 ml-auto"
-          onSubmit={handleSearch}
-        >
-          <input
-            value={searchTerm}
-            onChange={handleSearchTermChange}
-            className="outline-none bg-transparent w-full"
-            placeholder="Search Course"
-          />
-          <div className="size-9">
-            {searchTerm && (
-              <Button
-                size={"icon"}
-                variant={"ghost"}
-                onClick={handleClearSearchTerm}
-              >
-                <X />
-              </Button>
-            )}
+    <div className="container mx-auto py-8 space-y-6 px-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">Course Management</h1>
+        <p className="text-muted-foreground">
+          Manage and view university courses with filtering and pagination
+        </p>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Filter Courses
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="code">Course Code</Label>
+              <Input
+                id="code"
+                placeholder="e.g., CSE111"
+                value={filters.code || ""}
+                onChange={(e) => handleFilterChange("code", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="name">Course Name</Label>
+              <Input
+                id="name"
+                placeholder="e.g., Programming"
+                value={filters.name || ""}
+                onChange={(e) => handleFilterChange("name", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="depart">Department</Label>
+              <Input
+                id="depart"
+                placeholder="e.g., CSE"
+                value={filters.depart || ""}
+                onChange={(e) => handleFilterChange("depart", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="credit">Credit Hours</Label>
+              <Input
+                id="credit"
+                type="number"
+                placeholder="e.g., 3"
+                value={filters.credit || ""}
+                onChange={(e) => handleFilterChange("credit", e.target.value)}
+              />
+            </div>
           </div>
-          <Button className="flex-shrink-0 rounded-l-none border">
-            <Search />
-          </Button>
-        </form>
-      </section>
-      <section className="w-full flex flex-col gap-4">
-        <div className="w-full overflow-auto">
-          <ScrollArea className="">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  {header.map(({ id, label, sortable }) => (
-                    <TableActionHead
-                      id={id}
-                      key={id}
-                      sortable={sortable}
-                      className="capitalize whitespace-nowrap"
-                    >
-                      {label}
-                    </TableActionHead>
-                  ))}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {coursesList
-                  .slice(0, 100)
-                  .map(
-                    ({
-                      id,
-                      name,
-                      code,
-                      credit,
-                      department,
-                      curriculum,
-                      prerequisites,
-                    }) => (
-                      <TableRow
-                        key={id}
-                        className="hover:bg-gray-200/60 duration-100 transition-all"
+
+          <div className="flex gap-2 mt-4">
+            <Button onClick={handleSearch} disabled={loading}>
+              <Search className="w-4 h-4 mr-2" />
+              Search
+            </Button>
+            <Button variant="outline" onClick={handleClear} disabled={loading}>
+              <X className="w-4 h-4 mr-2" />
+              Clear
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="w-5 h-5" />
+            Courses ({courses.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-muted-foreground">Loading courses...</div>
+            </div>
+          ) : (
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Course Code</TableHead>
+                    <TableHead>Course Name</TableHead>
+                    <TableHead>Department</TableHead>
+                    <TableHead>Credit Hours</TableHead>
+                    <TableHead>Prerequisites</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedCourses.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={5}
+                        className="text-center py-8 text-muted-foreground"
                       >
-                        <TableCell className="font-medium">{name}</TableCell>
-                        <TableCell>{code}</TableCell>
-                        <TableCell>{credit}</TableCell>
-                        <TableCell>{department}</TableCell>
-                        <TableCell>{curriculum}</TableCell>
+                        No courses found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedCourses.map((course) => (
+                      <TableRow key={course._id}>
+                        <TableCell className="font-mono font-medium">
+                          {course.code.toUpperCase()}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {course.name}
+                        </TableCell>
                         <TableCell>
-                          {prerequisites.length ? prerequisites : "N/A"}
+                          <Badge variant="secondary">
+                            {course.depart.toUpperCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="outline">
+                            {course.credit} credits
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {course.prerequisiteCourse.length > 0 ? (
+                            <div className="flex flex-wrap gap-1">
+                              {course.prerequisiteCourse.map((prereq) => (
+                                <Badge
+                                  key={prereq._id}
+                                  variant="outline"
+                                  className="text-xs"
+                                >
+                                  {prereq.code.toUpperCase()}
+                                </Badge>
+                              ))}
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">
+                              None
+                            </span>
+                          )}
                         </TableCell>
                       </TableRow>
-                    )
+                    ))
                   )}
-              </TableBody>
-            </Table>
-            <ScrollBar orientation="horizontal" />
-          </ScrollArea>
-        </div>
-        <UsersTableFooter rowSizeList={rowSizeList} totalPages={10} />
-      </section>
-    </section>
-  );
-};
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-export default CoursePage;
+      {/* Pagination */}
+      {!loading && courses.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {getVisiblePages().map((page, index) => (
+                <PaginationItem key={index}>
+                  {page === "..." ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page as number)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </div>
+  );
+}
