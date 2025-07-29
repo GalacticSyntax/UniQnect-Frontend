@@ -33,8 +33,8 @@ import {
 import { Search, X, BookOpen, Edit } from "lucide-react";
 import { useAuth } from "@/provider/AuthProvider";
 import { toast } from "sonner";
-import axios from "axios";
 import PrivateRoute from "@/components/PrivateRoute";
+import { axiosClient } from "@/lib/apiClient";
 
 // Types
 interface Course {
@@ -54,11 +54,6 @@ interface CourseFilters {
   depart?: string;
   credit?: number;
 }
-
-// Axios client
-const axiosClient = axios.create({
-  baseURL: "http://localhost:3000/api/v1",
-});
 
 const ITEMS_PER_PAGE = 10;
 

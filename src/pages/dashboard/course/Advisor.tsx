@@ -1,4 +1,6 @@
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +14,15 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 import {
   Dialog,
   DialogContent,
@@ -20,21 +30,24 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, UserCheck, Edit, Trash2, Plus } from "lucide-react";
-import { Link, useSearchParams } from "react-router"; // Assuming react-router for Link and useSearchParams
+import { Search, UserCheck, Edit, Trash2, Plus, X } from "lucide-react";
 import { useAuth } from "@/provider/AuthProvider";
 import { toast } from "sonner";
 import axios from "axios";
-import SearchWithUrlSync from "@/components/SearchWithUrlSync"; // Assuming this component exists
 import PrivateRoute from "@/components/PrivateRoute"; // Assuming this component exists
-import UsersTableFooter from "@/components/table/TableFooter"; // Assuming this component exists
+import { axiosClient } from "@/lib/apiClient";
 
 // Types
 interface Teacher {
   _id: string;
-  fullName: string;
-  teacherId: string;
-  // Add other fields if needed for display in the table or edit form
+  userId: string;
+  teacherId: string; // This is the actual string ID for the teacher
+  designation: string;
+  joinedAt: string;
+  departmentId: string;
+  createdAt: string;
+  updatedAt: string;
+  fullName?: string; // Added, assuming your API might populate this in the future or it's derived
 }
 
 interface Advisor {
@@ -42,121 +55,110 @@ interface Advisor {
   departmentCode: string;
   session: string;
   semester: number;
-  teacherId: string; // Original ID
-  teacher?: Teacher; // Populated teacher object from API
+  teacherId: Teacher; // Changed: now it's the populated Teacher object
   createdAt: string;
   updatedAt: string;
+}
+
+// New interface for the editing state
+interface EditingAdvisor {
+  _id: string;
+  departmentCode: string;
+  session: string;
+  semester: number;
+  teacherId: string; // This will be the string ID for the input and payload
 }
 
 interface AdvisorFilters {
   departmentCode?: string;
   session?: string;
   semester?: number;
-  teacherName?: string; // For searching by teacher's name
+  teacherName?: string;
 }
 
-// Axios client
-const axiosClient = axios.create({
-  baseURL: "http://localhost:3000/api/v1",
-});
-
-const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
-
-const header = [
-  { id: "departmentCode", label: "Department", sortable: true },
-  { id: "session", label: "Session", sortable: true },
-  { id: "semester", label: "Semester", sortable: true },
-  { id: "teacher", label: "Advisor Name", sortable: true }, // Will display teacher.fullName
-  { id: "teacherId", label: "Teacher ID", sortable: true },
-  { id: "actions", label: "Actions", center: true }, // Admin only
-];
+const ITEMS_PER_PAGE = 10;
 
 export default function AdvisorManagement() {
   const { user } = useAuth();
-  const [searchParams] = useSearchParams();
+  // State
   const [advisors, setAdvisors] = useState<Advisor[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [totalPages, setTotalPages] = useState(0);
-  const [editingAdvisor, setEditingAdvisor] = useState<Advisor | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<AdvisorFilters>({});
+  // Use the new EditingAdvisor interface for the editing state
+  const [editingAdvisor, setEditingAdvisor] = useState<EditingAdvisor | null>(
+    null
+  );
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   // Fetch advisors function
-  const fetchAdvisors = async () => {
-    const limit = searchParams.get("size") ?? 10;
-    const page = searchParams.get("page") || 1;
-    const searchTerm = searchParams.get("searchTerm"); // This will be used for teacherName
-    const sort = searchParams.get("sort");
-
-    const departmentCodeFilter =
-      searchParams.get("departmentCode") || undefined;
-    const sessionFilter = searchParams.get("session") || undefined;
-    const semesterFilter = searchParams.get("semester")
-      ? Number(searchParams.get("semester"))
-      : undefined;
-
+  const fetchAdvisors = async (filterParams: AdvisorFilters = {}) => {
     setLoading(true);
     setError(null);
 
     try {
-      let apiUrl = `/course-advisor/advisors?limit=${limit}&page=${page}`;
-      if (departmentCodeFilter)
-        apiUrl += `&departmentCode=${departmentCodeFilter}`;
-      if (sessionFilter) apiUrl += `&session=${sessionFilter}`;
-      if (semesterFilter) apiUrl += `&semester=${semesterFilter}`;
-      if (searchTerm) apiUrl += `&teacherName=${searchTerm}`; // Assuming backend filters by teacherName for searchTerm
-      if (sort) apiUrl += `&sort=${sort}`;
+      const response = await axiosClient.get("/course-advisor/advisors", {
+        params: filterParams,
+      });
 
-      const response = await axiosClient.get(apiUrl);
-      const data = response.data;
-
-      if (data.success) {
-        setAdvisors(data.data?.result || data.data || []);
-        setTotalPages(
-          data.data?.meta?.totalPage ||
-            Math.ceil((data.data?.length || 0) / Number(limit))
-        );
+      if (response.data.success) {
+        setAdvisors(response.data.data);
       } else {
         setError("Failed to fetch advisors");
       }
     } catch (err) {
-      console.error(err);
-      setError(
-        axios.isAxiosError(err)
-          ? err?.response?.data?.message || "Failed to fetch advisors"
-          : "Failed to fetch advisors"
-      );
-      toast.error("Error occurred", {
-        description: axios.isAxiosError(err)
-          ? err?.response?.data?.message
-          : "Something went wrong",
-      });
+      if (axios.isAxiosError(err)) {
+        setError(err?.response?.data?.message || "Failed to fetch advisors");
+        toast.error("Error occurred", {
+          description: err?.response?.data?.message || "Something went wrong",
+        });
+      } else {
+        setError("Failed to fetch advisors");
+        toast.error("Error occurred", {
+          description: "Something went wrong",
+        });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  // Load advisors when search params change
+  // Load advisors on component mount
   useEffect(() => {
     fetchAdvisors();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, []);
 
-  // Filter handlers for direct input fields
+  // Filter handlers
   const handleFilterChange = (key: keyof AdvisorFilters, value: string) => {
-    const newSearchParams = new URLSearchParams(searchParams.toString());
-    if (value) {
-      newSearchParams.set(key, value);
-    } else {
-      newSearchParams.delete(key);
-    }
-    // This will trigger useEffect due to searchParams change
-    window.history.pushState(null, "", `?${newSearchParams.toString()}`);
+    const newFilters = {
+      ...filters,
+      [key]: value || undefined,
+    };
+    setFilters(newFilters);
+  };
+
+  const handleSearch = () => {
+    setCurrentPage(1); // Reset to first page on new search
+    fetchAdvisors(filters);
+  };
+
+  const handleClear = () => {
+    setFilters({});
+    setCurrentPage(1); // Reset to first page on clear
+    fetchAdvisors({});
   };
 
   // Edit advisor handler
   const handleEditAdvisor = (advisor: Advisor) => {
-    setEditingAdvisor({ ...advisor });
+    // Map the Advisor object to the EditingAdvisor structure
+    setEditingAdvisor({
+      _id: advisor._id,
+      departmentCode: advisor.departmentCode,
+      session: advisor.session,
+      semester: advisor.semester,
+      teacherId: advisor.teacherId.teacherId, // Extract the string ID
+    });
     setEditDialogOpen(true);
   };
 
@@ -169,14 +171,17 @@ export default function AdvisorManagement() {
         departmentCode: editingAdvisor.departmentCode,
         session: editingAdvisor.session,
         semester: editingAdvisor.semester,
-        teacherId: editingAdvisor.teacherId,
+        teacherId: editingAdvisor.teacherId, // This will now correctly be the string ID from the form
       };
 
-      await axiosClient.put(`/advisor/advisor/${editingAdvisor._id}`, payload);
+      await axiosClient.patch(
+        `/course-advisor/advisor/${editingAdvisor._id}`,
+        payload
+      );
       toast.success("Advisor updated successfully");
       setEditDialogOpen(false);
       setEditingAdvisor(null);
-      fetchAdvisors(); // Re-fetch to update the list
+      fetchAdvisors(filters); // Re-fetch to update the list with current filters
     } catch (err) {
       toast.error("Error updating advisor", {
         description: axios.isAxiosError(err)
@@ -192,9 +197,9 @@ export default function AdvisorManagement() {
       return;
 
     try {
-      await axiosClient.delete(`/advisor/advisor/${advisorId}`);
+      await axiosClient.delete(`/course-advisor/advisor/${advisorId}`);
       toast.success("Advisor deleted successfully");
-      fetchAdvisors(); // Re-fetch to update the list
+      fetchAdvisors(filters); // Re-fetch to update the list with current filters
     } catch (err) {
       toast.error("Error deleting advisor", {
         description: axios.isAxiosError(err)
@@ -206,7 +211,7 @@ export default function AdvisorManagement() {
 
   // Handle edit form changes
   const handleEditFormChange = (
-    field: keyof Advisor,
+    field: keyof EditingAdvisor,
     value: string | number
   ) => {
     if (!editingAdvisor) return;
@@ -217,203 +222,295 @@ export default function AdvisorManagement() {
     }));
   };
 
+  // Pagination logic
+  const paginatedAdvisors = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return advisors.slice(startIndex, endIndex);
+  }, [advisors, currentPage]);
+
+  const totalPages = Math.ceil(advisors.length / ITEMS_PER_PAGE);
+
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...");
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
   if (error) {
     return (
-      <PrivateRoute>
-        <div className="container mx-auto py-8">
-          <div className="text-center text-red-600">Error: {error}</div>
-        </div>
-      </PrivateRoute>
+      <div className="container mx-auto py-8">
+        <div className="text-center text-red-600">Error: {error}</div>
+      </div>
     );
   }
 
   return (
     <PrivateRoute>
-      <section className="w-full max-w-7xl mx-auto p-5 flex flex-col gap-5">
+      <div className="container mx-auto py-8 space-y-6 px-6">
         {/* Header */}
-        <section className="flex justify-between flex-wrap gap-4">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold">Advisor Management</h1>
-            <p className="text-muted-foreground">
-              Manage and view university advisor assignments
-            </p>
-          </div>
-          {user?.role === "admin" && (
-            <Link to="/dashboard/course/add-advisor">
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add New Advisor
-              </Button>
-            </Link>
-          )}
-        </section>
+        <div className="flex flex-col gap-2">
+          <h1 className="text-3xl font-bold">Advisor Management</h1>
+          <p className="text-muted-foreground">
+            Manage and view university advisor assignments
+          </p>
+        </div>
 
         {/* Filters */}
-        <section className="flex flex-col gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Search className="w-5 h-5" />
-                Filter Advisors
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 items-end">
-                <div className="space-y-2">
-                  <Label htmlFor="departmentCode">Department Code</Label>
-                  <Input
-                    id="departmentCode"
-                    placeholder="e.g., CSE"
-                    value={searchParams.get("departmentCode") || ""}
-                    onChange={(e) =>
-                      handleFilterChange("departmentCode", e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="session">Session</Label>
-                  <Input
-                    id="session"
-                    placeholder="e.g., fall-2025"
-                    value={searchParams.get("session") || ""}
-                    onChange={(e) =>
-                      handleFilterChange("session", e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="semester">Semester</Label>
-                  <Input
-                    id="semester"
-                    type="number"
-                    placeholder="e.g., 1"
-                    value={searchParams.get("semester") || ""}
-                    onChange={(e) =>
-                      handleFilterChange("semester", e.target.value)
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <SearchWithUrlSync label="Search by Teacher Name" />
-                </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Filter Advisors
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="departmentCode">Department Code</Label>
+                <Input
+                  id="departmentCode"
+                  placeholder="e.g., CSE"
+                  value={filters.departmentCode || ""}
+                  onChange={(e) =>
+                    handleFilterChange("departmentCode", e.target.value)
+                  }
+                />
               </div>
-            </CardContent>
-          </Card>
-        </section>
+
+              <div className="space-y-2">
+                <Label htmlFor="session">Session</Label>
+                <Input
+                  id="session"
+                  placeholder="e.g., fall-2025"
+                  value={filters.session || ""}
+                  onChange={(e) =>
+                    handleFilterChange("session", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="semester">Semester</Label>
+                <Input
+                  id="semester"
+                  type="number"
+                  placeholder="e.g., 1"
+                  value={filters.semester || ""}
+                  onChange={(e) =>
+                    handleFilterChange("semester", e.target.value)
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="teacherName">Teacher Name</Label>
+                <Input
+                  id="teacherName"
+                  placeholder="e.g., Alice Smith"
+                  value={filters.teacherName || ""}
+                  onChange={(e) =>
+                    handleFilterChange("teacherName", e.target.value)
+                  }
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2 mt-4">
+              <Button onClick={handleSearch} disabled={loading}>
+                <Search className="w-4 h-4 mr-2" />
+                Search
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleClear}
+                disabled={loading}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Clear
+              </Button>
+              {user?.role === "admin" && (
+                <Button
+                  onClick={() =>
+                    (window.location.href = "/dashboard/course/add-advisor")
+                  }
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add New Advisor
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Table */}
-        <section className="w-full flex flex-col gap-4">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <UserCheck className="w-5 h-5" />
-                Advisors ({advisors.length})
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <div className="flex items-center justify-center h-32">
-                  <div className="text-muted-foreground">
-                    Loading advisors...
-                  </div>
-                </div>
-              ) : (
-                <div className="w-full overflow-auto">
-                  <ScrollArea>
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          {header.map(({ id, label, center }) => (
-                            <TableHead
-                              key={id}
-                              // TableActionHead is a custom component, using TableHead for direct compatibility
-                              // If TableActionHead handles sorting, you'd use it here.
-                              // For now, assuming basic TableHead.
-                              className={`capitalize whitespace-nowrap ${
-                                center ? "text-center" : ""
-                              }`}
-                            >
-                              {label}
-                            </TableHead>
-                          ))}
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {advisors.length === 0 ? (
-                          <TableRow>
-                            <TableCell
-                              colSpan={header.length}
-                              className="text-center py-8 text-muted-foreground"
-                            >
-                              No advisors found
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCheck className="w-5 h-5" />
+              Advisors ({advisors.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-muted-foreground">Loading advisors...</div>
+              </div>
+            ) : (
+              <div className="rounded-md border overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Session</TableHead>
+                      <TableHead>Semester</TableHead>
+                      <TableHead>Advisor Name</TableHead>
+                      <TableHead>Teacher ID</TableHead>
+                      {user?.role === "admin" && (
+                        <TableHead className="text-center">Actions</TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedAdvisors.length === 0 ? (
+                      <TableRow>
+                        <TableCell
+                          colSpan={user?.role === "admin" ? 6 : 5}
+                          className="text-center py-8 text-muted-foreground"
+                        >
+                          No advisors found
+                        </TableCell>
+                      </TableRow>
+                    ) : (
+                      paginatedAdvisors.map((advisor) => (
+                        <TableRow key={advisor._id}>
+                          <TableCell className="font-medium">
+                            <Badge variant="secondary">
+                              {advisor.departmentCode.toUpperCase()}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            {advisor.session}
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              Semester {advisor.semester}
+                            </Badge>
+                          </TableCell>
+                          {/* Access fullName from the nested teacherId object */}
+                          <TableCell className="font-medium">
+                            {String(advisor.teacherId.fullName || "N/A")}
+                          </TableCell>
+                          {/* Access the actual teacherId string from the nested object */}
+                          <TableCell className="font-mono">
+                            {advisor.teacherId.teacherId}
+                          </TableCell>
+                          {user?.role === "admin" && (
+                            <TableCell className="text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditAdvisor(advisor)}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() =>
+                                    handleDeleteAdvisor(advisor._id)
+                                  }
+                                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
                             </TableCell>
-                          </TableRow>
-                        ) : (
-                          advisors.map((advisor) => (
-                            <TableRow
-                              key={advisor._id}
-                              className="hover:bg-gray-200/60 duration-100 transition-all"
-                            >
-                              <TableCell className="font-medium">
-                                <Badge variant="secondary">
-                                  {advisor.departmentCode.toUpperCase()}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                {advisor.session}
-                              </TableCell>
-                              <TableCell>
-                                <Badge variant="outline">
-                                  Semester {advisor.semester}
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="font-medium">
-                                {advisor.teacher?.fullName || "N/A"}
-                              </TableCell>
-                              <TableCell className="font-mono">
-                                {advisor.teacherId}
-                              </TableCell>
-                              {user?.role === "admin" && (
-                                <TableCell className="text-center">
-                                  <div className="flex items-center justify-center gap-2">
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleEditAdvisor(advisor)}
-                                      className="h-8 w-8 p-0"
-                                    >
-                                      <Edit className="h-4 w-4" />
-                                    </Button>
-                                    <Button
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() =>
-                                        handleDeleteAdvisor(advisor._id)
-                                      }
-                                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
-                              )}
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                    <ScrollBar orientation="horizontal" />
-                  </ScrollArea>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                          )}
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
-          <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPages} />
-        </section>
+        {/* Pagination */}
+        {!loading && advisors.length > 0 && totalPages > 1 && (
+          <div className="flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+
+                {getVisiblePages().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === "..." ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => setCurrentPage(page as number)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      setCurrentPage(Math.min(totalPages, currentPage + 1))
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
 
         {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
@@ -477,7 +574,7 @@ export default function AdvisorManagement() {
                     <Label htmlFor="edit-teacherId">Teacher ID</Label>
                     <Input
                       id="edit-teacherId"
-                      value={editingAdvisor.teacherId}
+                      value={editingAdvisor.teacherId} // No cast needed here
                       onChange={(e) =>
                         handleEditFormChange("teacherId", e.target.value)
                       }
@@ -501,7 +598,7 @@ export default function AdvisorManagement() {
             )}
           </DialogContent>
         </Dialog>
-      </section>
+      </div>
     </PrivateRoute>
   );
 }
