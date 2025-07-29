@@ -139,19 +139,19 @@ const adminRoutes = [
       },
     ],
   },
-  {
-    id: "curriculum",
-    title: "Curriculum",
-    url: "/dashboard/curriculum",
-    icon: ClipboardList, // Represents a structured list or curriculum
-    isActive: false,
-    items: [
-      {
-        title: "Curriculum",
-        url: "/dashboard/curriculum",
-      },
-    ],
-  },
+  // {
+  //   id: "curriculum",
+  //   title: "Curriculum",
+  //   url: "/dashboard/curriculum",
+  //   icon: ClipboardList, // Represents a structured list or curriculum
+  //   isActive: false,
+  //   items: [
+  //     {
+  //       title: "Curriculum",
+  //       url: "/dashboard/curriculum",
+  //     },
+  //   ],
+  // },
   {
     id: "department",
     title: "Department",
@@ -325,19 +325,19 @@ const teacherRoutes = [
       },
     ],
   },
-  {
-    id: "curriculum",
-    title: "Curriculum",
-    url: "/dashboard/curriculum",
-    icon: ClipboardList, // Represents a structured list or curriculum
-    isActive: false,
-    items: [
-      {
-        title: "Curriculum",
-        url: "/dashboard/curriculum",
-      },
-    ],
-  },
+  // {
+  //   id: "curriculum",
+  //   title: "Curriculum",
+  //   url: "/dashboard/curriculum",
+  //   icon: ClipboardList, // Represents a structured list or curriculum
+  //   isActive: false,
+  //   items: [
+  //     {
+  //       title: "Curriculum",
+  //       url: "/dashboard/curriculum",
+  //     },
+  //   ],
+  // },
   {
     id: "department",
     title: "Department",
@@ -444,19 +444,19 @@ const studentRoutes = [
       },
     ],
   },
-  {
-    id: "curriculum",
-    title: "Curriculum",
-    url: "/dashboard/curriculum",
-    icon: ClipboardList, // Represents a structured list or curriculum
-    isActive: false,
-    items: [
-      {
-        title: "Curriculum",
-        url: "/dashboard/curriculum",
-      },
-    ],
-  },
+  // {
+  //   id: "curriculum",
+  //   title: "Curriculum",
+  //   url: "/dashboard/curriculum",
+  //   icon: ClipboardList, // Represents a structured list or curriculum
+  //   isActive: false,
+  //   items: [
+  //     {
+  //       title: "Curriculum",
+  //       url: "/dashboard/curriculum",
+  //     },
+  //   ],
+  // },
   {
     id: "department",
     title: "Department",

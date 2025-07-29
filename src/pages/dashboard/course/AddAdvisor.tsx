@@ -31,7 +31,7 @@ import {
   //  Upload, FileText, UserCheck,
   X,
 } from "lucide-react";
-import axios from "axios";
+import { axiosClient } from "@/lib/apiClient";
 
 // Types
 interface Advisor {
@@ -41,11 +41,6 @@ interface Advisor {
   semester: number;
   teacherId: string;
 }
-
-// Axios client
-const axiosClient = axios.create({
-  baseURL: "http://localhost:3000/api/v1",
-});
 
 export default function AddAdvisorPage() {
   const [loading, setLoading] = useState(false);
@@ -68,8 +63,15 @@ export default function AddAdvisorPage() {
     setLoading(true);
 
     try {
-      await axiosClient.post("/advisor", formData);
-      toast.success("Advisor added successfully");
+      const response = await axiosClient.post(
+        "/course-advisor/advisor",
+        formData
+      );
+      if (!response?.data?.success) {
+        return toast.error(response?.data?.message || "Something went wrong");
+      } else {
+        toast.success(response?.data?.message || "Successfull");
+      }
 
       // Reset form
       setFormData({

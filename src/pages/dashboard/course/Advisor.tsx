@@ -36,6 +36,7 @@ import { toast } from "sonner";
 import axios from "axios";
 import PrivateRoute from "@/components/PrivateRoute"; // Assuming this component exists
 import { axiosClient } from "@/lib/apiClient";
+import { Link } from "react-router";
 
 // Types
 interface Teacher {
@@ -354,14 +355,12 @@ export default function AdvisorManagement() {
                 Clear
               </Button>
               {user?.role === "admin" && (
-                <Button
-                  onClick={() =>
-                    (window.location.href = "/dashboard/course/add-advisor")
-                  }
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add New Advisor
-                </Button>
+                <Link to="/dashboard/course/add-advisor">
+                  <Button>
+                    <Plus className="w-4 h-4 mr-2" />
+                    Add New Advisor
+                  </Button>
+                </Link>
               )}
             </div>
           </CardContent>
