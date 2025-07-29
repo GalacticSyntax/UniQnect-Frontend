@@ -41,6 +41,7 @@ import UserLayout from "@/pages/dashboard/user/Layout";
 import UserPage from "@/pages/dashboard/user/User";
 import Home from "@/pages/Home";
 import { createBrowserRouter, RouterProvider } from "react-router";
+import AddAdvisorPage from "@/pages/dashboard/course/AddAdvisor";
 
 const router = createBrowserRouter([
   {
@@ -148,6 +149,7 @@ const router = createBrowserRouter([
           { path: "offered", element: <OfferedCoursePage /> },
           { path: "registered", element: <RegisteredCoursePage /> },
           { path: "add-course", element: <AddCoursePage /> },
+          { path: "add-advisor", element: <AddAdvisorPage /> },
         ],
       },
 

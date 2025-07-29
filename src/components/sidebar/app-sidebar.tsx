@@ -130,8 +130,12 @@ const adminRoutes = [
         url: "/dashboard/course/registered",
       },
       {
-        title: "Add Courses",
+        title: "Add Course",
         url: "/dashboard/course/add-course",
+      },
+      {
+        title: "Add Advisor",
+        url: "/dashboard/course/add-advisor",
       },
     ],
   },
