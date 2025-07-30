@@ -137,6 +137,10 @@ const adminRoutes = [
         title: "Add Advisor",
         url: "/dashboard/course/add-advisor",
       },
+      {
+        title: "Registration Form",
+        url: "/dashboard/course/registration-form",
+      },
     ],
   },
   // {
