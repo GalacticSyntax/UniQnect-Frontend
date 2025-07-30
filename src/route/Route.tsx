@@ -42,6 +42,7 @@ import UserPage from "@/pages/dashboard/user/User";
 import Home from "@/pages/Home";
 import { createBrowserRouter, RouterProvider } from "react-router";
 import AddAdvisorPage from "@/pages/dashboard/course/AddAdvisor";
+import MyOfferedCourses from "@/pages/dashboard/course/My-offered-courses";
 
 const router = createBrowserRouter([
   {
@@ -154,6 +155,7 @@ const router = createBrowserRouter([
           { path: "registered", element: <RegisteredCoursePage /> },
           { path: "add-course", element: <AddCoursePage /> },
           { path: "add-advisor", element: <AddAdvisorPage /> },
+          { path: "my-offered-courses", element: <MyOfferedCourses /> },
         ],
       },
 

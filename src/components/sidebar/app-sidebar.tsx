@@ -323,6 +323,10 @@ const teacherRoutes = [
         title: "Registered",
         url: "/dashboard/course/registered",
       },
+      {
+        title: "My Offered Courses",
+        url: "/dashboard/course/my-offered-courses",
+      },
     ],
   },
   // {
