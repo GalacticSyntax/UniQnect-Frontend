@@ -69,43 +69,36 @@ const dummyStudentCourses: RegisteredCourse[] = [
     courseCode: "CSE-0613111",
     courseTitle: "Discrete Mathematics",
     credits: 3,
-    grade: "A",
   },
   {
     courseCode: "CSE-0613113",
     courseTitle: "Structured Programming Language",
     credits: 3,
-    grade: "B+",
   },
   {
     courseCode: "CSE-0613114",
     courseTitle: "Structured Programming Language Lab",
     credits: 1.5,
-    grade: "A-",
   },
   {
     courseCode: "ENG-02321201",
     courseTitle: "Advanced Functional English",
     credits: 3,
-    grade: "B",
   },
   {
     courseCode: "MAT-0541101",
     courseTitle: "Calculus",
     credits: 3,
-    grade: "A",
   },
   {
     courseCode: "PHY-05331201",
     courseTitle: "Fundamentals of Physics",
     credits: 3,
-    grade: "B",
   },
   {
     courseCode: "SSW-03141101",
     courseTitle: "History of Bangladesh",
     credits: 3,
-    grade: "A",
   },
 ];
 
@@ -121,19 +114,16 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "A",
       },
       {
         courseCode: "CSE-0613113",
         courseTitle: "Structured Programming Language",
         credits: 3,
-        grade: "B+",
       },
       {
         courseCode: "MAT-0541101",
         courseTitle: "Calculus",
         credits: 3,
-        grade: "A",
       },
     ],
   },
@@ -148,19 +138,16 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "B",
       },
       {
         courseCode: "ENG-02321201",
         courseTitle: "Advanced Functional English",
         credits: 3,
-        grade: "A-",
       },
       {
         courseCode: "CSE-0613114",
         courseTitle: "Structured Programming Language Lab",
         credits: 1.5,
-        grade: "B",
       },
     ],
   },
@@ -175,13 +162,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "EEE-101",
         courseTitle: "Basic Electrical Circuits",
         credits: 3,
-        grade: "A",
       },
       {
         courseCode: "PHY-101",
         courseTitle: "Physics I",
         credits: 3,
-        grade: "B+",
       },
     ],
   },
@@ -196,13 +181,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-06131211",
         courseTitle: "Data Structures and Algorithms",
         credits: 3,
-        grade: "A",
       },
       {
         courseCode: "CSE-06131213",
         courseTitle: "Electronic Devices and Circuits",
         credits: 3,
-        grade: "A-",
       },
     ],
   },
@@ -217,13 +200,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "C+",
       },
       {
         courseCode: "MAT-0541101",
         courseTitle: "Calculus",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -238,13 +219,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613113",
         courseTitle: "Structured Programming Language",
         credits: 3,
-        grade: "A",
       },
       {
         courseCode: "PHY-05331201",
         courseTitle: "Fundamentals of Physics",
         credits: 3,
-        grade: "A-",
       },
     ],
   },
@@ -259,7 +238,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -274,13 +252,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "EEE-201",
         courseTitle: "Circuit Analysis",
         credits: 3,
-        grade: "B",
       },
       {
         courseCode: "MAT-201",
         courseTitle: "Differential Equations",
         credits: 3,
-        grade: "C+",
       },
     ],
   },
@@ -295,13 +271,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "A-",
       },
       {
         courseCode: "ENG-02321201",
         courseTitle: "Advanced Functional English",
         credits: 3,
-        grade: "B+",
       },
     ],
   },
@@ -316,13 +290,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-06131211",
         courseTitle: "Data Structures and Algorithms",
         credits: 3,
-        grade: "B",
       },
       {
         courseCode: "CSE-06131213",
         courseTitle: "Electronic Devices and Circuits",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -337,13 +309,11 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613113",
         courseTitle: "Structured Programming Language",
         credits: 3,
-        grade: "A",
       },
       {
         courseCode: "MAT-0541101",
         courseTitle: "Calculus",
         credits: 3,
-        grade: "A-",
       },
     ],
   },
@@ -358,7 +328,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -373,7 +342,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "EEE-201",
         courseTitle: "Circuit Analysis",
         credits: 3,
-        grade: "C+",
       },
     ],
   },
@@ -388,7 +356,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613113",
         courseTitle: "Structured Programming Language",
         credits: 3,
-        grade: "A-",
       },
     ],
   },
@@ -403,7 +370,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-06131211",
         courseTitle: "Data Structures and Algorithms",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -418,7 +384,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613111",
         courseTitle: "Discrete Mathematics",
         credits: 3,
-        grade: "A",
       },
     ],
   },
@@ -433,7 +398,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "EEE-101",
         courseTitle: "Basic Electrical Circuits",
         credits: 3,
-        grade: "B+",
       },
     ],
   },
@@ -448,7 +412,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "MAT-0541101",
         courseTitle: "Calculus",
         credits: 3,
-        grade: "A-",
       },
     ],
   },
@@ -463,7 +426,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-06131213",
         courseTitle: "Electronic Devices and Circuits",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -478,7 +440,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "ENG-02321201",
         courseTitle: "Advanced Functional English",
         credits: 3,
-        grade: "A",
       },
     ],
   },
@@ -493,7 +454,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "PHY-101",
         courseTitle: "Physics I",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -508,7 +468,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "SSW-03141101",
         courseTitle: "History of Bangladesh",
         credits: 3,
-        grade: "A-",
       },
     ],
   },
@@ -523,7 +482,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-06131211",
         courseTitle: "Data Structures and Algorithms",
         credits: 3,
-        grade: "C",
       },
     ],
   },
@@ -538,7 +496,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "CSE-0613113",
         courseTitle: "Structured Programming Language",
         credits: 3,
-        grade: "B",
       },
     ],
   },
@@ -553,7 +510,6 @@ const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
         courseCode: "EEE-101",
         courseTitle: "Basic Electrical Circuits",
         credits: 3,
-        grade: "A",
       },
     ],
   },
@@ -588,9 +544,6 @@ function StudentCoursesView({ courses, semester }: StudentCoursesViewProps) {
                 <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
                   Credits
                 </TableHead>
-                <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
-                  Grade
-                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -621,14 +574,6 @@ function StudentCoursesView({ courses, semester }: StudentCoursesViewProps) {
                         className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
                       >
                         {course.credits}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant="secondary"
-                        className="text-xs px-2 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-200 border-blue-100 dark:border-blue-800"
-                      >
-                        {course.grade || "N/A"}
                       </Badge>
                     </TableCell>
                   </TableRow>
@@ -1058,9 +1003,6 @@ function AdminCoursesView({ currentSession }: AdminCoursesViewProps) {
                       <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
                         Credits
                       </TableHead>
-                      <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
-                        Grade
-                      </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -1091,14 +1033,6 @@ function AdminCoursesView({ currentSession }: AdminCoursesViewProps) {
                               className="text-xs px-1 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
                             >
                               {course.credits}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge
-                              variant="secondary"
-                              className="text-xs px-1 py-0.5 bg-blue-50 dark:bg-blue-950 text-blue-700 dark:text-blue-200 border-blue-100 dark:border-blue-800"
-                            >
-                              {course.grade || "N/A"}
                             </Badge>
                           </TableCell>
                         </TableRow>
