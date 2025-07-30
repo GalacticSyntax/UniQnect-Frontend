@@ -438,7 +438,7 @@ export default function OfferedCoursesPage() {
       <div className="flex flex-col gap-2 text-center mb-8">
         <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-50 flex items-center justify-center gap-3">
           <GraduationCap className="w-9 h-9 text-blue-600 dark:text-blue-400" />
-          Department of CSE; Course Offer List
+          Course Offer List
         </h1>
         <p className="text-lg text-muted-foreground">
           Comprehensive overview of courses offered by semester and assigned
