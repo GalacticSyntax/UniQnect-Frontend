@@ -331,6 +331,16 @@ const teacherRoutes = [
         title: "My Offered Courses",
         url: "/dashboard/course/my-offered-courses",
       },
+      {
+        title: "Attendance For Teacher",
+        url: "/dashboard/course/attendance_for_teachers",
+      },
+
+      /* for time being */
+      {
+        title: "Attendance For Students",
+        url: "/dashboard/course/attendance_for_students",
+      },
     ],
   },
   // {
@@ -449,6 +459,10 @@ const studentRoutes = [
       {
         title: "Registered",
         url: "/dashboard/course/registered",
+      },
+      {
+        title: "Attendance For Students",
+        url: "/dashboard/course/attendance_for_students",
       },
     ],
   },
@@ -684,8 +698,13 @@ const data = {
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const { user } = useAuth();
+  console.log(user?.role);
 
-  const [role, setRole] = React.useState(user?.role ?? "student");
+  const [role, setRole] = React.useState(user?.role);
+
+  React.useEffect(() => {
+    setRole(user?.role);
+  }, [user?.role]);
 
   React.useEffect(() => {
     const fetchUserData = async () => {
@@ -694,7 +713,8 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
         const response = await axiosClient(`/user/${user?._id}`);
         const data = await response.data;
         if (data.success && data.data?.role) {
-          setRole(data.data.role);
+          console.log(data.data.role);
+          setRole(data.data.role ?? "student");
         }
       } catch (err) {
         console.error("Failed to fetch user role:", err);

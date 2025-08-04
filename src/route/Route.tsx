@@ -44,6 +44,8 @@ import { createBrowserRouter, RouterProvider } from "react-router";
 import AddAdvisorPage from "@/pages/dashboard/course/AddAdvisor";
 import MyOfferedCourses from "@/pages/dashboard/course/My-offered-courses";
 import RegistrationForm from "@/pages/dashboard/course/RegistrationForm";
+import AttendanceForTeacherPage from "@/pages/dashboard/course/AttendanceForTeacher";
+import AttendanceForStudentsPage from "@/pages/dashboard/course/AttendanceForStudents";
 
 const router = createBrowserRouter([
   {
@@ -158,6 +160,8 @@ const router = createBrowserRouter([
           { path: "add-advisor", element: <AddAdvisorPage /> },
           { path: "my-offered-courses", element: <MyOfferedCourses /> },
           { path: "registration-form", element: <RegistrationForm /> },
+          { path: "attendance_for_teachers", element: <AttendanceForTeacherPage /> },
+          { path: "attendance_for_students", element: <AttendanceForStudentsPage /> },
         ],
       },
 
