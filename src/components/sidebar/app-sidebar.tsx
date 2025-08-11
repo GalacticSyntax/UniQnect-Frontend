@@ -384,6 +384,10 @@ const teacherRoutes = [
         title: "Result",
         url: "/dashboard/result",
       },
+      {
+        title: "Submit Result",
+        url: "/dashboard/result/submission",
+      },
     ],
   },
   {

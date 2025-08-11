@@ -47,6 +47,7 @@ import RegistrationForm from "@/pages/dashboard/course/RegistrationForm";
 import AttendanceForTeacherPage from "@/pages/dashboard/course/AttendanceForTeacher";
 import AttendanceForStudentsPage from "@/pages/dashboard/course/AttendanceForStudents";
 import AddDepartmentHeadPage from "@/pages/dashboard/department/AddDepartmentHead";
+import ResultSubmissionPage from "@/pages/dashboard/result/ResultSubmission";
 
 const router = createBrowserRouter([
   {
@@ -130,7 +131,10 @@ const router = createBrowserRouter([
       {
         path: "result",
         element: <ResultLayout />,
-        children: [{ index: true, element: <ResultPage /> }],
+        children: [
+          { index: true, element: <ResultPage /> },
+          {  path: "submission", element: <ResultSubmissionPage /> },
+        ],
       },
 
       {
