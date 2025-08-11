@@ -48,6 +48,8 @@ import AttendanceForTeacherPage from "@/pages/dashboard/course/AttendanceForTeac
 import AttendanceForStudentsPage from "@/pages/dashboard/course/AttendanceForStudents";
 import AddDepartmentHeadPage from "@/pages/dashboard/department/AddDepartmentHead";
 import ResultSubmissionPage from "@/pages/dashboard/result/ResultSubmission";
+import StudentRegistrationPage from "@/pages/dashboard/course/StudentRegistration";
+import CourseAcceptancePage from "@/pages/dashboard/course/CourseAcceptance";
 
 const router = createBrowserRouter([
   {
@@ -133,7 +135,7 @@ const router = createBrowserRouter([
         element: <ResultLayout />,
         children: [
           { index: true, element: <ResultPage /> },
-          {  path: "submission", element: <ResultSubmissionPage /> },
+          { path: "submission", element: <ResultSubmissionPage /> },
         ],
       },
 
@@ -166,8 +168,22 @@ const router = createBrowserRouter([
           { path: "add-advisor", element: <AddAdvisorPage /> },
           { path: "my-offered-courses", element: <MyOfferedCourses /> },
           { path: "registration-form", element: <RegistrationForm /> },
-          { path: "attendance_for_teachers", element: <AttendanceForTeacherPage /> },
-          { path: "attendance_for_students", element: <AttendanceForStudentsPage /> },
+          {
+            path: "attendance_for_teachers",
+            element: <AttendanceForTeacherPage />,
+          },
+          {
+            path: "attendance_for_students",
+            element: <AttendanceForStudentsPage />,
+          },
+          {
+            path: "student_registration",
+            element: <StudentRegistrationPage />,
+          },
+          {
+            path: "accept_course",
+            element: <CourseAcceptancePage />,
+          },
         ],
       },
 

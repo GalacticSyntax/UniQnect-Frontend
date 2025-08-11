@@ -339,6 +339,10 @@ const teacherRoutes = [
         title: "Attendance For Teacher",
         url: "/dashboard/course/attendance_for_teachers",
       },
+      {
+        title: "Accept Course",
+        url: "/dashboard/course/accept_course",
+      },
 
       /* for time being */
       {
@@ -471,6 +475,10 @@ const studentRoutes = [
       {
         title: "Attendance For Students",
         url: "/dashboard/course/attendance_for_students",
+      },
+      {
+        title: "Student Registration",
+        url: "/dashboard/course/student_registration",
       },
     ],
   },

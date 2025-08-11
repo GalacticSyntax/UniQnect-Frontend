@@ -1,9 +1,12 @@
-const ResultPage = () => {
-  return (
-    <>
-      <h1 className="text-2xl text-green-500 font-bold">Result Page</h1>
-    </>
-  );
-};
+import { useAuth } from "@/provider/AuthProvider";
+import TeacherResult from "./TeacherResult";
+import AdminResult from "./AdminResult";
 
-export default ResultPage;
+export default function ResultPage() {
+  const { user } = useAuth();
+
+  if (user?.role === "teacher") return <TeacherResult />;
+  else if (user?.role === "admin") return <AdminResult />;
+
+  return null;
+}
