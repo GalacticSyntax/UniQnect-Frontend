@@ -171,6 +171,10 @@ const adminRoutes = [
         title: "Add Department",
         url: "/dashboard/department/add",
       },
+      {
+        title: "Add Department Head",
+        url: "/dashboard/department/add-department-head",
+      },
     ],
   },
   {

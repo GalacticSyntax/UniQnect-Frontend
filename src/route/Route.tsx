@@ -46,6 +46,7 @@ import MyOfferedCourses from "@/pages/dashboard/course/My-offered-courses";
 import RegistrationForm from "@/pages/dashboard/course/RegistrationForm";
 import AttendanceForTeacherPage from "@/pages/dashboard/course/AttendanceForTeacher";
 import AttendanceForStudentsPage from "@/pages/dashboard/course/AttendanceForStudents";
+import AddDepartmentHeadPage from "@/pages/dashboard/department/AddDepartmentHead";
 
 const router = createBrowserRouter([
   {
@@ -139,6 +140,7 @@ const router = createBrowserRouter([
           { index: true, element: <DepartmentPage /> },
           { path: "add", element: <AddDepartment /> },
           { path: "edit/:id", element: <EditDepartment /> },
+          { path: "add-department-head", element: <AddDepartmentHeadPage /> },
         ],
       },
 
