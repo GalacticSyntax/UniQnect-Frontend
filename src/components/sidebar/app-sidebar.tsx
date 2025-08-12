@@ -720,7 +720,6 @@ const studentRoutes = [
 
 const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
   const { user } = useAuth();
-  console.log(user?.role);
 
   const [role, setRole] = React.useState(user?.role);
 
@@ -771,7 +770,7 @@ const AppSidebar = ({ ...props }: React.ComponentProps<typeof Sidebar>) => {
       <SidebarFooter>
         <AppNavUser
           user={{
-            name: String(user?.name ?? ""),
+            name: String(user?.fullName ?? ""),
             email: String(user?.email ?? ""),
             avatar: String(user?.image ?? ""),
           }}
