@@ -51,7 +51,9 @@ interface Course {
 
 interface Teacher {
   _id: string;
-  userId: string;
+  userId: {
+    fullName: string;
+  };
   teacherId: string;
   designation: string;
   joinedAt: string;
@@ -59,7 +61,6 @@ interface Teacher {
   createdAt: string;
   updatedAt: string;
 }
-
 interface CourseAdvisor {
   _id: string;
   departmentCode: string;
@@ -375,8 +376,8 @@ function MyOfferedCoursesPage() {
                 </TableHeader>
                 <TableBody>
                   {offeredCourses.map((course) => (
-                    <TableRow key={course._id}>
-                      <TableCell className="font-medium">
+                    <TableRow key={course._id} className="capitalize">
+                      <TableCell className="font-medium uppercase">
                         {course.courseId.code}
                       </TableCell>
                       <TableCell>{course.courseId.name}</TableCell>
@@ -386,7 +387,7 @@ function MyOfferedCoursesPage() {
                         </Badge>
                       </TableCell>
                       <TableCell>{course.runningSession}</TableCell>
-                      <TableCell>{course.teacherId.teacherId}</TableCell>
+                      <TableCell>{course.teacherId.userId.fullName}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
