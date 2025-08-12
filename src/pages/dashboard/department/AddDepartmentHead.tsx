@@ -8,12 +8,13 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { axiosClient } from "@/lib/apiClient";
 import type React from "react";
 import { useState } from "react";
 
-export default function AddDepartmentHeadPage() {
+export default function AddDepartmentHead() {
   const [formData, setFormData] = useState({
-    departmentId: "",
+    departmentCode: "",
     teacherId: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -30,7 +31,7 @@ export default function AddDepartmentHeadPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!formData.departmentId || !formData.teacherId) {
+    if (!formData.departmentCode || !formData.teacherId) {
       setMessage("Please fill in all fields");
       return;
     }
@@ -39,29 +40,24 @@ export default function AddDepartmentHeadPage() {
     setMessage("");
 
     try {
-      const response = await fetch("/api/department-head", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
+      const response = await axiosClient.post(
+        "/department-head/department-head",
+        formData
+      );
 
-      if (response.ok) {
-        setMessage("Department head added successfully!");
-        setFormData({ departmentId: "", teacherId: "" });
-      } else {
-        setMessage("Failed to add department head");
-      }
+      console.log(response);
+
+      setMessage("Department head added successfully!");
+      setFormData({ departmentCode: "", teacherId: "" });
     } catch {
-      setMessage("An error occurred");
+      setMessage("Failed to add department head");
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleClear = () => {
-    setFormData({ departmentId: "", teacherId: "" });
+    setFormData({ departmentCode: "", teacherId: "" });
     setMessage("");
   };
 
@@ -75,14 +71,14 @@ export default function AddDepartmentHeadPage() {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="departmentId">Department ID</Label>
+              <Label htmlFor="departmentCode">Department Code</Label>
               <Input
-                id="departmentId"
-                name="departmentId"
+                id="departmentCode"
+                name="departmentCode"
                 type="text"
-                value={formData.departmentId}
+                value={formData.departmentCode}
                 onChange={handleInputChange}
-                placeholder="Enter department ID"
+                placeholder="Enter department code"
                 required
               />
             </div>

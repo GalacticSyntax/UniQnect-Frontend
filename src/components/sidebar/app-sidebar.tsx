@@ -168,6 +168,10 @@ const adminRoutes = [
         url: "/dashboard/department",
       },
       {
+        title: "Department Head",
+        url: "/dashboard/department/department-head",
+      },
+      {
         title: "Add Department",
         url: "/dashboard/department/add",
       },
@@ -250,6 +254,10 @@ const admissionOfficeRoutes = [
       {
         title: "Department",
         url: "/dashboard/department",
+      },
+      {
+        title: "Department Head",
+        url: "/dashboard/department/department-head",
       },
     ],
   },
@@ -374,6 +382,10 @@ const teacherRoutes = [
       {
         title: "Department",
         url: "/dashboard/department",
+      },
+      {
+        title: "Department Head",
+        url: "/dashboard/department/department-head",
       },
     ],
   },
@@ -505,6 +517,10 @@ const studentRoutes = [
       {
         title: "Department",
         url: "/dashboard/department",
+      },
+      {
+        title: "Department Head",
+        url: "/dashboard/department/department-head",
       },
     ],
   },

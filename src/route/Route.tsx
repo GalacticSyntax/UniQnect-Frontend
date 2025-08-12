@@ -50,6 +50,7 @@ import AddDepartmentHeadPage from "@/pages/dashboard/department/AddDepartmentHea
 import ResultSubmissionPage from "@/pages/dashboard/result/ResultSubmission";
 import StudentRegistrationPage from "@/pages/dashboard/course/StudentRegistration";
 import CourseAcceptancePage from "@/pages/dashboard/course/CourseAcceptance";
+import DepartmentHeadPage from "@/pages/dashboard/department/DepartmentHead";
 
 const router = createBrowserRouter([
   {
@@ -144,6 +145,7 @@ const router = createBrowserRouter([
         element: <DepartmentLayout />,
         children: [
           { index: true, element: <DepartmentPage /> },
+          { path: "department-head", element: <DepartmentHeadPage /> },
           { path: "add", element: <AddDepartment /> },
           { path: "edit/:id", element: <EditDepartment /> },
           { path: "add-department-head", element: <AddDepartmentHeadPage /> },
