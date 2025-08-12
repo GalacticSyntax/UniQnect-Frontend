@@ -24,6 +24,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { axiosClient } from "@/lib/apiClient";
 
 interface AdvisorCheckResponse {
   _id: string;
@@ -110,18 +111,12 @@ function AddOfferedCourseDialog({
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/v1/course-offered/offered",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await axiosClient.post("/course-offered/offered", {
+        ...formData,
+      });
 
-      if (!response.ok) throw new Error("Failed to create offered course");
+      if (!response?.data?.success)
+        throw new Error("Failed to create offered course");
 
       toast.success("Offered course created successfully");
       onOpenChange(false);
@@ -260,18 +255,20 @@ function MyOfferedCoursesPage() {
         const advisorResponse = await fetch(
           `http://localhost:3000/api/v1/course-advisor/advisor/check/${user._id}`
         );
-        if (!advisorResponse.ok) throw new Error("Failed to check advisor status");
+        if (!advisorResponse.ok)
+          throw new Error("Failed to check advisor status");
         const advisorData = await advisorResponse.json();
-        
+
         if (advisorData.success) {
           setAdvisorData(advisorData.data);
-          
+
           // Fetch offered courses
           setLoadingCourses(true);
           const coursesResponse = await fetch(
             `http://localhost:3000/api/v1/course-offered/advisor/offered-courses/${user._id}`
           );
-          if (!coursesResponse.ok) throw new Error("Failed to fetch offered courses");
+          if (!coursesResponse.ok)
+            throw new Error("Failed to fetch offered courses");
           const coursesData = await coursesResponse.json();
           setOfferedCourses(coursesData.data);
         } else {
@@ -361,7 +358,8 @@ function MyOfferedCoursesPage() {
             </div>
           ) : offeredCourses.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No courses offered yet. Click "Add New Offered Course" to get started!
+              No courses offered yet. Click "Add New Offered Course" to get
+              started!
             </div>
           ) : (
             <div className="rounded-md border">
@@ -383,7 +381,9 @@ function MyOfferedCoursesPage() {
                       </TableCell>
                       <TableCell>{course.courseId.name}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{course.courseId.credit} credits</Badge>
+                        <Badge variant="outline">
+                          {course.courseId.credit} credits
+                        </Badge>
                       </TableCell>
                       <TableCell>{course.runningSession}</TableCell>
                       <TableCell>{course.teacherId.teacherId}</TableCell>
