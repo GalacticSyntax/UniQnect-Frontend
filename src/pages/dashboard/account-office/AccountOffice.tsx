@@ -48,7 +48,7 @@ const header = [
   },
 ];
 
-const AdmissionOfficePage = () => {
+const AccountOfficePage = () => {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const [, setLoader] = useState(false);
@@ -97,11 +97,11 @@ const AdmissionOfficePage = () => {
     <PrivateRoute>
       <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
         <section className="flex justify-between flex-wrap gap-4">
-          <h1 className="text-2xl font-bold">Admission officer list</h1>
+          <h1 className="text-2xl font-bold">Account officer list</h1>
           {user?.role === "admin" && (
-            <Link to="/dashboard/admission-office/add">
+            <Link to="/dashboard/account-office/add">
               <Button>
-                <Plus /> Add Admission officer
+                <Plus /> Add Account officer
               </Button>
             </Link>
           )}
@@ -164,4 +164,4 @@ const AdmissionOfficePage = () => {
   );
 };
 
-export default AdmissionOfficePage;
+export default AccountOfficePage;

@@ -2,10 +2,7 @@ import About from "@/pages/About";
 import AuthLayout from "@/pages/auth/AuthLayout";
 import ChangePassword from "@/pages/auth/ChangePassword";
 import Login from "@/pages/auth/Login";
-import AddAdmissionOffice from "@/pages/dashboard/admission-office/AddAdmissionOffice";
 import AddTeacher from "@/pages/dashboard/teacher/AddTeacher";
-import AdmissionOfficePage from "@/pages/dashboard/admission-office/AdmissionOffice";
-import AdmissionOfficeLayout from "@/pages/dashboard/admission-office/Layout";
 import AttendancePage from "@/pages/dashboard/attendance/Attendance";
 import CourseAttendance from "@/pages/dashboard/attendance/course/course-by-id/CourseAttendance";
 import AttendancesLayout from "@/pages/dashboard/attendance/Layout";
@@ -51,6 +48,9 @@ import ResultSubmissionPage from "@/pages/dashboard/result/ResultSubmission";
 import StudentRegistrationPage from "@/pages/dashboard/course/StudentRegistration";
 import CourseAcceptancePage from "@/pages/dashboard/course/CourseAcceptance";
 import DepartmentHeadPage from "@/pages/dashboard/department/DepartmentHead";
+import AccountOfficeLayout from "@/pages/dashboard/account-office/Layout";
+import AccountOfficePage from "@/pages/dashboard/account-office/AccountOffice";
+import AddAccountOffice from "@/pages/dashboard/account-office/AddAccountOffice";
 
 const router = createBrowserRouter([
   {
@@ -104,11 +104,11 @@ const router = createBrowserRouter([
       },
 
       {
-        path: "admission-office",
-        element: <AdmissionOfficeLayout />,
+        path: "account-office",
+        element: <AccountOfficeLayout />,
         children: [
-          { index: true, element: <AdmissionOfficePage /> },
-          { path: "add", element: <AddAdmissionOffice /> },
+          { index: true, element: <AccountOfficePage /> },
+          { path: "add", element: <AddAccountOffice /> },
         ],
       },
 

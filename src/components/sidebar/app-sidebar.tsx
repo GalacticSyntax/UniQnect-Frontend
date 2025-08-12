@@ -43,19 +43,19 @@ const adminRoutes = [
     ],
   },
   {
-    id: "admission-office",
-    title: "Admission Office",
-    url: "/dashboard/admission-office",
+    id: "account-office",
+    title: "Account Office",
+    url: "/dashboard/account-office",
     icon: ShieldPlus,
     isActive: false,
     items: [
       {
-        title: "Admission Officers",
-        url: "/dashboard/admission-office",
+        title: "Account Officers",
+        url: "/dashboard/account-office",
       },
       {
-        title: "Add Admission Offices",
-        url: "/dashboard/admission-office/add",
+        title: "Add Account Offices",
+        url: "/dashboard/account-office/add",
       },
     ],
   },
@@ -215,15 +215,15 @@ const adminRoutes = [
 
 const admissionOfficeRoutes = [
   {
-    id: "admission-office",
-    title: "Admission Office",
-    url: "/dashboard/admission-office",
+    id: "account-office",
+    title: "Account Office",
+    url: "/dashboard/account-office",
     icon: ShieldPlus,
     isActive: false,
     items: [
       {
-        title: "Admission Officers",
-        url: "/dashboard/admission-office",
+        title: "Account Officers",
+        url: "/dashboard/account-office",
       },
     ],
   },

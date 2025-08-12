@@ -69,7 +69,7 @@ const formSchema = {
           },
           {
             id: "admission_office",
-            value: "Admission Office",
+            value: "Account Office",
           },
         ],
         required: true,

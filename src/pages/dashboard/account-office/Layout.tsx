@@ -1,6 +1,6 @@
 import { Outlet } from "react-router";
 
-const AdmissionOfficeLayout = () => {
+const AccountOfficeLayout = () => {
   return (
     <section className="w-full h-full">
       <Outlet />
@@ -8,4 +8,4 @@ const AdmissionOfficeLayout = () => {
   );
 };
 
-export default AdmissionOfficeLayout;
+export default AccountOfficeLayout;

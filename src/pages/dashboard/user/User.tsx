@@ -144,7 +144,11 @@ const UserPage = () => {
                           />
                         </TableCell>
                         <TableCell className="capitalize">{gender}</TableCell>
-                        <TableCell>{role}</TableCell>
+                        <TableCell>
+                          {role === "admission-office"
+                            ? "account-office"
+                            : role}
+                        </TableCell>
                       </TableRow>
                     )
                   )}

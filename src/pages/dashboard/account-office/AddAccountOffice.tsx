@@ -9,7 +9,7 @@ import { axiosClient } from "@/lib/apiClient";
 
 const formSchema = {
   title: {
-    label: "Add new admission officer",
+    label: "Add new account officer",
     align: "center" as AlignType,
   },
   fields: [
@@ -66,7 +66,7 @@ const formSchema = {
   ],
 };
 
-const AddAdmissionOffice = () => {
+const AddAccountOffice = () => {
   const [, setLoader] = useState(false);
   const navigate = useNavigate();
 
@@ -110,4 +110,4 @@ const AddAdmissionOffice = () => {
   );
 };
 
-export default AddAdmissionOffice;
+export default AddAccountOffice;
