@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
@@ -8,9 +9,72 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, UserCheck, GraduationCap } from "lucide-react"; // Added GraduationCap for overall title
+import { BookOpen, UserCheck, GraduationCap, Loader2 } from "lucide-react";
+import { axiosClient } from "@/lib/apiClient";
+import { toast } from "sonner";
 
-// Types
+// API Response Types
+interface CourseData {
+  _id: string;
+  name: string;
+  code: string;
+  credit: number;
+  depart: string;
+  prerequisiteCourse: string[];
+}
+
+interface UserData {
+  _id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  isVerified: boolean;
+  role: string;
+  phone: string;
+  gender: string;
+  createdAt: string;
+  updatedAt: string;
+  image: string;
+}
+
+interface TeacherData {
+  _id: string;
+  userId: UserData;
+  teacherId: string;
+  designation: string;
+  joinedAt: string;
+  departmentId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CourseAdvisorData {
+  _id: string;
+  departmentCode: string;
+  teacherId: TeacherData;
+  session: string;
+  semester: number;
+  offeredCourses: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface OfferedCourseAPI {
+  _id: string;
+  courseId: CourseData;
+  runningSession: string;
+  courseAdvisor: CourseAdvisorData;
+  teacherId: TeacherData;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface APIResponse {
+  success: boolean;
+  data: OfferedCourseAPI[];
+}
+
+// UI Types
 interface OfferedCourse {
   courseTitle: string;
   courseCode: string;
@@ -19,7 +83,7 @@ interface OfferedCourse {
 }
 
 interface SemesterBlockData {
-  id: string; // Unique ID for the block
+  id: string;
   semesterName: string;
   totalCredit: number;
   advisorName: string;
@@ -55,12 +119,8 @@ function SemesterCourseBlock({ data }: SemesterCourseBlockProps) {
       </CardHeader>
       <CardContent className="p-4 flex-grow">
         <div className="rounded-lg border overflow-hidden">
-          {" "}
-          {/* Changed to rounded-lg for softer corners */}
           <Table>
             <TableHeader className="bg-gray-50 dark:bg-gray-800">
-              {" "}
-              {/* Subtle background for header */}
               <TableRow>
                 <TableHead className="w-[100px] text-gray-600 dark:text-gray-300 font-medium">
                   Code
@@ -92,8 +152,6 @@ function SemesterCourseBlock({ data }: SemesterCourseBlockProps) {
                     key={index}
                     className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
                   >
-                    {" "}
-                    {/* Hover effect */}
                     <TableCell className="font-mono text-sm font-medium text-gray-900 dark:text-gray-50">
                       {course.courseCode.toUpperCase()}
                     </TableCell>
@@ -133,308 +191,153 @@ function SemesterCourseBlock({ data }: SemesterCourseBlockProps) {
 }
 
 // Main Page Component
-export default function OfferedCoursesPage() {
-  // Dummy Data for demonstration
-  const dummySemesterData: SemesterBlockData[] = [
-    {
-      id: "fall-25-1-1",
-      semesterName: "Fall-25 (1/1)",
-      totalCredit: 18,
-      advisorName: "Mr. Shahadat Hussain Parvez (SHP)",
-      courses: [
+export default function OfferedCoursesPageWithAPI() {
+  const [semesterData, setSemesterData] = useState<SemesterBlockData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchOfferedCourses = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const response = await axiosClient.get<APIResponse>(
+        "/course-offered/offereds"
+      );
+
+      if (response.data.success) {
+        const transformedData = transformAPIDataToSemesterBlocks(
+          response.data.data
+        );
+        setSemesterData(transformedData);
+      } else {
+        throw new Error("Failed to fetch offered courses");
+      }
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch offered courses";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const transformAPIDataToSemesterBlocks = (
+    apiData: OfferedCourseAPI[]
+  ): SemesterBlockData[] => {
+    // Group by session and semester
+    const groupedData = apiData.reduce(
+      (acc, item) => {
+        const sessionKey = `${item.runningSession}-${item.courseAdvisor.semester}`;
+
+        if (!acc[sessionKey]) {
+          acc[sessionKey] = {
+            session: item.runningSession,
+            semester: item.courseAdvisor.semester,
+            advisorName: item.courseAdvisor.teacherId.userId.fullName, // Extract advisor name from nested structure
+            courses: [],
+            totalCredit: 0,
+          };
+        }
+
+        // Check if course already exists (to handle multiple teachers for same course)
+        const existingCourseIndex = acc[sessionKey].courses.findIndex(
+          (course) => course.courseCode === item.courseId.code
+        );
+
+        const teacherName = item.teacherId.userId.fullName; // Extract teacher name from nested structure
+
+        if (existingCourseIndex >= 0) {
+          // Add teacher to existing course
+          if (
+            !acc[sessionKey].courses[
+              existingCourseIndex
+            ].courseTeachers.includes(teacherName)
+          ) {
+            acc[sessionKey].courses[existingCourseIndex].courseTeachers.push(
+              teacherName
+            );
+          }
+        } else {
+          // Add new course
+          acc[sessionKey].courses.push({
+            courseTitle: item.courseId.name,
+            courseCode: item.courseId.code,
+            credits: item.courseId.credit,
+            courseTeachers: [teacherName], // Use full name instead of teacherId
+          });
+          acc[sessionKey].totalCredit += item.courseId.credit;
+        }
+
+        return acc;
+      },
+      {} as Record<
+        string,
         {
-          courseCode: "CSE-0613111",
-          courseTitle: "Discrete Mathematics",
-          credits: 3,
-          courseTeachers: ["Dr. Arif Ahmad (AAD)", "Md. Jahidul Islam (MJI)"],
-        },
-        {
-          courseCode: "CSE-0613113",
-          courseTitle: "Structured Programming Language",
-          credits: 3,
-          courseTeachers: [
-            "Mr. Sabuj Chandra Paul (SCP)",
-            "Mr. Shahadat Hussain Parvez (SHP)",
-          ],
-        },
-        {
-          courseCode: "CSE-0613114",
-          courseTitle: "Structured Programming Language Lab",
-          credits: 1.5,
-          courseTeachers: [
-            "Mr. Sabuj Chandra Paul (SCP)",
-            "Mr. Shahadat Hussain Parvez (SHP)",
-          ],
-        },
-        {
-          courseCode: "CSE-0613115",
-          courseTitle: "Basic Electrical Engineering",
-          credits: 3,
-          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
-        },
-        {
-          courseCode: "CSE-0613116",
-          courseTitle: "Basic Electrical Engineering Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Shahadat Hussain Parvez (SHP)"],
-        },
-        {
-          courseCode: "MAT-0541101",
-          courseTitle: "Calculus",
-          credits: 3,
-          courseTeachers: ["Mr. Rathindra Chandra Gope (RCG)"],
-        },
-        {
-          courseCode: "SSW-03141101",
-          courseTitle: "History of the Emergence of Bangladesh",
-          credits: 3,
-          courseTeachers: ["Ms. Most. Sweety Khatun (MSK)"],
-        },
-      ],
-    },
-    {
-      id: "spring-25-1-2",
-      semesterName: "Spring-25 (1/2)",
-      totalCredit: 21,
-      advisorName: "Dr. Arif Ahmad (AAD)",
-      courses: [
-        {
-          courseCode: "CSE-06131211",
-          courseTitle: "Data Structures and Algorithms",
-          credits: 3,
-          courseTeachers: ["Ms. Muthmainna Mou (MM)"],
-        },
-        {
-          courseCode: "CSE-06131212",
-          courseTitle: "Data Structures and Algorithms Lab",
-          credits: 1.5,
-          courseTeachers: ["Ms. Muthmainna Mou (MM)"],
-        },
-        {
-          courseCode: "CSE-06131213",
-          courseTitle: "Electronic Devices and Circuits",
-          credits: 3,
-          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
-        },
-        {
-          courseCode: "CSE-06131214",
-          courseTitle: "Electronic Devices and Circuits Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
-        },
-        {
-          courseCode: "MAT-05411203",
-          courseTitle: "Linear Algebra",
-          credits: 3,
-          courseTeachers: ["Mr. Rathindra Chandra Gope (RCG)"],
-        },
-        {
-          courseCode: "PHY-05331201",
-          courseTitle: "Fundamentals of Physics",
-          credits: 3,
-          courseTeachers: ["Mr. Mazharul Islam (MI)"],
-        },
-        {
-          courseCode: "ENG-02321201",
-          courseTitle: "Advanced Functional English",
-          credits: 3,
-          courseTeachers: ["Ms. Bushra Jannat (BJ)"],
-        },
-        {
-          courseCode: "SSW-03141202",
-          courseTitle: "Bangladesh Studies",
-          credits: 3,
-          courseTeachers: ["Ms. Most. Sweety Khatun (MSK)"],
-        },
-      ],
-    },
-    {
-      id: "fall-24-2-1",
-      semesterName: "Fall-24 (2/1)",
-      totalCredit: 19.5,
-      advisorName: "Ms. Muthmainna Mou (MM)",
-      courses: [
-        {
-          courseCode: "CSE-06132111",
-          courseTitle: "Object Oriented Programming Language",
-          credits: 3,
-          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
-        },
-        {
-          courseCode: "CSE-06132112",
-          courseTitle: "Object Oriented Programming Language Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
-        },
-        {
-          courseCode: "CSE-06132113",
-          courseTitle: "Algorithm Design and Analysis",
-          credits: 3,
-          courseTeachers: ["Dr. Arif Ahmad (AAD)"],
-        },
-        {
-          courseCode: "CSE-06132114",
-          courseTitle: "Algorithm Design and Analysis Lab",
-          credits: 1.5,
-          courseTeachers: ["Dr. Arif Ahmad (AAD)"],
-        },
-        {
-          courseCode: "CSE-0613213",
-          courseTitle: "Electronic Devices and Circuits",
-          credits: 3,
-          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
-        },
-        {
-          courseCode: "CSE-0613214",
-          courseTitle: "Electronic Devices and Circuits Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Pinok Chowdhury Manik (PCM)"],
-        },
-        {
-          courseCode: "STA-05422101",
-          courseTitle: "Basic Statistics and Probability",
-          credits: 3,
-          courseTeachers: ["Mr. Moammad Salah Uddin (MSU)"],
-        },
-        {
-          courseCode: "BUS-04112101",
-          courseTitle: "Principles of Accounting",
-          credits: 3,
-          courseTeachers: ["Md Ohiduzzaman Anik (MOA)"],
-        },
-      ],
-    },
-    {
-      id: "spring-24-2-2",
-      semesterName: "Spring-24 (2/2)",
-      totalCredit: 21,
-      advisorName: "Dr. Arif Ahmad (AAD)",
-      courses: [
-        {
-          courseCode: "CSE-06132211",
-          courseTitle: "Introduction to Database Systems",
-          credits: 3,
-          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
-        },
-        {
-          courseCode: "CSE-06132212",
-          courseTitle: "Introduction to Database Systems Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
-        },
-        {
-          courseCode: "CSE-06132213",
-          courseTitle: "Operating System",
-          credits: 3,
-          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
-        },
-        {
-          courseCode: "CSE-06132214",
-          courseTitle: "Operating System Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
-        },
-        {
-          courseCode: "CSE-06132215",
-          courseTitle: "Theory of Computation",
-          credits: 3,
-          courseTeachers: ["Mr. Sourov Roy Shuvo (SRS)"],
-        },
-        {
-          courseCode: "CSE-06132217",
-          courseTitle: "Numerical Analysis",
-          credits: 3,
-          courseTeachers: ["Mr. Pritom Paul (PRP)"],
-        },
-        {
-          courseCode: "CSE-06132218",
-          courseTitle: "Numerical Analysis Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Pritom Paul (PRP)"],
-        },
-        {
-          courseCode: "CSE-06132220",
-          courseTitle: "Project Work I",
-          credits: 1.5,
-          courseTeachers: ["Mr. Khadem Mohammad Asif-uz-zaman (KMA)"],
-        },
-        {
-          courseCode: "MAT-05412205",
-          courseTitle:
-            "Complex Variables, Laplace Transform and Fourier Series",
-          credits: 3,
-          courseTeachers: ["Mr. Moammad Salah Uddin (MSU)"],
-        },
-      ],
-    },
-    {
-      id: "summer-23-3-1",
-      semesterName: "Summer-23 (3/1)",
-      totalCredit: 21,
-      advisorName: "Mr. Shahadat Hussain Parvez (SHP)",
-      courses: [
-        {
-          courseCode: "CSE-06133111",
-          courseTitle: "Computer Networks",
-          credits: 3,
-          courseTeachers: ["Mr. Sourov Roy Shuvo (SRS)"],
-        },
-        {
-          courseCode: "CSE-06133112",
-          courseTitle: "Computer Networks Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Sourov Roy Shuvo (SRS)"],
-        },
-        {
-          courseCode: "CSE-06133113",
-          courseTitle: "Software Engineering and Design Patterns",
-          credits: 3,
-          courseTeachers: ["Mr. Pritom Paul (PRP)"],
-        },
-        {
-          courseCode: "CSE-06133114",
-          courseTitle: "Software Engineering and Design Patterns Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Pritom Paul (PRP)"],
-        },
-        {
-          courseCode: "CSE-06133115",
-          courseTitle: "Artificial Intelligence",
-          credits: 3,
-          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
-        },
-        {
-          courseCode: "CSE-06133116",
-          courseTitle: "Artificial Intelligence Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Razorshi Prozzwal Talukder (RPT)"],
-        },
-        {
-          courseCode: "CSE-06133117",
-          courseTitle: "Microprocessor and Interfacing",
-          credits: 3,
-          courseTeachers: ["Mr. Shahadat Hussain Parvez (SHP)"],
-        },
-        {
-          courseCode: "CSE-06133118",
-          courseTitle: "Microprocessor and Interfacing Lab",
-          credits: 1.5,
-          courseTeachers: ["Mr. Shahadat Hussain Parvez (SHP)"],
-        },
-        {
-          courseCode: "CSE-06133119",
-          courseTitle: "Data Communication",
-          credits: 3,
-          courseTeachers: ["Md. Jahidul Islam (MJI)"],
-        },
-      ],
-    },
-  ];
+          session: string;
+          semester: number;
+          advisorName: string; // Changed from advisorId to advisorName
+          courses: OfferedCourse[];
+          totalCredit: number;
+        }
+      >
+    );
+
+    // Convert to SemesterBlockData array
+    return Object.entries(groupedData).map(([key, data]) => ({
+      id: key,
+      semesterName: `${
+        data.session.charAt(0).toUpperCase() + data.session.slice(1)
+      } (Semester ${data.semester})`,
+      totalCredit: data.totalCredit,
+      advisorName: data.advisorName, // Now using actual advisor name
+      courses: data.courses,
+    }));
+  };
+
+  useEffect(() => {
+    fetchOfferedCourses();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="container mx-auto py-8 px-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-lg text-muted-foreground">
+            Loading offered courses...
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8 px-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <div className="flex flex-col items-center justify-center min-h-[400px] gap-4">
+          <div className="text-red-500 text-center">
+            <h2 className="text-xl font-semibold mb-2">
+              Error Loading Courses
+            </h2>
+            <p className="text-muted-foreground">{error}</p>
+            <button
+              onClick={fetchOfferedCourses}
+              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Try Again
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 space-y-8 px-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-      {" "}
-      {/* Added subtle background */}
       <div className="flex flex-col gap-2 text-center mb-8">
         <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-50 flex items-center justify-center gap-3">
           <GraduationCap className="w-9 h-9 text-blue-600 dark:text-blue-400" />
@@ -445,12 +348,20 @@ export default function OfferedCoursesPage() {
           advisors.
         </p>
       </div>
-      {/* Using a responsive grid with `items-start` for a masonry-like effect */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 items-start">
-        {dummySemesterData.map((semester) => (
-          <SemesterCourseBlock key={semester.id} data={semester} />
-        ))}
-      </div>
+
+      {semesterData.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-lg text-muted-foreground">
+            No courses offered at this time.
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 items-start">
+          {semesterData.map((semester) => (
+            <SemesterCourseBlock key={semester.id} data={semester} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
