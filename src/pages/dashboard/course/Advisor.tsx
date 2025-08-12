@@ -21,7 +21,7 @@ import { useAuth } from "@/provider/AuthProvider"
 import { toast } from "sonner"
 import axios from "axios"
 import PrivateRoute from "@/components/PrivateRoute"
-import { axiosClient } from "@/lib/apiClient" // Assuming this is correctly set up
+import { axiosClient } from "@/lib/apiClient"
 import { Link } from "react-router"
 
 // Types
@@ -53,40 +53,67 @@ interface Advisor {
   departmentCode: string
   session: string
   semester: number
-  teacherId: Teacher // Populated Teacher object
-  offeredCourses: unknown[] // Added based on your API response
+  teacherId: Teacher
+  offeredCourses: unknown[]
   createdAt: string
   updatedAt: string
 }
 
-// New interface for the editing state
 interface EditingAdvisor {
   _id: string
   departmentCode: string
   session: string
   semester: number
-  teacherId: string // This will be the string ID for the input and payload
+  teacherId: string
 }
 
 interface AdvisorFilters {
   departmentCode?: string
   session?: string
   semester?: number
-  teacherName?: string // This will be a client-side filter
+  teacherName?: string
 }
 
 const ITEMS_PER_PAGE = 5
 
-export default function AdvisorManagement() {
+export default function AdvisorManagementUpdated() {
   const { user } = useAuth()
   // State
-  const [advisors, setAdvisors] = useState<Advisor[]>([]) // Holds data after server-side filters
+  const [advisors, setAdvisors] = useState<Advisor[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [filters, setFilters] = useState<AdvisorFilters>({})
   const [editingAdvisor, setEditingAdvisor] = useState<EditingAdvisor | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [isDepartmentHead, setIsDepartmentHead] = useState(false)
+  const [checkingDeptHead, setCheckingDeptHead] = useState(true)
+
+  const checkDepartmentHeadStatus = async () => {
+    if (!user?._id) {
+      setCheckingDeptHead(false)
+      return
+    }
+
+    try {
+      const response = await axiosClient.get("/department-head/is-department-head", {
+        params: { userId: user._id },
+      })
+
+      if (response.data.success) {
+        setIsDepartmentHead(response.data.isDepartmentHead)
+      }
+    } catch (err) {
+      console.error("Error checking department head status:", err)
+      setIsDepartmentHead(false)
+    } finally {
+      setCheckingDeptHead(false)
+    }
+  }
+
+  useEffect(() => {
+    checkDepartmentHeadStatus()
+  }, [user?._id])
 
   // Fetch advisors function
   const fetchAdvisors = async (filterParams: AdvisorFilters = {}) => {
@@ -94,7 +121,6 @@ export default function AdvisorManagement() {
     setError(null)
 
     try {
-      // Send only server-supported filters to the backend
       const serverFilterParams = {
         department: filterParams.departmentCode,
         session: filterParams.session,
@@ -127,52 +153,41 @@ export default function AdvisorManagement() {
     }
   }
 
-  // Load advisors on component mount and when server-side filters change
   useEffect(() => {
-    // Only trigger fetch when server-side filter relevant parts of `filters` change
-    // This useEffect will run when `filters` object reference changes, which happens on any filter change.
-    // The `fetchAdvisors` function itself will then decide which filters to send to the backend.
     fetchAdvisors(filters)
-  }, [filters]) // Depend on the entire filters object reference
+  }, [filters])
 
-  // Filter handlers
   const handleFilterChange = (key: keyof AdvisorFilters, value: string | number) => {
     const newFilters = {
       ...filters,
-      [key]: value === "" ? undefined : value, // Set to undefined if empty string
+      [key]: value === "" ? undefined : value,
     }
     setFilters(newFilters)
-    setCurrentPage(1) // Reset to first page on any filter change
+    setCurrentPage(1)
   }
 
   const handleSearch = () => {
-    // The `useEffect` above already handles fetching when filters change.
-    // This button primarily triggers a re-evaluation of filters and a fetch.
-    // No additional logic needed here as `setFilters` already triggers the effect.
-    // No additional logic needed here as `setFilters` already triggers the effect.
     setCurrentPage(1)
-    fetchAdvisors(filters) // Explicitly call fetch for immediate feedback
+    fetchAdvisors(filters)
   }
 
   const handleClear = () => {
-    setFilters({}) // Clear all filters
-    setCurrentPage(1) // Reset to first page on clear
-    fetchAdvisors({}) // Fetch all data
+    setFilters({})
+    setCurrentPage(1)
+    fetchAdvisors({})
   }
 
-  // Edit advisor handler
   const handleEditAdvisor = (advisor: Advisor) => {
     setEditingAdvisor({
       _id: advisor._id,
       departmentCode: advisor.departmentCode,
       session: advisor.session,
       semester: advisor.semester,
-      teacherId: advisor.teacherId.teacherId, // Extract the string ID
+      teacherId: advisor.teacherId.teacherId,
     })
     setEditDialogOpen(true)
   }
 
-  // Update advisor handler
   const handleUpdateAdvisor = async () => {
     if (!editingAdvisor) return
 
@@ -184,11 +199,11 @@ export default function AdvisorManagement() {
         teacherId: editingAdvisor.teacherId,
       }
 
-      await axiosClient.patch(`/course-advisor/advisor/${editingAdvisor._id}`, payload) // Updated path
+      await axiosClient.patch(`/course-advisor/advisor/${editingAdvisor._id}`, payload)
       toast.success("Advisor updated successfully")
       setEditDialogOpen(false)
       setEditingAdvisor(null)
-      fetchAdvisors(filters) // Re-fetch to update the list with current filters
+      fetchAdvisors(filters)
     } catch (err) {
       toast.error("Error updating advisor", {
         description: axios.isAxiosError(err) ? err?.response?.data?.message : "Something went wrong",
@@ -196,14 +211,13 @@ export default function AdvisorManagement() {
     }
   }
 
-  // Delete advisor handler
   const handleDeleteAdvisor = async (advisorId: string) => {
     if (!confirm("Are you sure you want to delete this advisor assignment?")) return
 
     try {
-      await axiosClient.delete(`/course-advisor/advisor/${advisorId}`) // Updated path
+      await axiosClient.delete(`/course-advisor/advisor/${advisorId}`)
       toast.success("Advisor deleted successfully")
-      fetchAdvisors(filters) // Re-fetch to update the list with current filters
+      fetchAdvisors(filters)
     } catch (err) {
       toast.error("Error deleting advisor", {
         description: axios.isAxiosError(err) ? err?.response?.data?.message : "Something went wrong",
@@ -211,7 +225,6 @@ export default function AdvisorManagement() {
     }
   }
 
-  // Handle edit form changes
   const handleEditFormChange = (field: keyof EditingAdvisor, value: string | number) => {
     if (!editingAdvisor) return
 
@@ -221,13 +234,10 @@ export default function AdvisorManagement() {
     }))
   }
 
-  // Client-side filtering and pagination logic
   const filteredAdvisors = useMemo(() => {
     return advisors.filter((advisor) => {
       const matchesTeacherName = filters.teacherName
-        ? (advisor.teacherId.userId.fullName || "") // Access userId.fullName
-            .toLowerCase()
-            .includes(filters.teacherName.toLowerCase())
+        ? (advisor.teacherId.userId.fullName || "").toLowerCase().includes(filters.teacherName.toLowerCase())
         : true
 
       return matchesTeacherName
@@ -279,13 +289,11 @@ export default function AdvisorManagement() {
   return (
     <PrivateRoute>
       <div className="container mx-auto py-8 space-y-6 px-6">
-        {/* Header */}
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold">Advisor Management</h1>
           <p className="text-muted-foreground">Manage and view university advisor assignments</p>
         </div>
 
-        {/* Filters */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -346,10 +354,8 @@ export default function AdvisorManagement() {
                 <X className="w-4 h-4 mr-2" />
                 Clear
               </Button>
-              {user?.role === "admin" && (
-                <Link to="/dashboard/advisor/add">
-                  {" "}
-                  {/* Corrected Link usage */}
+              {!checkingDeptHead && isDepartmentHead && (
+                <Link to="/dashboard/course/add-advisor">
                   <Button>
                     <Plus className="w-4 h-4 mr-2" />
                     Add New Advisor
@@ -360,12 +366,11 @@ export default function AdvisorManagement() {
           </CardContent>
         </Card>
 
-        {/* Table */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <UserCheck className="w-5 h-5" />
-              Advisors ({filteredAdvisors.length}) {/* Display count of filtered advisors */}
+              Advisors ({filteredAdvisors.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -383,14 +388,14 @@ export default function AdvisorManagement() {
                       <TableHead>Semester</TableHead>
                       <TableHead>Advisor Name</TableHead>
                       <TableHead>Teacher ID</TableHead>
-                      {user?.role === "admin" && <TableHead className="text-center">Actions</TableHead>}
+                      {!checkingDeptHead && isDepartmentHead && <TableHead className="text-center">Actions</TableHead>}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedAdvisors.length === 0 ? (
                       <TableRow>
                         <TableCell
-                          colSpan={user?.role === "admin" ? 6 : 5}
+                          colSpan={!checkingDeptHead && isDepartmentHead ? 6 : 5}
                           className="text-center py-8 text-muted-foreground"
                         >
                           No advisors found
@@ -406,13 +411,11 @@ export default function AdvisorManagement() {
                           <TableCell>
                             <Badge variant="outline">Semester {advisor.semester}</Badge>
                           </TableCell>
-                          {/* Access fullName from the nested teacherId object */}
                           <TableCell className="font-medium">
                             {String(advisor.teacherId.userId.fullName || "N/A")}
                           </TableCell>
-                          {/* Access the actual teacherId string from the nested object */}
                           <TableCell className="font-mono">{advisor.teacherId.teacherId}</TableCell>
-                          {user?.role === "admin" && (
+                          {!checkingDeptHead && isDepartmentHead && (
                             <TableCell className="text-center">
                               <div className="flex items-center justify-center gap-2">
                                 <Button
@@ -444,7 +447,6 @@ export default function AdvisorManagement() {
           </CardContent>
         </Card>
 
-        {/* Pagination */}
         {!loading && filteredAdvisors.length > 0 && totalPages > 1 && (
           <div className="flex justify-center">
             <Pagination>
@@ -483,7 +485,6 @@ export default function AdvisorManagement() {
           </div>
         )}
 
-        {/* Edit Dialog */}
         <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
           <DialogContent className="sm:max-w-[600px]">
             <DialogHeader>

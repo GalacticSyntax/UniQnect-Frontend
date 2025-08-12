@@ -134,10 +134,6 @@ const adminRoutes = [
         url: "/dashboard/course/add-course",
       },
       {
-        title: "Add Advisor",
-        url: "/dashboard/course/add-advisor",
-      },
-      {
         title: "Registration Form",
         url: "/dashboard/course/registration-form",
       },
@@ -350,12 +346,6 @@ const teacherRoutes = [
       {
         title: "Accept Course",
         url: "/dashboard/course/accept_course",
-      },
-
-      /* for time being */
-      {
-        title: "Attendance For Students",
-        url: "/dashboard/course/attendance_for_students",
       },
     ],
   },
