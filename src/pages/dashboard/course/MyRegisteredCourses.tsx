@@ -48,7 +48,7 @@ interface ApiResponse {
   data: Registration[];
 }
 
-const MyRegisteredCourses: React.FC = () => {
+const MyRegisteredCoursesPage: React.FC = () => {
   const { user } = useAuth();
   const [registrations, setRegistrations] = useState<Registration[]>([]);
   const [loading, setLoading] = useState(true);
@@ -211,7 +211,7 @@ const MyRegisteredCourses: React.FC = () => {
                     <TableBody>
                       {registration.courseList.map((course) => (
                         <TableRow key={course._id}>
-                          <TableCell className="font-mono font-medium uppercase">
+                          <TableCell className="font-mono font-medium">
                             {course.code.toUpperCase()}
                           </TableCell>
                           <TableCell className="font-medium capitalize">
@@ -220,7 +220,7 @@ const MyRegisteredCourses: React.FC = () => {
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={`text-xs uppercase ${getDepartmentBadgeColor(
+                              className={`text-xs ${getDepartmentBadgeColor(
                                 course.depart
                               )}`}
                             >
@@ -265,4 +265,4 @@ const MyRegisteredCourses: React.FC = () => {
   );
 };
 
-export default MyRegisteredCourses;
+export default MyRegisteredCoursesPage;
