@@ -86,7 +86,7 @@ const AddAccountOffice = () => {
         description: `${data?.data?.fullName} Employeed added successfully`,
       });
 
-      navigate("/dashboard/admission-office");
+      navigate("/dashboard/account-office");
     } catch (error: unknown) {
       setLoader(false);
       toast("Error occure", {

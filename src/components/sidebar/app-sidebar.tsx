@@ -264,6 +264,19 @@ const admissionOfficeRoutes = [
     ],
   },
   {
+    id: "course",
+    title: "Course",
+    url: "/dashboard/course",
+    icon: Book, // Represents courses or books
+    isActive: false,
+    items: [
+      {
+        title: "Student Registration",
+        url: "/dashboard/course/student_registration",
+      },
+    ],
+  },
+  {
     id: "school",
     title: "School",
     url: "/dashboard/school",
@@ -487,10 +500,6 @@ const studentRoutes = [
       {
         title: "Attendance For Students",
         url: "/dashboard/course/attendance_for_students",
-      },
-      {
-        title: "Student Registration",
-        url: "/dashboard/course/student_registration",
       },
       {
         title: "Registration Form",
