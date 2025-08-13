@@ -1,167 +1,405 @@
+import { useState, useEffect, useMemo } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
-  TableActionHead,
   TableBody,
   TableCell,
+  TableHead,
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
-import { Link, useSearchParams } from "react-router";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import UsersTableFooter from "@/components/table/TableFooter";
-import { useEffect, useState } from "react";
+import { Badge } from "@/components/ui/badge";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { Search, X, Users } from "lucide-react";
 import { axiosClient } from "@/lib/apiClient";
-import { toast } from "sonner";
-import axios from "axios";
-import SearchWithUrlSync from "@/components/SearchWithUrlSync";
-import PrivateRoute from "@/components/PrivateRoute";
-import { useAuth } from "@/provider/AuthProvider";
 
-const rowSizeList = ["5", "10", "20", "30", "50", "80", "100"];
+interface AccountOfficer {
+  _id: string;
+  fullName: string;
+  email: string;
+  password: string;
+  isVerified: boolean;
+  role: string;
+  phone: string;
+  gender: string;
+  createdAt: string;
+  updatedAt: string;
+  image: string;
+}
 
-const header = [
-  {
-    id: "fullName",
-    label: "Full Name",
-    sortable: true,
-  },
-  {
-    id: "email",
-    label: "Email",
-    sortable: true,
-  },
-  {
-    id: "phone",
-    label: "Phone Number",
-    sortable: true,
-  },
-  {
-    id: "image",
-    label: "Profile Picture",
-    center: true,
-  },
-  {
-    id: "gender",
-    label: "Gender",
-  },
-];
+interface AccountOfficerFilters {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+  gender?: string;
+}
 
-const AccountOfficePage = () => {
-  const { user } = useAuth();
-  const [searchParams] = useSearchParams();
-  const [, setLoader] = useState(false);
-  const [admissionOfficerList, setAdmissionOfficerList] = useState([]);
-  const [totalPage, setTotalPage] = useState(0);
+const ITEMS_PER_PAGE = 10;
 
-  useEffect(() => {
-    fetchAdmissionOfficers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+export default function AccountOfficeManagement() {
+  // State
+  const [accountOfficers, setAccountOfficers] = useState<AccountOfficer[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filters, setFilters] = useState<AccountOfficerFilters>({});
 
-  const fetchAdmissionOfficers = async () => {
-    const limit = searchParams.get("size") ?? 5;
-    const page = searchParams.get("page") || 1;
-    const searchTerm = searchParams.get("searchTerm");
-    const sort = searchParams.get("sort");
-    // const fields = searchParams.get("fields");
+  const fetchAccountOfficers = async () => {
+    setLoading(true);
+    setError(null);
 
     try {
-      let apiUrl = `/user/admission-officers?limit=${limit}&page=${page}`;
-      if (searchTerm) apiUrl += `&searchTerm=${searchTerm}`;
-      if (sort) apiUrl += `&sort=${sort}`;
-      // fields && (apiUrl += `&fields=${fields}`);
-
-      const response = await axiosClient.get(apiUrl);
-
-      const data = await response.data;
-
-      if (!data || !data.data || !data.data.result) return;
-
-      setAdmissionOfficerList(() => data.data?.result ?? []);
-      setTotalPage(data.data?.meta?.totalPage);
-
-      setLoader(false);
-    } catch (error: unknown) {
-      setLoader(false);
-      toast("Error occure", {
-        description: axios.isAxiosError(error)
-          ? error?.response?.data?.message
-          : "Something went wrong",
-      });
+      const response = await axiosClient.get("/user/admission-officers");
+      const accountOfficerData = response.data.data || response.data || [];
+      setAccountOfficers(accountOfficerData);
+    } catch (err) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to fetch account officers");
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
+  // Load account officers on component mount
+  useEffect(() => {
+    fetchAccountOfficers();
+  }, []);
+
+  const filteredAccountOfficers = useMemo(() => {
+    let filtered = accountOfficers;
+
+    // Apply filters
+    if (filters.fullName) {
+      filtered = filtered.filter((officer) =>
+        officer.fullName.toLowerCase().includes(filters.fullName!.toLowerCase())
+      );
+    }
+    if (filters.email) {
+      filtered = filtered.filter((officer) =>
+        officer.email.toLowerCase().includes(filters.email!.toLowerCase())
+      );
+    }
+    if (filters.phone) {
+      filtered = filtered.filter((officer) =>
+        officer.phone.includes(filters.phone!)
+      );
+    }
+    if (filters.gender) {
+      filtered = filtered.filter((officer) =>
+        officer.gender.toLowerCase().includes(filters.gender!.toLowerCase())
+      );
+    }
+
+    return filtered;
+  }, [accountOfficers, filters]);
+
+  // Filter handlers
+  const handleFilterChange = (
+    key: keyof AccountOfficerFilters,
+    value: string
+  ) => {
+    const newFilters = {
+      ...filters,
+      [key]: value || undefined,
+    };
+    setFilters(newFilters);
+    setCurrentPage(1); // Reset to first page when filtering
+  };
+
+  const handleClear = () => {
+    setFilters({});
+    setCurrentPage(1);
+  };
+
+  const handleSearch = async () => {
+    setLoading(true);
+    // Simulate API delay
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    setLoading(false);
+  };
+
+  // Pagination
+  const paginatedAccountOfficers = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return filteredAccountOfficers.slice(startIndex, endIndex);
+  }, [filteredAccountOfficers, currentPage]);
+
+  const totalPages = Math.ceil(filteredAccountOfficers.length / ITEMS_PER_PAGE);
+
+  const getVisiblePages = () => {
+    const delta = 2;
+    const range = [];
+    const rangeWithDots = [];
+
+    for (
+      let i = Math.max(2, currentPage - delta);
+      i <= Math.min(totalPages - 1, currentPage + delta);
+      i++
+    ) {
+      range.push(i);
+    }
+
+    if (currentPage - delta > 2) {
+      rangeWithDots.push(1, "...");
+    } else {
+      rangeWithDots.push(1);
+    }
+
+    rangeWithDots.push(...range);
+
+    if (currentPage + delta < totalPages - 1) {
+      rangeWithDots.push("...", totalPages);
+    } else if (totalPages > 1) {
+      rangeWithDots.push(totalPages);
+    }
+
+    return rangeWithDots;
+  };
+
+  // Helper function to display role as "account-office" instead of "admission-office"
+  const displayRole = (role: string) => {
+    return role === "admission-office" ? "account-office" : role;
+  };
+
+  if (error) {
+    return (
+      <div className="container mx-auto py-8">
+        <div className="text-center text-red-600">Error: {error}</div>
+      </div>
+    );
+  }
+
   return (
-    <PrivateRoute>
-      <section className="w-full max-w-6xl mx-auto p-5 flex flex-col gap-5">
-        <section className="flex justify-between flex-wrap gap-4">
-          <h1 className="text-2xl font-bold">Account officer list</h1>
-          {user?.role === "admin" && (
-            <Link to="/dashboard/account-office/add">
-              <Button>
-                <Plus /> Add Account officer
-              </Button>
-            </Link>
-          )}
-        </section>
-        <section className="flex justify-between flex-wrap gap-2">
-          {/* <SelectWithUrlSync list={searchList} /> */}
-          <SearchWithUrlSync label="Search by email address" />
-        </section>
-        <section className="w-full flex flex-col gap-4">
-          <div className="w-full overflow-auto">
-            <ScrollArea className="">
+    <div className="container mx-auto py-8 space-y-6 px-6">
+      {/* Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">Account Office Management</h1>
+        <p className="text-muted-foreground">
+          Manage and view account office staff with filtering and pagination
+        </p>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="w-5 h-5" />
+            Filter Account Officers
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name</Label>
+              <Input
+                id="fullName"
+                placeholder="e.g., John Doe"
+                value={filters.fullName || ""}
+                onChange={(e) => handleFilterChange("fullName", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                placeholder="e.g., john@example.com"
+                value={filters.email || ""}
+                onChange={(e) => handleFilterChange("email", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                placeholder="e.g., +1234567890"
+                value={filters.phone || ""}
+                onChange={(e) => handleFilterChange("phone", e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="gender">Gender</Label>
+              <Input
+                id="gender"
+                placeholder="e.g., male"
+                value={filters.gender || ""}
+                onChange={(e) => handleFilterChange("gender", e.target.value)}
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-2 mt-4">
+            <Button onClick={handleSearch} disabled={loading}>
+              <Search className="w-4 h-4 mr-2" />
+              Search
+            </Button>
+            <Button variant="outline" onClick={handleClear} disabled={loading}>
+              <X className="w-4 h-4 mr-2" />
+              Clear
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="w-5 h-5" />
+            Account Officers ({filteredAccountOfficers.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="text-muted-foreground">
+                Loading account officers...
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {header.map(({ id, label, sortable, center }) => (
-                      <TableActionHead
-                        id={id}
-                        key={id}
-                        sortable={sortable}
-                        center={center}
-                        className="capitalize whitespace-nowrap"
-                      >
-                        {label}
-                      </TableActionHead>
-                    ))}
+                    <TableHead>Profile</TableHead>
+                    <TableHead>Full Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Gender</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Joined</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {admissionOfficerList.map(
-                    ({ _id, fullName, email, phone, image, gender }) => (
-                      <TableRow
-                        key={_id}
-                        className="hover:bg-gray-200/60 duration-100 transition-all"
+                  {paginatedAccountOfficers.length === 0 ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={8}
+                        className="text-center py-8 text-muted-foreground"
                       >
-                        <TableCell className="font-medium">
-                          {fullName}
-                        </TableCell>
-                        <TableCell>{email}</TableCell>
-                        <TableCell>{phone}</TableCell>
-                        <TableCell className="text-right">
+                        No account officers found
+                      </TableCell>
+                    </TableRow>
+                  ) : (
+                    paginatedAccountOfficers.map((officer) => (
+                      <TableRow key={officer._id}>
+                        <TableCell>
                           <img
-                            src={image}
-                            alt=""
-                            className="size-9 rounded-full object-cover mx-auto select-none"
+                            src={
+                              officer.image ||
+                              "/placeholder.svg?height=40&width=40&query=user avatar"
+                            }
+                            alt={officer.fullName}
+                            className="w-10 h-10 rounded-full object-cover"
+                            onError={(e) => {
+                              e.currentTarget.src =
+                                "/placeholder.svg?height=40&width=40";
+                            }}
                           />
                         </TableCell>
-                        <TableCell>{gender}</TableCell>
+                        <TableCell className="font-medium">
+                          {officer.fullName}
+                        </TableCell>
+                        <TableCell>{officer.email}</TableCell>
+                        <TableCell>{officer.phone}</TableCell>
+                        <TableCell>
+                          <Badge variant="secondary" className="capitalize">
+                            {officer.gender}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="default" className="capitalize">
+                            {displayRole(officer.role)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              officer.isVerified ? "default" : "destructive"
+                            }
+                          >
+                            {officer.isVerified ? "Verified" : "Unverified"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {new Date(officer.createdAt).toLocaleDateString()}
+                        </TableCell>
                       </TableRow>
-                    )
+                    ))
                   )}
                 </TableBody>
               </Table>
-              <ScrollBar orientation="horizontal" />
-            </ScrollArea>
-          </div>
-          <UsersTableFooter rowSizeList={rowSizeList} totalPages={totalPage} />
-        </section>
-      </section>
-    </PrivateRoute>
-  );
-};
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
-export default AccountOfficePage;
+      {/* Pagination */}
+      {!loading && filteredAccountOfficers.length > 0 && totalPages > 1 && (
+        <div className="flex justify-center">
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+                  className={
+                    currentPage === 1
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+
+              {getVisiblePages().map((page, index) => (
+                <PaginationItem key={index}>
+                  {page === "..." ? (
+                    <PaginationEllipsis />
+                  ) : (
+                    <PaginationLink
+                      onClick={() => setCurrentPage(page as number)}
+                      isActive={currentPage === page}
+                      className="cursor-pointer"
+                    >
+                      {page}
+                    </PaginationLink>
+                  )}
+                </PaginationItem>
+              ))}
+
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() =>
+                    setCurrentPage(Math.min(totalPages, currentPage + 1))
+                  }
+                  className={
+                    currentPage === totalPages
+                      ? "pointer-events-none opacity-50"
+                      : "cursor-pointer"
+                  }
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      )}
+    </div>
+  );
+}
