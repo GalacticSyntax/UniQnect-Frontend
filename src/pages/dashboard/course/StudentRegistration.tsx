@@ -332,7 +332,7 @@ const StudentRegistrationPageWithAPI: React.FC = () => {
                             className="flex items-center justify-between bg-white p-2 rounded border"
                           >
                             <div>
-                              <span className="font-medium text-sm">
+                              <span className="font-medium text-sm uppercase">
                                 {course.courseCode}
                               </span>
                               <span className="text-xs text-gray-600 ml-2">
@@ -435,7 +435,7 @@ const StudentRegistrationPageWithAPI: React.FC = () => {
                             />
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-1">
-                                <h3 className="font-semibold text-gray-900">
+                                <h3 className="font-semibold text-gray-900 uppercase">
                                   {course.courseCode}
                                 </h3>
                                 <Badge variant="secondary">
@@ -445,27 +445,35 @@ const StudentRegistrationPageWithAPI: React.FC = () => {
                                   Semester {course.semester}
                                 </Badge>
                               </div>
-                              <p className="text-gray-700 font-medium mb-1">
+                              <p className="text-gray-700 font-medium mb-1 capitalize">
                                 {course.courseName}
                               </p>
                               <div className="text-sm text-gray-600 space-y-1">
                                 <p>
                                   <span className="font-medium">
                                     Department:
-                                  </span>{" "}
-                                  {course.department.toUpperCase()}
+                                  </span>
+                                  <span className="uppercase">
+                                    {" "}
+                                    {course.department.toUpperCase()}
+                                  </span>
                                 </p>
                                 <p>
                                   <span className="font-medium">Teacher:</span>{" "}
-                                  {course.teacherName} ({course.teacherId})
+                                  <span className="capitalize">
+                                    {" "}
+                                    {course.teacherName}
+                                  </span>
                                 </p>
                                 <p>
                                   <span className="font-medium">Advisor:</span>{" "}
-                                  {course.advisorName}
+                                  <span className="capitalize">
+                                    {course.advisorName}
+                                  </span>
                                 </p>
                                 <p>
                                   <span className="font-medium">Session:</span>{" "}
-                                  {course.session}
+                                  <span className="capitalize">{course.session}</span>
                                 </p>
                                 {course.prerequisites &&
                                   course.prerequisites.length > 0 && (
