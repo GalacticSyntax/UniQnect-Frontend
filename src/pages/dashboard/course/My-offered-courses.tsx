@@ -114,6 +114,7 @@ function AddOfferedCourseDialog({
     try {
       const response = await axiosClient.post("/course-offered/offered", {
         ...formData,
+        runningSession: formData.runningSession.toLowerCase(),
       });
 
       if (!response?.data?.success)
