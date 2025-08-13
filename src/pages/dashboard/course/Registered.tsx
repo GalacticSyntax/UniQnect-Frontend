@@ -28,621 +28,156 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Search, Users, GraduationCap, X, BookOpen, Eye } from "lucide-react";
-import { useAuth } from "@/provider/AuthProvider";
-import PrivateRoute from "@/components/PrivateRoute";
+import {
+  Search,
+  Users,
+  GraduationCap,
+  X,
+  BookOpen,
+  Eye,
+  RefreshCw,
+} from "lucide-react";
+import { axiosClient } from "@/lib/apiClient";
 
-// --- Types (Consolidated) ---
-interface RegisteredCourse {
-  courseTitle: string;
-  courseCode: string;
-  credits: number;
-  grade?: string; // Optional, as grades might not be available immediately
+// Types based on your API response
+interface Course {
+  _id: string;
+  name: string;
+  code: string;
+  credit: number;
+  depart: string;
+  prerequisiteCourse: Course[];
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface StudentRegisteredCourses {
+interface Department {
+  _id: string;
+  code: string;
+  name: string;
+  schoolId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface User {
+  _id: string;
+  fullName: string;
+  email: string;
+  role: string;
+  phone: string;
+  gender: string;
+  image: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface Student {
+  _id: string;
+  userId: User;
   studentId: string;
-  studentName: string;
-  department: string;
-  session: string;
-  semester: number;
-  courses: RegisteredCourse[];
+  departmentId: Department;
+  admittedAt: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface RegisteredCourseData {
+  _id: string;
+  studentId: Student;
+  courseList: Course[];
+  runningSession: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface ApiResponse {
+  success: boolean;
+  data: RegisteredCourseData[];
 }
 
 interface StudentCourseFilters {
   department?: string;
   session?: string;
-  semester?: number;
   studentName?: string;
   courseTitle?: string;
   courseCode?: string;
 }
 
-// --- Constants (Consolidated) ---
-const CURRENT_SEMESTER = "Fall-2025 (1/1)";
-const CURRENT_SESSION = "Fall-2025";
 const ITEMS_PER_PAGE = 10;
 
-// --- Dummy Data (Consolidated) ---
-const dummyStudentCourses: RegisteredCourse[] = [
-  {
-    courseCode: "CSE-0613111",
-    courseTitle: "Discrete Mathematics",
-    credits: 3,
-  },
-  {
-    courseCode: "CSE-0613113",
-    courseTitle: "Structured Programming Language",
-    credits: 3,
-  },
-  {
-    courseCode: "CSE-0613114",
-    courseTitle: "Structured Programming Language Lab",
-    credits: 1.5,
-  },
-  {
-    courseCode: "ENG-02321201",
-    courseTitle: "Advanced Functional English",
-    credits: 3,
-  },
-  {
-    courseCode: "MAT-0541101",
-    courseTitle: "Calculus",
-    credits: 3,
-  },
-  {
-    courseCode: "PHY-05331201",
-    courseTitle: "Fundamentals of Physics",
-    credits: 3,
-  },
-  {
-    courseCode: "SSW-03141101",
-    courseTitle: "History of Bangladesh",
-    credits: 3,
-  },
-];
-
-const dummyAllStudentsCourses: StudentRegisteredCourses[] = [
-  {
-    studentId: "S001",
-    studentName: "Alice Johnson",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-      {
-        courseCode: "CSE-0613113",
-        courseTitle: "Structured Programming Language",
-        credits: 3,
-      },
-      {
-        courseCode: "MAT-0541101",
-        courseTitle: "Calculus",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S002",
-    studentName: "Bob Williams",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-      {
-        courseCode: "ENG-02321201",
-        courseTitle: "Advanced Functional English",
-        credits: 3,
-      },
-      {
-        courseCode: "CSE-0613114",
-        courseTitle: "Structured Programming Language Lab",
-        credits: 1.5,
-      },
-    ],
-  },
-  {
-    studentId: "S003",
-    studentName: "Charlie Brown",
-    department: "EEE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "EEE-101",
-        courseTitle: "Basic Electrical Circuits",
-        credits: 3,
-      },
-      {
-        courseCode: "PHY-101",
-        courseTitle: "Physics I",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S004",
-    studentName: "Diana Prince",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 2, // Different semester
-    courses: [
-      {
-        courseCode: "CSE-06131211",
-        courseTitle: "Data Structures and Algorithms",
-        credits: 3,
-      },
-      {
-        courseCode: "CSE-06131213",
-        courseTitle: "Electronic Devices and Circuits",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S005",
-    studentName: "Eve Adams",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-      {
-        courseCode: "MAT-0541101",
-        courseTitle: "Calculus",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S006",
-    studentName: "Frank White",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613113",
-        courseTitle: "Structured Programming Language",
-        credits: 3,
-      },
-      {
-        courseCode: "PHY-05331201",
-        courseTitle: "Fundamentals of Physics",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S007",
-    studentName: "Grace Black",
-    department: "CSE",
-    session: "Spring-2025", // Different session
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S008",
-    studentName: "Henry Green",
-    department: "EEE",
-    session: "Fall-2025",
-    semester: 2,
-    courses: [
-      {
-        courseCode: "EEE-201",
-        courseTitle: "Circuit Analysis",
-        credits: 3,
-      },
-      {
-        courseCode: "MAT-201",
-        courseTitle: "Differential Equations",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S009",
-    studentName: "Ivy Blue",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-      {
-        courseCode: "ENG-02321201",
-        courseTitle: "Advanced Functional English",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S010",
-    studentName: "Jack Red",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 2,
-    courses: [
-      {
-        courseCode: "CSE-06131211",
-        courseTitle: "Data Structures and Algorithms",
-        credits: 3,
-      },
-      {
-        courseCode: "CSE-06131213",
-        courseTitle: "Electronic Devices and Circuits",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S011",
-    studentName: "Karen Yellow",
-    department: "CSE",
-    session: "Spring-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613113",
-        courseTitle: "Structured Programming Language",
-        credits: 3,
-      },
-      {
-        courseCode: "MAT-0541101",
-        courseTitle: "Calculus",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S012",
-    studentName: "Liam White",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S013",
-    studentName: "Olivia Green",
-    department: "EEE",
-    session: "Fall-2025",
-    semester: 2,
-    courses: [
-      {
-        courseCode: "EEE-201",
-        courseTitle: "Circuit Analysis",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S014",
-    studentName: "Noah Black",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613113",
-        courseTitle: "Structured Programming Language",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S015",
-    studentName: "Emma Blue",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 2,
-    courses: [
-      {
-        courseCode: "CSE-06131211",
-        courseTitle: "Data Structures and Algorithms",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S016",
-    studentName: "Ava Red",
-    department: "CSE",
-    session: "Spring-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613111",
-        courseTitle: "Discrete Mathematics",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S017",
-    studentName: "Sophia Yellow",
-    department: "EEE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "EEE-101",
-        courseTitle: "Basic Electrical Circuits",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S018",
-    studentName: "Jackson Purple",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "MAT-0541101",
-        courseTitle: "Calculus",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S019",
-    studentName: "Mia Orange",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 2,
-    courses: [
-      {
-        courseCode: "CSE-06131213",
-        courseTitle: "Electronic Devices and Circuits",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S020",
-    studentName: "Lucas Pink",
-    department: "CSE",
-    session: "Spring-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "ENG-02321201",
-        courseTitle: "Advanced Functional English",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S021",
-    studentName: "Isabella Gold",
-    department: "EEE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "PHY-101",
-        courseTitle: "Physics I",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S022",
-    studentName: "Ethan Silver",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "SSW-03141101",
-        courseTitle: "History of Bangladesh",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S023",
-    studentName: "Charlotte Bronze",
-    department: "CSE",
-    session: "Fall-2025",
-    semester: 2,
-    courses: [
-      {
-        courseCode: "CSE-06131211",
-        courseTitle: "Data Structures and Algorithms",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S024",
-    studentName: "Mason Platinum",
-    department: "CSE",
-    session: "Spring-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "CSE-0613113",
-        courseTitle: "Structured Programming Language",
-        credits: 3,
-      },
-    ],
-  },
-  {
-    studentId: "S025",
-    studentName: "Amelia Diamond",
-    department: "EEE",
-    session: "Fall-2025",
-    semester: 1,
-    courses: [
-      {
-        courseCode: "EEE-101",
-        courseTitle: "Basic Electrical Circuits",
-        credits: 3,
-      },
-    ],
-  },
-];
-
-// --- Student View Component (Consolidated) ---
-interface StudentCoursesViewProps {
-  courses: RegisteredCourse[];
-  semester: string;
-}
-
-function StudentCoursesView({ courses, semester }: StudentCoursesViewProps) {
-  return (
-    <Card className="w-full shadow-sm">
-      <CardHeader className="pb-4 border-b border-gray-100 dark:border-gray-800">
-        <CardTitle className="text-xl font-semibold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-          <BookOpen className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-          Your Registered Courses for {semester}
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="rounded-lg border overflow-hidden">
-          <Table>
-            <TableHeader className="bg-gray-50 dark:bg-gray-800">
-              <TableRow>
-                <TableHead className="w-[100px] text-gray-600 dark:text-gray-300 font-medium">
-                  Code
-                </TableHead>
-                <TableHead className="text-gray-600 dark:text-gray-300 font-medium">
-                  Course Title
-                </TableHead>
-                <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
-                  Credits
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {courses.length === 0 ? (
-                <TableRow>
-                  <TableCell
-                    colSpan={4}
-                    className="text-center py-6 text-muted-foreground"
-                  >
-                    No courses registered for this semester.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                courses.map((course, index) => (
-                  <TableRow
-                    key={index}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                  >
-                    <TableCell className="font-mono text-sm font-medium text-gray-900 dark:text-gray-50">
-                      {course.courseCode.toUpperCase()}
-                    </TableCell>
-                    <TableCell className="font-medium text-sm text-gray-800 dark:text-gray-100">
-                      {course.courseTitle}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      <Badge
-                        variant="outline"
-                        className="text-xs px-2 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
-                      >
-                        {course.credits}
-                      </Badge>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
-
-// --- Admin View Component (Consolidated) ---
-interface AdminCoursesViewProps {
-  currentSession: string;
-}
-
-function AdminCoursesView({ currentSession }: AdminCoursesViewProps) {
-  const [studentsData, setStudentsData] = useState<StudentRegisteredCourses[]>(
-    []
-  );
+export default function RegisteredCoursesPage() {
+  const [studentsData, setStudentsData] = useState<RegisteredCourseData[]>([]);
   const [loading, setLoading] = useState(false);
-  const [filters, setFilters] = useState<StudentCourseFilters>({
-    session: currentSession,
-  });
+  const [error, setError] = useState<string | null>(null);
+  const [filters, setFilters] = useState<StudentCourseFilters>({});
   const [currentPage, setCurrentPage] = useState(1);
-
   const [viewingStudentCourses, setViewingStudentCourses] =
-    useState<StudentRegisteredCourses | null>(null);
+    useState<RegisteredCourseData | null>(null);
   const [viewCoursesDialogOpen, setViewCoursesDialogOpen] = useState(false);
 
-  // Simulate fetching data
-  const fetchStudents = async (filterParams: StudentCourseFilters = {}) => {
+  // Fetch data from API
+  const fetchRegisteredCourses = async () => {
     setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 500)); // Simulate API delay
+    setError(null);
+    try {
+      const response = await axiosClient.get<ApiResponse>("/course-registered");
+      if (response.data.success) {
+        setStudentsData(response.data.data);
+      } else {
+        setError("Failed to fetch registered courses");
+      }
+    } catch (err) {
+      setError("Error fetching data from server");
+      console.error("API Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const filteredData = dummyAllStudentsCourses.filter((student) => {
-      const matchesDepartment = filterParams.department
-        ? student.department
+  useEffect(() => {
+    fetchRegisteredCourses();
+  }, []);
+
+  // Filter data based on current filters
+  const filteredData = useMemo(() => {
+    return studentsData.filter((registration) => {
+      const student = registration.studentId;
+      const department = student.departmentId;
+
+      const matchesDepartment = filters.department
+        ? department.code
             .toLowerCase()
-            .includes(filterParams.department.toLowerCase())
-        : true;
-      const matchesSession = filterParams.session
-        ? student.session
+            .includes(filters.department.toLowerCase()) ||
+          department.name
             .toLowerCase()
-            .includes(filterParams.session.toLowerCase())
+            .includes(filters.department.toLowerCase())
         : true;
-      const matchesSemester = filterParams.semester
-        ? student.semester === Number(filterParams.semester)
-        : true;
-      const matchesStudentName = filterParams.studentName
-        ? student.studentName
+
+      const matchesSession = filters.session
+        ? registration.runningSession
             .toLowerCase()
-            .includes(filterParams.studentName.toLowerCase())
+            .includes(filters.session.toLowerCase())
+        : true;
+
+      const matchesStudentName = filters.studentName
+        ? student.userId.fullName
+            .toLowerCase()
+            .includes(filters.studentName.toLowerCase())
         : true;
 
       const matchesCourse =
-        filterParams.courseTitle || filterParams.courseCode
-          ? student.courses.some((course) => {
-              const titleMatch = filterParams.courseTitle
-                ? course.courseTitle
+        filters.courseTitle || filters.courseCode
+          ? registration.courseList.some((course) => {
+              const titleMatch = filters.courseTitle
+                ? course.name
                     .toLowerCase()
-                    .includes(filterParams.courseTitle.toLowerCase())
+                    .includes(filters.courseTitle.toLowerCase())
                 : true;
-              const codeMatch = filterParams.courseCode
-                ? course.courseCode
+              const codeMatch = filters.courseCode
+                ? course.code
                     .toLowerCase()
-                    .includes(filterParams.courseCode.toLowerCase())
+                    .includes(filters.courseCode.toLowerCase())
                 : true;
               return titleMatch && codeMatch;
             })
@@ -651,53 +186,39 @@ function AdminCoursesView({ currentSession }: AdminCoursesViewProps) {
       return (
         matchesDepartment &&
         matchesSession &&
-        matchesSemester &&
         matchesStudentName &&
         matchesCourse
       );
     });
-
-    setStudentsData(filteredData);
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchStudents(filters);
-  }, [filters]); // Re-fetch when filters change
+  }, [studentsData, filters]);
 
   const handleFilterChange = (
     key: keyof StudentCourseFilters,
-    value: string | number
+    value: string
   ) => {
-    const newFilters = {
-      ...filters,
+    setFilters((prev) => ({
+      ...prev,
       [key]: value === "" ? undefined : value,
-    };
-    setFilters(newFilters);
-    setCurrentPage(1); // Reset to first page on filter change
-  };
-
-  const handleSearch = () => {
-    // The useEffect hook already handles re-fetching/filtering when filters change
-    // No explicit action needed here other than what handleFilterChange does
+    }));
+    setCurrentPage(1);
   };
 
   const handleClear = () => {
-    setFilters({ session: currentSession }); // Reset to default session filter
+    setFilters({});
     setCurrentPage(1);
   };
 
   // Pagination logic
   const paginatedStudents = useMemo(() => {
-    const sortedStudents = [...studentsData].sort((a, b) =>
-      a.studentName.localeCompare(b.studentName)
+    const sortedStudents = [...filteredData].sort((a, b) =>
+      a.studentId.userId.fullName.localeCompare(b.studentId.userId.fullName)
     );
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     return sortedStudents.slice(startIndex, endIndex);
-  }, [studentsData, currentPage]);
+  }, [filteredData, currentPage]);
 
-  const totalPages = Math.ceil(studentsData.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredData.length / ITEMS_PER_PAGE);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -733,350 +254,363 @@ function AdminCoursesView({ currentSession }: AdminCoursesViewProps) {
     return rangeWithDots;
   };
 
-  const handleViewStudentCourses = (student: StudentRegisteredCourses) => {
-    setViewingStudentCourses(student);
+  const handleViewStudentCourses = (registration: RegisteredCourseData) => {
+    setViewingStudentCourses(registration);
     setViewCoursesDialogOpen(true);
   };
 
+  const getTotalCredits = (courses: Course[]) => {
+    return courses.reduce((total, course) => total + course.credit, 0);
+  };
+
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
-        <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
-        Registered Courses for All Students
-      </h2>
+    <div className="container mx-auto py-8 space-y-8 px-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
+      <div className="flex flex-col gap-2 text-center mb-8">
+        <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-50 flex items-center justify-center gap-3">
+          <GraduationCap className="w-9 h-9 text-blue-600 dark:text-blue-400" />
+          Registered Courses
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Overview of registered courses for all students
+        </p>
+      </div>
 
-      {/* Filters Card */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Search className="w-5 h-5" />
-            Filter Students & Courses
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="filter-department">Department</Label>
-              <Input
-                id="filter-department"
-                placeholder="e.g., CSE"
-                value={filters.department || ""}
-                onChange={(e) =>
-                  handleFilterChange("department", e.target.value)
-                }
-              />
-            </div>
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+            <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+            Registered Courses for All Students
+          </h2>
+          <Button
+            onClick={fetchRegisteredCourses}
+            disabled={loading}
+            variant="outline"
+          >
+            <RefreshCw
+              className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </Button>
+        </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="filter-session">Session</Label>
-              <Input
-                id="filter-session"
-                placeholder="e.g., Fall-2025"
-                value={filters.session || ""}
-                onChange={(e) => handleFilterChange("session", e.target.value)}
-              />
-            </div>
+        {/* Filters Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Search className="w-5 h-5" />
+              Filter Students & Courses
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="filter-department">Department</Label>
+                <Input
+                  id="filter-department"
+                  placeholder="e.g., CSE or Computer Science"
+                  value={filters.department || ""}
+                  onChange={(e) =>
+                    handleFilterChange("department", e.target.value)
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="filter-semester">Semester</Label>
-              <Input
-                id="filter-semester"
-                type="number"
-                placeholder="e.g., 1"
-                value={filters.semester || ""}
-                onChange={(e) =>
-                  handleFilterChange("semester", Number(e.target.value))
-                }
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="filter-session">Session</Label>
+                <Input
+                  id="filter-session"
+                  placeholder="e.g., fall-2025"
+                  value={filters.session || ""}
+                  onChange={(e) =>
+                    handleFilterChange("session", e.target.value)
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="filter-studentName">Student Name</Label>
-              <Input
-                id="filter-studentName"
-                placeholder="e.g., Alice Johnson"
-                value={filters.studentName || ""}
-                onChange={(e) =>
-                  handleFilterChange("studentName", e.target.value)
-                }
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="filter-studentName">Student Name</Label>
+                <Input
+                  id="filter-studentName"
+                  placeholder="e.g., Student99"
+                  value={filters.studentName || ""}
+                  onChange={(e) =>
+                    handleFilterChange("studentName", e.target.value)
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="filter-courseTitle">Course Title</Label>
-              <Input
-                id="filter-courseTitle"
-                placeholder="e.g., Programming"
-                value={filters.courseTitle || ""}
-                onChange={(e) =>
-                  handleFilterChange("courseTitle", e.target.value)
-                }
-              />
-            </div>
+              <div className="space-y-2">
+                <Label htmlFor="filter-courseTitle">Course Title</Label>
+                <Input
+                  id="filter-courseTitle"
+                  placeholder="e.g., programming"
+                  value={filters.courseTitle || ""}
+                  onChange={(e) =>
+                    handleFilterChange("courseTitle", e.target.value)
+                  }
+                />
+              </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="filter-courseCode">Course Code</Label>
-              <Input
-                id="filter-courseCode"
-                placeholder="e.g., CSE111"
-                value={filters.courseCode || ""}
-                onChange={(e) =>
-                  handleFilterChange("courseCode", e.target.value)
-                }
-              />
-            </div>
-          </div>
-
-          <div className="flex gap-2 mt-4">
-            <Button onClick={handleSearch} disabled={loading}>
-              <Search className="w-4 h-4 mr-2" />
-              Search
-            </Button>
-            <Button variant="outline" onClick={handleClear} disabled={loading}>
-              <X className="w-4 h-4 mr-2" />
-              Clear
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Main Table for Students */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Students ({studentsData.length})
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex items-center justify-center h-32">
-              <div className="text-muted-foreground">
-                Loading student data...
+              <div className="space-y-2">
+                <Label htmlFor="filter-courseCode">Course Code</Label>
+                <Input
+                  id="filter-courseCode"
+                  placeholder="e.g., cse111"
+                  value={filters.courseCode || ""}
+                  onChange={(e) =>
+                    handleFilterChange("courseCode", e.target.value)
+                  }
+                />
               </div>
             </div>
-          ) : paginatedStudents.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No students found matching the current filters.
+
+            <div className="flex gap-2 mt-4">
+              <Button
+                variant="outline"
+                onClick={handleClear}
+                disabled={loading}
+              >
+                <X className="w-4 h-4 mr-2" />
+                Clear Filters
+              </Button>
             </div>
-          ) : (
-            <div className="rounded-md border overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student ID</TableHead>
-                    <TableHead>Student Name</TableHead>
-                    <TableHead>Department</TableHead>
-                    <TableHead>Session</TableHead>
-                    <TableHead>Semester</TableHead>
-                    <TableHead className="text-center">Total Courses</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedStudents.map((student) => (
-                    <TableRow key={student.studentId}>
-                      <TableCell className="font-mono font-medium">
-                        {student.studentId}
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        {student.studentName}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">
-                          {student.department.toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{student.session}</TableCell>
-                      <TableCell>
-                        <Badge variant="outline">
-                          Semester {student.semester}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline">
-                          {student.courses.length}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleViewStudentCourses(student)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Eye className="h-4 w-4" />
-                          <span className="sr-only">
-                            View courses for {student.studentName}
-                          </span>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Pagination */}
-      {!loading && studentsData.length > 0 && totalPages > 1 && (
-        <div className="flex justify-center">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                  className={
-                    currentPage === 1
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
+        {/* Error Display */}
+        {error && (
+          <Card className="border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950">
+            <CardContent className="pt-6">
+              <div className="text-red-600 dark:text-red-400 text-center">
+                {error}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
-              {getVisiblePages().map((page, index) => (
-                <PaginationItem key={index}>
-                  {page === "..." ? (
-                    <PaginationEllipsis />
-                  ) : (
-                    <PaginationLink
-                      onClick={() => handlePageChange(page as number)}
-                      isActive={currentPage === page}
-                      className="cursor-pointer"
-                    >
-                      {page}
-                    </PaginationLink>
-                  )}
-                </PaginationItem>
-              ))}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() =>
-                    handlePageChange(Math.min(totalPages, currentPage + 1))
-                  }
-                  className={
-                    currentPage === totalPages
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
-
-      {/* View Student Courses Dialog */}
-      <Dialog
-        open={viewCoursesDialogOpen}
-        onOpenChange={setViewCoursesDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <BookOpen className="w-5 h-5" />
-              Courses for {viewingStudentCourses?.studentName} (
-              {viewingStudentCourses?.studentId})
-            </DialogTitle>
-            <DialogDescription>
-              Registered courses for {viewingStudentCourses?.studentName} in{" "}
-              {viewingStudentCourses?.session} (Semester{" "}
-              {viewingStudentCourses?.semester}).
-            </DialogDescription>
-          </DialogHeader>
-
-          {viewingStudentCourses && (
-            <div className="space-y-4">
-              <div className="rounded-lg border overflow-hidden">
+        {/* Main Table for Students */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              Students ({filteredData.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loading ? (
+              <div className="flex items-center justify-center h-32">
+                <div className="text-muted-foreground">
+                  Loading student data...
+                </div>
+              </div>
+            ) : paginatedStudents.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                {filteredData.length === 0 && studentsData.length > 0
+                  ? "No students found matching the current filters."
+                  : "No registered courses data available."}
+              </div>
+            ) : (
+              <div className="rounded-md border overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-gray-50 dark:bg-gray-800">
+                  <TableHeader>
                     <TableRow>
-                      <TableHead className="w-[100px] text-gray-600 dark:text-gray-300 font-medium">
-                        Code
+                      <TableHead>Student ID</TableHead>
+                      <TableHead>Student Name</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Session</TableHead>
+                      <TableHead className="text-center">
+                        Total Courses
                       </TableHead>
-                      <TableHead className="text-gray-600 dark:text-gray-300 font-medium">
-                        Course Title
+                      <TableHead className="text-center">
+                        Total Credits
                       </TableHead>
-                      <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
-                        Credits
-                      </TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {viewingStudentCourses.courses.length === 0 ? (
-                      <TableRow>
-                        <TableCell
-                          colSpan={4}
-                          className="text-center py-4 text-muted-foreground"
-                        >
-                          No courses registered for this student.
+                    {paginatedStudents.map((registration) => (
+                      <TableRow key={registration._id}>
+                        <TableCell className="font-mono font-medium">
+                          {registration.studentId.studentId}
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {registration.studentId.userId.fullName}
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant="secondary">
+                            {registration.studentId.departmentId.code.toUpperCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="capitalize">
+                          {registration.runningSession}
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline">
+                            {registration.courseList.length}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Badge variant="outline">
+                            {getTotalCredits(registration.courseList)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-center">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() =>
+                              handleViewStudentCourses(registration)
+                            }
+                            className="h-8 w-8 p-0"
+                          >
+                            <Eye className="h-4 w-4" />
+                            <span className="sr-only">
+                              View courses for{" "}
+                              {registration.studentId.userId.fullName}
+                            </span>
+                          </Button>
                         </TableCell>
                       </TableRow>
-                    ) : (
-                      viewingStudentCourses.courses.map((course, idx) => (
-                        <TableRow
-                          key={idx}
-                          className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
-                        >
-                          <TableCell className="font-mono text-sm font-medium text-gray-900 dark:text-gray-50">
-                            {course.courseCode.toUpperCase()}
-                          </TableCell>
-                          <TableCell className="text-sm text-gray-800 dark:text-gray-100">
-                            {course.courseTitle}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            <Badge
-                              variant="outline"
-                              className="text-xs px-1 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
-                            >
-                              {course.credits}
-                            </Badge>
-                          </TableCell>
-                        </TableRow>
-                      ))
-                    )}
+                    ))}
                   </TableBody>
                 </Table>
               </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+            )}
+          </CardContent>
+        </Card>
 
-// --- Main Page Component (Consolidated) ---
-export default function RegisteredCourseListPage() {
-  const { user } = useAuth(); // Assuming useAuth provides { role: string } | null
+        {/* Pagination */}
+        {!loading && filteredData.length > 0 && totalPages > 1 && (
+          <div className="flex justify-center">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() =>
+                      handlePageChange(Math.max(1, currentPage - 1))
+                    }
+                    className={
+                      currentPage === 1
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
 
-  return (
-    <PrivateRoute>
-      <div className="container mx-auto py-8 space-y-8 px-6 bg-gray-50 dark:bg-gray-900 min-h-screen">
-        <div className="flex flex-col gap-2 text-center mb-8">
-          <h1 className="text-4xl font-extrabold text-gray-900 dark:text-gray-50 flex items-center justify-center gap-3">
-            <GraduationCap className="w-9 h-9 text-blue-600 dark:text-blue-400" />
-            Registered Courses
-          </h1>
-          <p className="text-lg text-muted-foreground">
-            {user?.role === "student"
-              ? `View your registered courses for the ${CURRENT_SEMESTER}.`
-              : `Overview of registered courses for all students.`}
-          </p>
-        </div>
+                {getVisiblePages().map((page, index) => (
+                  <PaginationItem key={index}>
+                    {page === "..." ? (
+                      <PaginationEllipsis />
+                    ) : (
+                      <PaginationLink
+                        onClick={() => handlePageChange(page as number)}
+                        isActive={currentPage === page}
+                        className="cursor-pointer"
+                      >
+                        {page}
+                      </PaginationLink>
+                    )}
+                  </PaginationItem>
+                ))}
 
-        {user?.role === "student" ? (
-          <StudentCoursesView
-            courses={dummyStudentCourses}
-            semester={CURRENT_SEMESTER}
-          />
-        ) : (
-          <AdminCoursesView currentSession={CURRENT_SESSION} />
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() =>
+                      handlePageChange(Math.min(totalPages, currentPage + 1))
+                    }
+                    className={
+                      currentPage === totalPages
+                        ? "pointer-events-none opacity-50"
+                        : "cursor-pointer"
+                    }
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
         )}
+
+        {/* View Student Courses Dialog */}
+        <Dialog
+          open={viewCoursesDialogOpen}
+          onOpenChange={setViewCoursesDialogOpen}
+        >
+          <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <BookOpen className="w-5 h-5" />
+                Courses for {viewingStudentCourses?.studentId.userId.fullName} (
+                {viewingStudentCourses?.studentId.studentId})
+              </DialogTitle>
+              <DialogDescription>
+                Registered courses for{" "}
+                {viewingStudentCourses?.studentId.userId.fullName} in{" "}
+                {viewingStudentCourses?.runningSession} session.
+              </DialogDescription>
+            </DialogHeader>
+
+            {viewingStudentCourses && (
+              <div className="space-y-4">
+                <div className="rounded-lg border overflow-hidden">
+                  <Table>
+                    <TableHeader className="bg-gray-50 dark:bg-gray-800">
+                      <TableRow>
+                        <TableHead className="w-[100px] text-gray-600 dark:text-gray-300 font-medium">
+                          Code
+                        </TableHead>
+                        <TableHead className="text-gray-600 dark:text-gray-300 font-medium">
+                          Course Title
+                        </TableHead>
+                        <TableHead className="text-center text-gray-600 dark:text-gray-300 font-medium w-[80px]">
+                          Credits
+                        </TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {viewingStudentCourses.courseList.length === 0 ? (
+                        <TableRow>
+                          <TableCell
+                            colSpan={3}
+                            className="text-center py-4 text-muted-foreground"
+                          >
+                            No courses registered for this student.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        viewingStudentCourses.courseList.map((course) => (
+                          <TableRow
+                            key={course._id}
+                            className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                          >
+                            <TableCell className="font-mono text-sm font-medium text-gray-900 dark:text-gray-50">
+                              {course.code.toUpperCase()}
+                            </TableCell>
+                            <TableCell className="text-sm text-gray-800 dark:text-gray-100 capitalize">
+                              {course.name}
+                            </TableCell>
+                            <TableCell className="text-center">
+                              <Badge
+                                variant="outline"
+                                className="text-xs px-1 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-200 dark:border-gray-600"
+                              >
+                                {course.credit}
+                              </Badge>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+                <div className="text-right text-sm text-muted-foreground">
+                  Total Credits:{" "}
+                  {getTotalCredits(viewingStudentCourses.courseList)}
+                </div>
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
-    </PrivateRoute>
+    </div>
   );
 }
