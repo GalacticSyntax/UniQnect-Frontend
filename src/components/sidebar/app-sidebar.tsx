@@ -505,6 +505,10 @@ const studentRoutes = [
         title: "Registration Form",
         url: "/dashboard/course/registration-form",
       },
+      {
+        title: "My Registered Courses",
+        url: "/dashboard/course/my_registered_courses",
+      },
     ],
   },
   // {
