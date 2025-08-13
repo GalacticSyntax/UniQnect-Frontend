@@ -155,15 +155,15 @@ const AddDepartment = () => {
                     ? schoolList.find(
                         (school) => school.schoolId === formData.schoolId
                       )?.name
-                    : "Select framework..."}
+                    : "Select school..."}
                   <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
                 <Command>
-                  <CommandInput placeholder="Search framework..." />
+                  <CommandInput placeholder="Search school..." />
                   <CommandList>
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandEmpty>No school found.</CommandEmpty>
                     <CommandGroup>
                       {schoolList.map((school) => (
                         <CommandItem

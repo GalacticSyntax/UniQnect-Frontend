@@ -353,6 +353,10 @@ const teacherRoutes = [
         title: "Accept Course",
         url: "/dashboard/course/accept_course",
       },
+      {
+        title: "Registration Form",
+        url: "/dashboard/course/registration-form",
+      },
     ],
   },
   // {
@@ -487,6 +491,10 @@ const studentRoutes = [
       {
         title: "Student Registration",
         url: "/dashboard/course/student_registration",
+      },
+      {
+        title: "Registration Form",
+        url: "/dashboard/course/registration-form",
       },
     ],
   },

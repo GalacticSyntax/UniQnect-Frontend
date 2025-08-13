@@ -250,7 +250,7 @@ const SessionManagement: React.FC = () => {
                 <Input
                   id="session"
                   type="text"
-                  placeholder="e.g., Spring 2024, Fall 2024"
+                  placeholder="e.g., Spring-2024, Fall-2024"
                   value={newSession}
                   onChange={(e) => setNewSession(e.target.value)}
                   disabled={creating}
