@@ -93,19 +93,19 @@ const adminRoutes = [
       },
     ],
   },
-  {
-    id: "attendance",
-    title: "Attendance",
-    url: "/dashboard/attendance",
-    icon: CheckSquare, // Represents checklists or attendance
-    isActive: false,
-    items: [
-      {
-        title: "Attendance",
-        url: "/dashboard/attendance",
-      },
-    ],
-  },
+  // {
+  //   id: "attendance",
+  //   title: "Attendance",
+  //   url: "/dashboard/attendance",
+  //   icon: CheckSquare, // Represents checklists or attendance
+  //   isActive: false,
+  //   items: [
+  //     {
+  //       title: "Attendance",
+  //       url: "/dashboard/attendance",
+  //     },
+  //   ],
+  // },
   {
     id: "course",
     title: "Course",
@@ -469,19 +469,19 @@ const studentRoutes = [
       },
     ],
   },
-  {
-    id: "attendance",
-    title: "Attendance",
-    url: "/dashboard/attendance",
-    icon: CheckSquare, // Represents checklists or attendance
-    isActive: false,
-    items: [
-      {
-        title: "Attendance",
-        url: "/dashboard/attendance",
-      },
-    ],
-  },
+  // {
+  //   id: "attendance",
+  //   title: "Attendance",
+  //   url: "/dashboard/attendance",
+  //   icon: CheckSquare, // Represents checklists or attendance
+  //   isActive: false,
+  //   items: [
+  //     {
+  //       title: "Attendance",
+  //       url: "/dashboard/attendance",
+  //     },
+  //   ],
+  // },
   {
     id: "course",
     title: "Course",
