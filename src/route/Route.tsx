@@ -54,6 +54,7 @@ import AddAccountOffice from "@/pages/dashboard/account-office/AddAccountOffice"
 import SessionLayout from "@/pages/dashboard/session/Layout";
 import SessionPage from "@/pages/dashboard/session/Session";
 import MyRegisteredCoursesPage from "@/pages/dashboard/course/MyRegisteredCourses";
+import TeacherMyCoursesPage from "@/pages/dashboard/course/MyCoursesAsTeacher";
 
 const router = createBrowserRouter([
   {
@@ -192,6 +193,10 @@ const router = createBrowserRouter([
           {
             path: "accept_course",
             element: <CourseAcceptancePage />,
+          },
+          {
+            path: "teacher_my_courses",
+            element: <TeacherMyCoursesPage />,
           },
         ],
       },

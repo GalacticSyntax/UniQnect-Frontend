@@ -370,6 +370,10 @@ const teacherRoutes = [
         title: "Registration Form",
         url: "/dashboard/course/registration-form",
       },
+      {
+        title: "My Courses",
+        url: "/dashboard/course/teacher_my_courses",
+      },
     ],
   },
   // {
