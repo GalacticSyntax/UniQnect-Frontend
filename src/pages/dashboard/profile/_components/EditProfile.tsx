@@ -1,12 +1,12 @@
-import { useEffect, useState, type FormEvent } from "react";
-import { Button } from "@/components/ui/button";
-import { Pencil } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+"use client"
+
+import type React from "react"
+import { useState, useEffect } from "react"
+import { Pencil, Save, X } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Dialog,
   DialogContent,
@@ -14,222 +14,194 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "recharts";
-import { useAuth } from "@/provider/AuthProvider";
-import { axiosClient } from "@/lib/apiClient";
-import { toast } from "sonner";
-import axios from "axios";
+} from "@/components/ui/dialog"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
+import type { UserFormData } from "../types"
+import { useProfile } from "../ProfileProvider"
+import { useProfileData } from "../user-profile-data"
 
-interface User {
-  fullName: string;
-  email: string;
-  phone: string;
-  presentAddress: string;
-  permanentAddress: string;
+export interface EditProfileProps {
+  className?: string
 }
 
-const EditProfile = () => {
-  const { user: localUserData } = useAuth();
-  // const [user, setUser] = useState<User | null>(null);
-  const [, setLoading] = useState(true);
-  const [formData, setFormData] = useState<User>({
+const EditProfile: React.FC<EditProfileProps> = ({ className }) => {
+  const { user, updateUser, isLoading } = useProfile()
+  const profileData = useProfileData(user)
+  const [isOpen, setIsOpen] = useState<boolean>(false)
+  const [formData, setFormData] = useState<UserFormData>({
     fullName: "",
     email: "",
     phone: "",
     presentAddress: "",
     permanentAddress: "",
-  });
+  })
 
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const response = await axiosClient(
-          `/user/${localUserData?._id as string}`
-        ); // Use the actual API endpoint here
-        const data = await response.data;
-        if (data.success) {
-          const user = data.data;
+    if (profileData) {
+      setFormData({
+        fullName: profileData.fullName || "",
+        email: profileData.email || "",
+        phone: profileData.phone || "",
+        presentAddress: profileData.presentAddress || "",
+        permanentAddress: profileData.permanentAddress || "",
+      })
+    }
+  }, [profileData])
 
-          const userRole = user.role
-            ? user.role
-            : user.teacherId
-            ? "teacher"
-            : user.studentId
-            ? "student"
-            : "Admission officer";
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>): void => {
+    const { name, value } = e.target
+    setFormData((prev) => ({ ...prev, [name]: value }))
+  }
 
-          const newData: Partial<User> = {};
-          newData.fullName =
-            userRole === "student" || userRole === "teacher"
-              ? user?.userId?.fullName
-              : user.fullName;
-          newData.email =
-            userRole === "student" || userRole === "teacher"
-              ? user?.userId?.email
-              : user.email;
-          newData.phone =
-            userRole === "student" || userRole === "teacher"
-              ? user?.userId?.phone
-              : user.phone;
-          newData.presentAddress =
-            (userRole === "student" || userRole === "teacher"
-              ? user?.userId?.presentAddress
-              : user.presentAddress) ?? "";
-          newData.permanentAddress =
-            (userRole === "student" || userRole === "teacher"
-              ? user?.userId?.permanentAddress
-              : user.permanentAddress) ?? "";
-
-          setFormData(newData as User);
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>): Promise<void> => {
+    e.preventDefault()
 
     try {
-      const response = await axiosClient.patch(`/user/${localUserData?._id}`, {
-        ...formData,
-      });
-
-      // const data =
-      await response.data;
-
-      toast("Update successfully", {
-        description: `Information updated successfully`,
-      });
-      console.log("===================")
-    } catch (error: unknown) {
-      toast("Error occure", {
-        description: axios.isAxiosError(error)
-          ? error?.response?.data?.message
-          : "Something went wrong",
-      });
+      await updateUser(formData)
+      setIsOpen(false)
+    } catch (error) {
+      // Error is handled in the context
+      console.error("Update failed:", error)
     }
-  };
+  }
+
+  const handleCancel = (): void => {
+    if (profileData) {
+      setFormData({
+        fullName: profileData.fullName || "",
+        email: profileData.email || "",
+        phone: profileData.phone || "",
+        presentAddress: profileData.presentAddress || "",
+        permanentAddress: profileData.permanentAddress || "",
+      })
+    }
+    setIsOpen(false)
+  }
+
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <span>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button size={"icon"} className="fixed bottom-4 right-4">
-                  <Pencil />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="left">
-                <p>Edit Profile</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </span>
-      </DialogTrigger>
+    <div className={className}>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogTrigger asChild>
+          <div className="fixed bottom-6 right-6 z-50">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="lg"
+                    className="h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
+                  >
+                    <Pencil className="h-5 w-5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>Edit Profile</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
+        </DialogTrigger>
 
-      <DialogContent className="w-[90%] max-h-[90vh] max-w-3xl overflow-hidden overflow-y-auto">
-        <ScrollArea className="w-full h-full">
-          <div className="px-1">
-            <DialogHeader className="pb-5">
-              <DialogTitle>Edit Profile</DialogTitle>
-              <DialogDescription>
-                Edit your profile details below.
-              </DialogDescription>
-            </DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil className="h-5 w-5" />
+              Edit Profile
+            </DialogTitle>
+            <DialogDescription>
+              Update your profile information below. Changes will be saved immediately.
+            </DialogDescription>
+          </DialogHeader>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Full Name */}
-              <div>
-                <Label>Full Name</Label>
+          <form onSubmit={handleSubmit} className="space-y-6 overflow-y-auto max-h-[calc(90vh-120px)] pr-2">
+            {/* Full Name */}
+            <div className="space-y-2">
+              <Label htmlFor="fullName">Full Name *</Label>
+              <Input
+                id="fullName"
+                name="fullName"
+                value={formData.fullName}
+                onChange={handleChange}
+                placeholder="Enter your full name"
+                required
+              />
+            </div>
 
+            {/* Email & Phone */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address *</Label>
                 <Input
-                  name="fullName"
-                  value={formData.fullName}
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
                   onChange={handleChange}
-                  placeholder="Full Name"
+                  placeholder="Enter your email"
+                  required
                 />
               </div>
-
-              {/* Email & Phone */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Email</Label>
-
-                  <Input
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Email"
-                  />
-                </div>
-
-                <div>
-                  <Label>Phone Number</Label>
-                  <Input
-                    name="phone"
-                    type="text"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Phone number"
-                  />
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number *</Label>
+                <Input
+                  id="phone"
+                  name="phone"
+                  type="tel"
+                  value={formData.phone}
+                  onChange={handleChange}
+                  placeholder="Enter your phone number"
+                  required
+                />
               </div>
+            </div>
 
-              {/* Addresses */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Present Address</Label>
-                  <Textarea
-                    name="presentAddress"
-                    value={formData.presentAddress}
-                    onChange={handleChange}
-                    placeholder="Present Address"
-                    className="h-24 max-h-24"
-                  />
-                </div>
-
-                <div>
-                  <Label>Permanent Address</Label>
-                  <Textarea
-                    name="permanentAddress"
-                    value={formData.permanentAddress}
-                    onChange={handleChange}
-                    placeholder="Permanent Address"
-                    className="h-24 max-h-24"
-                  />
-                </div>
+            {/* Addresses */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="presentAddress">Present Address</Label>
+                <Textarea
+                  id="presentAddress"
+                  name="presentAddress"
+                  value={formData.presentAddress}
+                  onChange={handleChange}
+                  placeholder="Enter your current address"
+                  className="min-h-[100px] resize-none"
+                />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="permanentAddress">Permanent Address</Label>
+                <Textarea
+                  id="permanentAddress"
+                  name="permanentAddress"
+                  value={formData.permanentAddress}
+                  onChange={handleChange}
+                  placeholder="Enter your permanent address"
+                  className="min-h-[100px] resize-none"
+                />
+              </div>
+            </div>
 
-              {/* Submit Button */}
-              <Button type="submit" className="w-full">
-                Save Changes
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4 border-t">
+              <Button type="submit" disabled={isLoading} className="flex-1 gap-2">
+                <Save className="h-4 w-4" />
+                {isLoading ? "Saving..." : "Save Changes"}
               </Button>
-            </form>
-          </div>
-        </ScrollArea>
-      </DialogContent>
-    </Dialog>
-  );
-};
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleCancel}
+                disabled={isLoading}
+                className="gap-2 bg-transparent"
+              >
+                <X className="h-4 w-4" />
+                Cancel
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+  )
+}
 
-export default EditProfile;
+export default EditProfile

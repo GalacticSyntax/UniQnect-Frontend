@@ -1,160 +1,302 @@
-import { useEffect } from "react";
-import { BadgeCheck, BadgeX } from "lucide-react";
+import type React from "react";
+import { useEffect, useState, useRef } from "react";
+import { BadgeCheck, BadgeX, Camera, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
-import ProfileImageEditor from "./ProfileImageEditor";
-import { useAuth } from "@/provider/AuthProvider";
+import { useToast } from "@/hooks/use-toast";
 import { BACKEND_BASE_URL } from "@/constant";
 import { useProfile } from "../ProfileProvider";
+import { useProfileData } from "../user-profile-data";
+import { axiosClient } from "@/lib/apiClient";
 
-interface User {
-  [x: string]: unknown;
-  fullName: string;
-  email: string;
-  isVerified: boolean;
-  image: string;
-  role: string;
-  department: string;
-  semester: string;
-  session: string;
+export interface ProfileTopProps {
+  className?: string;
 }
 
-const calculateSemester = (admittedAt: string): number => {
-  const admissionDate = new Date(admittedAt); // Parse the admittedAt date string into a Date object
-  const currentDate = new Date(); // Get the current date
-  const diffTime = Math.abs(currentDate.getTime() - admissionDate.getTime()); // Calculate the time difference in milliseconds
-  const diffMonths = Math.floor(diffTime / (1000 * 3600 * 24 * 30)); // Convert time difference to months
-
-  // Calculate the semester (each semester is 6 months)
-  const semester = Math.floor(diffMonths / 6) + 1; // Round down and add 1 to ensure the correct semester is returned
-
-  return semester;
-};
-
-const ProfileTop = () => {
-  const { user: localUserData } = useAuth();
-  const { user, fetchUserData, error, isLoading } = useProfile();
+const ProfileTop: React.FC<ProfileTopProps> = ({ className }) => {
+  const { user, isLoading, error, fetchUserData, updateUser } = useProfile();
+  const profileData = useProfileData(user);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetchUserData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [fetchUserData]);
 
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
 
-  if (!user) return <div>No user found</div>;
+    if (!file.type.startsWith("image/")) {
+      toast({
+        title: "Invalid file type",
+        description: "Please select an image file",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const userRole = user.role
-    ? user.role
-    : user.teacherId
-    ? "teacher"
-    : user.studentId
-    ? "student"
-    : "admission-office";
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please select an image smaller than 5MB",
+        variant: "destructive",
+      });
+      return;
+    }
 
-  const userImage =
-    BACKEND_BASE_URL +
-    (userRole === "student" || userRole === "teacher"
-      ? localUserData?.userId?.image
-      : user.image);
+    setIsUploadingImage(true);
 
-  console.log({ userImage });
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
 
-  const userFullName =
-    userRole === "student" || userRole === "teacher"
-      ? user?.userId?.fullName
-      : user.fullName;
+      const response = await axiosClient.patch(`/user/${user?._id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
 
-  const userIsVerified =
-    userRole === "student" || userRole === "teacher"
-      ? user?.userId?.isVerified
-      : user.isVerified;
+      console.log(response);
 
-  const userDepartment =
-    userRole === "student" || userRole === "teacher"
-      ? user?.departmentId?.name
-      : "";
+      if (response.statusText !== "OK") {
+        return toast({
+          title: "Something went wrong",
+          description: "We are facing some problem.",
+        });
+      }
 
-  const userSemester =
-    userRole === "student" ? calculateSemester(user?.admittedAt) : "";
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { password, ...data } = response.data.data ?? {};
 
-  return (
-    <div className="flex flex-col sm:flex-row gap-4 shadow-lg p-5 sm:py-8 bg-primary rounded-md overflow-hidden">
-      <div className="w-full max-w-52 aspect-square rounded-md ring-2 ring-primary-foreground relative">
-        <img
-          src={userImage}
-          alt="Profile Image"
-          className="w-full h-full object-cover"
-        />
-        <EditProfileImageOverlay />
-        <VerifyTag isVerified={userIsVerified} />
-      </div>
-      <div className="w-full flex flex-col gap-2 items-start text-primary-foreground selection:bg-primary-foreground selection:text-primary">
-        <h2 className="text-2xl font-bold">{userFullName}</h2>
-        <Badge variant={"secondary"}>{userRole}</Badge>
-        <span className="py-1"></span>
-        {(userRole === "student" || userRole === "teacher") && (
-          <>
-            <p>Department: {userDepartment}</p>
-            {userRole === "student" && userSemester && (
-              <>
-                <p>Semester: {userSemester}</p>
-              </>
-            )}
-          </>
-        )}
-      </div>
-    </div>
-  );
-};
+      await updateUser({ image: data.imagePath });
 
-interface VerifyTagProps {
-  isVerified: boolean;
-}
+      toast({
+        title: "Image updated successfully",
+        description: "Your profile image has been updated",
+      });
 
-const VerifyTag = ({ isVerified }: VerifyTagProps) => {
-  return (
-    <TooltipProvider>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          {isVerified ? (
-            <span className="bg-green-500 text-white absolute bottom-0 right-0 z-10 rounded-full p-1 translate-x-2 translate-y-2">
-              <BadgeCheck />
-            </span>
-          ) : (
-            <span className="bg-red-500 text-white absolute bottom-0 right-0 z-10 rounded-full p-1 translate-x-2 translate-y-2">
-              <BadgeX />
-            </span>
-          )}
-        </TooltipTrigger>
-        <TooltipContent
-          side="bottom"
-          sideOffset={3}
-          className={cn({
-            "bg-red-500": !isVerified,
-            "bg-green-500": isVerified,
-          })}
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    } catch (error) {
+      console.error("Image upload error:", error);
+      toast({
+        title: "Upload failed",
+        description:
+          error instanceof Error
+            ? error.message
+            : "Failed to update profile image. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
+
+  const handleEditImageClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  if (isLoading) {
+    return <ProfileTopSkeleton />;
+  }
+
+  if (error) {
+    return (
+      <div className="bg-destructive/10 border border-destructive/20 rounded-lg p-6 text-center">
+        <p className="text-destructive font-medium">Error loading profile</p>
+        <p className="text-sm text-muted-foreground mt-1">{error}</p>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={fetchUserData}
+          className="mt-3 bg-transparent"
         >
-          <p>{isVerified ? "verified" : "unverified"}</p>
-        </TooltipContent>
-      </Tooltip>
-    </TooltipProvider>
-  );
-};
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
-const EditProfileImageOverlay = () => {
+  if (!profileData) {
+    return (
+      <div className="bg-muted/50 border rounded-lg p-6 text-center">
+        <p className="text-muted-foreground">No profile data available</p>
+      </div>
+    );
+  }
+
+  const imageUrl = profileData.image
+    ? `${BACKEND_BASE_URL}${profileData.image}`
+    : "/placeholder.svg?height=200&width=200";
+
   return (
-    <div className="absolute w-full h-full top-0 left-0 grid place-items-center duration-100 transition-colors bg-primary/50 opacity-0 hover:opacity-100 rounded-md">
-      <ProfileImageEditor />
+    <div
+      className={`relative overflow-hidden rounded-xl bg-gradient-to-br from-primary via-primary/90 to-primary/80 p-8 text-primary-foreground shadow-xl ${
+        className || ""
+      }`}
+    >
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+      />
+
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.1),transparent_50%)]" />
+      </div>
+
+      <div className="relative flex flex-col gap-6 sm:flex-row sm:items-start">
+        <div className="relative mx-auto sm:mx-0">
+          <div className="group relative h-32 w-32 overflow-hidden rounded-2xl border-4 border-primary-foreground/20 bg-primary-foreground/10 shadow-2xl transition-transform hover:scale-105">
+            <img
+              src={imageUrl || "/placeholder.svg"}
+              alt={`${profileData.fullName}'s profile`}
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                e.currentTarget.src = "/placeholder.svg?height=200&width=200";
+              }}
+            />
+
+            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+              <Button
+                size="sm"
+                variant="secondary"
+                className="gap-2"
+                onClick={handleEditImageClick}
+                disabled={isUploadingImage}
+              >
+                {isUploadingImage ? (
+                  <>
+                    <Upload className="h-4 w-4 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Camera className="h-4 w-4" />
+                    Edit
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="absolute -bottom-2 -right-2 rounded-full bg-background p-1 shadow-lg">
+                  {profileData.isVerified ? (
+                    <BadgeCheck className="h-6 w-6 text-green-500" />
+                  ) : (
+                    <BadgeX className="h-6 w-6 text-red-500" />
+                  )}
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>
+                  {profileData.isVerified
+                    ? "Verified Account"
+                    : "Unverified Account"}
+                </p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+
+        <div className="flex-1 space-y-4 text-center sm:text-left">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {profileData.fullName}
+            </h1>
+            <p className="text-lg text-primary-foreground/80 capitalize">
+              {profileData.gender}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 justify-center sm:justify-start">
+            <Badge
+              variant="secondary"
+              className="bg-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/30"
+            >
+              {profileData.role}
+            </Badge>
+            {profileData.department && (
+              <Badge
+                variant="outline"
+                className="border-primary-foreground/30 text-primary-foreground"
+              >
+                {profileData.department}
+              </Badge>
+            )}
+          </div>
+
+          <div className="space-y-2 text-sm text-primary-foreground/90">
+            {profileData.studentId && (
+              <div className="flex flex-col sm:flex-row sm:gap-6">
+                <p>
+                  <span className="font-medium">Student ID:</span>{" "}
+                  {profileData.studentId}
+                </p>
+                {profileData.semester && (
+                  <p>
+                    <span className="font-medium">Semester:</span>{" "}
+                    {profileData.semester}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {profileData.teacherId && (
+              <div className="flex flex-col sm:flex-row sm:gap-6">
+                <p>
+                  <span className="font-medium">Teacher ID:</span>{" "}
+                  {profileData.teacherId}
+                </p>
+                {profileData.designation && (
+                  <p>
+                    <span className="font-medium">Designation:</span>{" "}
+                    {profileData.designation}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
+
+const ProfileTopSkeleton: React.FC = () => (
+  <div className="rounded-xl bg-muted p-8">
+    <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+      <Skeleton className="mx-auto h-32 w-32 rounded-2xl sm:mx-0" />
+      <div className="flex-1 space-y-4">
+        <div className="space-y-2">
+          <Skeleton className="mx-auto h-8 w-48 sm:mx-0" />
+          <Skeleton className="mx-auto h-5 w-24 sm:mx-0" />
+        </div>
+        <div className="flex gap-2 justify-center sm:justify-start">
+          <Skeleton className="h-6 w-16" />
+          <Skeleton className="h-6 w-20" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default ProfileTop;
