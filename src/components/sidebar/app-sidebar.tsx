@@ -374,6 +374,10 @@ const teacherRoutes = [
         title: "My Courses",
         url: "/dashboard/course/teacher_my_courses",
       },
+      {
+        title: "My Students",
+        url: "/dashboard/course/my_students",
+      },
     ],
   },
   // {

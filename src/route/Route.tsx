@@ -55,6 +55,7 @@ import SessionLayout from "@/pages/dashboard/session/Layout";
 import SessionPage from "@/pages/dashboard/session/Session";
 import MyRegisteredCoursesPage from "@/pages/dashboard/course/MyRegisteredCourses";
 import TeacherMyCoursesPage from "@/pages/dashboard/course/MyCoursesAsTeacher";
+import MyStudentsPage from "@/pages/dashboard/course/MyStudents";
 
 const router = createBrowserRouter([
   {
@@ -197,6 +198,10 @@ const router = createBrowserRouter([
           {
             path: "teacher_my_courses",
             element: <TeacherMyCoursesPage />,
+          },
+          {
+            path: "my_students",
+            element: <MyStudentsPage />,
           },
         ],
       },
