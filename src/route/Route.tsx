@@ -51,6 +51,8 @@ import DepartmentHeadPage from "@/pages/dashboard/department/DepartmentHead";
 import AccountOfficeLayout from "@/pages/dashboard/account-office/Layout";
 import AccountOfficePage from "@/pages/dashboard/account-office/AccountOffice";
 import AddAccountOffice from "@/pages/dashboard/account-office/AddAccountOffice";
+import SessionLayout from "@/pages/dashboard/session/Layout";
+import SessionPage from "@/pages/dashboard/session/Session";
 
 const router = createBrowserRouter([
   {
@@ -196,6 +198,11 @@ const router = createBrowserRouter([
           { index: true, element: <AttendancePage /> },
           { path: "course/:id", element: <CourseAttendance /> },
         ],
+      },
+      {
+        path: "session",
+        element: <SessionLayout />,
+        children: [{ index: true, element: <SessionPage /> }],
       },
     ],
   },

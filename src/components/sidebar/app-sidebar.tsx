@@ -207,6 +207,12 @@ const adminRoutes = [
       },
     ],
   },
+  {
+    id: "Session",
+    title: "Session",
+    url: "/dashboard/Session",
+    icon: School, // Represents schools/education institutions
+  },
 ];
 
 const admissionOfficeRoutes = [
