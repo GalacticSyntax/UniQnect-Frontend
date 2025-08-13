@@ -16,6 +16,7 @@ interface User {
 
 interface AuthContextType {
   user: User | null;
+  image?: string;
   setUser: React.Dispatch<React.SetStateAction<User | null>>;
   login: (userData: User) => void;
   logout: () => void;

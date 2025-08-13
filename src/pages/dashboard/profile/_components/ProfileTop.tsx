@@ -15,6 +15,7 @@ import { BACKEND_BASE_URL } from "@/constant";
 import { useProfile } from "../ProfileProvider";
 import { useProfileData } from "../user-profile-data";
 import { axiosClient } from "@/lib/apiClient";
+import { useAuth } from "@/provider/AuthProvider";
 
 export interface ProfileTopProps {
   className?: string;
@@ -23,6 +24,7 @@ export interface ProfileTopProps {
 const ProfileTop: React.FC<ProfileTopProps> = ({ className }) => {
   const { user, isLoading, error, fetchUserData, updateUser } = useProfile();
   const profileData = useProfileData(user);
+  const { setUser } = useAuth();
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
@@ -79,7 +81,15 @@ const ProfileTop: React.FC<ProfileTopProps> = ({ className }) => {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { password, ...data } = response.data.data ?? {};
 
-      await updateUser({ image: data.imagePath });
+      await updateUser({ image: data.image });
+      setUser((prev) =>
+        prev
+          ? {
+              ...prev,
+              image: `${BACKEND_BASE_URL}${data.image}`,
+            }
+          : null
+      );
 
       toast({
         title: "Image updated successfully",
@@ -137,9 +147,9 @@ const ProfileTop: React.FC<ProfileTopProps> = ({ className }) => {
     );
   }
 
-  const imageUrl = profileData.image
-    ? `${BACKEND_BASE_URL}${profileData.image}`
-    : "/placeholder.svg?height=200&width=200";
+  // const imageUrl = profileData.image
+  //   ? `${BACKEND_BASE_URL}${profileData.image}`
+  //   : "/placeholder.svg?height=200&width=200";
 
   return (
     <div
@@ -164,7 +174,13 @@ const ProfileTop: React.FC<ProfileTopProps> = ({ className }) => {
         <div className="relative mx-auto sm:mx-0">
           <div className="group relative h-32 w-32 overflow-hidden rounded-2xl border-4 border-primary-foreground/20 bg-primary-foreground/10 shadow-2xl transition-transform hover:scale-105">
             <img
-              src={imageUrl || "/placeholder.svg"}
+              src={
+                profileData.image?.includes(
+                  "https://avatar.iran.liara.run/public"
+                )
+                  ? profileData.image
+                  : `${BACKEND_BASE_URL}${profileData.image}`
+              }
               alt={`${profileData.fullName}'s profile`}
               className="h-full w-full object-cover"
               onError={(e) => {
